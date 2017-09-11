@@ -15,19 +15,27 @@ background_names = [
 	"zll",
 	"wlnu",
 	"vvqq",
-	"hbb",
+	"hqq125",
+	"tthqq125",
+	"vbfhqq125",
+	"whqq125",
+	"zhqq125",
 ]
 # First 12.05 signal processing. Some samples are missing.
 signal_names = []
 simulated_signal_names = []
-signal_models = ["Sbb", "PSbb"]
-signal_model_masses = [50,100,125,200,300,350,400,500]  # 400,500
+signal_models = ["Sbb", "PSbb", "ZPrime"]
+signal_model_masses = {
+	"Sbb":[50,100,125,200,300,350,400,500], 
+	"PSbb":[50,100,125,200,300,350,400,500], 
+	"ZPrime":[50, 75, 100, 125, 200, 300],
+}
 signal_masses = {}
 #signal_masses = [25,50,75,100,125,150,200,250,300,350,400,500,600,800]
 #signal_masses = [50,75,100,125,150,200,250,300,350,400,500,600,800,1000]
 #signal_masses = [50,75,100,125,150,200,250,300,400,500]
-for model in ["Sbb", "PSbb"]:
-	for mass in signal_model_masses:
+for model in signal_models:
+	for mass in signal_model_masses[model]:
 		this_signal_name = "{}{}".format(model, mass)
 		signal_names.append(this_signal_name)
 		simulated_signal_names.append(this_signal_name)
@@ -46,6 +54,11 @@ for model in ["Sbb", "PSbb"]:
 		signal_names.append(this_signal_name)
 		interpolated_signal_names.append(this_signal_name)
 		signal_masses[this_signal_name] = mass
+for mass in range(50, 325, 25):
+	this_signal_name = "{}{}".format("ZPrime", mass)
+	signal_names.append(this_signal_name)
+	interpolated_signal_names.append(this_signal_name)
+	signal_masses[this_signal_name] = mass
 
 
 # Sample names. Dictionary is [signal/background/data name]:[list of samples] 
@@ -60,7 +73,12 @@ samples = {
 	"wlnu":['wlnu_HT_100To200','wlnu_HT_200To400','wlnu_HT_400To600','wlnu_HT_600To800','wlnu_HT_800To1200','wlnu_HT_1200To2500','wlnu_HT_2500ToInf'],
 	"vvqq":["WWTo4Q", "WZ", "ZZ"],
 	#"vvqq":["vvqq"],
-	"hbb":["gghbb", "vbfhbb", "wmhbb", "wphbb", "tthbb", "zqqhbb", "znunuhbb", "ggzqqhbb", "ggznunuhbb"],#,"vbfhqq125","zhqq125","whqq125","tthqq125"
+	"hqq125":["gghbb"],
+	"tthqq125":["tthbb"],
+	"vbfhqq125":["vbfhbb"],
+	"whqq125":["wmhbb", "wphbb"],
+	"zhqq125":["zqqhbb", "znunuhbb", "ggzqqhbb", "ggznunuhbb"],
+	#"hbb":["gghbb", "vbfhbb", "wmhbb", "wphbb", "tthbb", "zqqhbb", "znunuhbb", "ggzqqhbb", "ggznunuhbb"],#,"vbfhqq125","zhqq125","whqq125","tthqq125"
 	"data_obs":["JetHTRun2016B","JetHTRun2016C","JetHTRun2016D","JetHTRun2016E","JetHTRun2016F","JetHTRun2016G","JetHTRun2016H"],
 	"data_singlemu":["SingleMuRun2016B","SingleMuRun2016C","SingleMuRun2016D","SingleMuRun2016E","SingleMuRun2016F","SingleMuRun2016G","SingleMuRun2016H"],
 	"DMSbb50":["DMSbb50"],
@@ -100,6 +118,12 @@ samples = {
 	"PSbb350":["PSbb350"],
 	"PSbb400":["PSbb400"],
 	"PSbb500":["PSbb500"],
+	"ZPrime50":["ZPrime50"],
+	"ZPrime75":["ZPrime75"],
+	"ZPrime100":["ZPrime100"],
+	"ZPrime125":["ZPrime125"],
+	"ZPrime200":["ZPrime200"],
+	"ZPrime300":["ZPrime300"],
 }
 #for mass in signal_masses:
 #	for spin in ["Scalar", "PseudoScalar"]:
@@ -140,9 +164,12 @@ skims["QCD_HT2000toInf"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_B
 #skims["WZ"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/WZ_13TeV_pythia8.txt"), "r")]
 #skims["ZZ"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/ZZ_13TeV_pythia8.txt"), "r")]
 
-for mass in signal_model_masses:
+for mass in signal_model_masses["Sbb"]:
 	skims["Sbb{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/Spin0_ggPhibb1j_g1_{}_Scalar.txt".format(mass)))]
+for mass in signal_model_masses["PSbb"]:
 	skims["PSbb{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/Spin0_ggPhibb1j_g1_{}_PseudoScalar.txt".format(mass)))]
+for mass in signal_model_masses["ZPrime"]:
+	skims["ZPrime{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/VectorDiJet1Jet_{}_13TeV_madgraph.txt".format(mass)))]
 
 # Function to infer the sample from a file path... removing for now, because this doesn't work well on the batch system. E.g. if you have subfiles with generic names (e.g. Output_subjob1.root), there is no way to get the sample.
 #def get_sample_from_skim(skim):

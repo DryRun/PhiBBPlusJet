@@ -227,6 +227,9 @@ if __name__ == "__main__":
 									sys.exit(1)
 							input_histograms[ptbin][mass] = input_file.Get("{}{}_{}{}".format(model, mass, region, syst)).ProjectionX("{}{}_{}_ptbin{}".format(model, mass, region, ptbin), ptbin, ptbin)
 							input_histograms[ptbin][mass].SetDirectory(0)
+							# Save a copy to the output file
+							output_file.cd()
+							input_file.Get("{}{}_{}{}".format(model, mass, region, syst)).Write()
 						print input_histograms[ptbin]
 						interpolator = HistogramInterpolator(input_histograms[ptbin])
 						for mass in output_masses:
@@ -260,12 +263,14 @@ if __name__ == "__main__":
 					input_histograms = {}
 					output_histograms = {}
 					for mass in input_masses:
-						h_2D = input_file.Get("{}{}_{}{}".format(model, mass, region, syst))
-						if not h_2D:
+						input_histograms[mass] = input_file.Get("{}{}_{}{}".format(model, mass, region, syst)).Clone()
+						if not input_histograms[mass]:
 							print "ERROR : Couldn't find histogram {}{}_{}{} in file {}".format(model, mass, region, syst, input_file.GetPath())
 							sys.exit(1)
-						input_histograms[mass] = h_2D.ProjectionX()
 						input_histograms[mass].SetDirectory(0)
+						# Save a copy of the input to the output file
+						output_file.cd()
+						input_histograms[mass].Write()
 					print input_histograms
 					interpolator = HistogramInterpolator(input_histograms)
 					for mass in output_masses:

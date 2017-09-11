@@ -694,7 +694,7 @@ if __name__ == "__main__":
 				supersamples = ["data_obs", "data_singlemu", "qcd"]
 				args.skim_inputs = True
 			elif args.all_cmslpc:
-				supersamples = ["stqq", "tqq", "wqq", "zqq", "zll", "wlnu", "vvqq", "hbb"]
+				supersamples = ["stqq", "tqq", "wqq", "zqq", "zll", "wlnu", "vvqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]
 				supersamples.extend(config.simulated_signal_names)
 				args.skim_inputs = False
 			samples = [] 
@@ -928,15 +928,15 @@ if __name__ == "__main__":
 			# data_obs, data_singlemu - not ready yet
 			# "zll", "wlnu", "vvqq" - you need to find the cross sections, and split into appropriate samples
 			if selection == "muCR":
-				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hbb", "stqq", "vvqq", "zll", "wlnu"]
+				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
 			else:
-				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hbb", "stqq", "vvqq"]
+				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
 			supersamples.extend(config.simulated_signal_names)
 			for supersample in supersamples:
 				first = True
 				pass_histograms_syst[supersample] = {}
 				fail_histograms_syst[supersample] = {}
-				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hbb"]) or ("Sbb" in supersample)
+				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample)
 				use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
 				if use_loose_template:
 					pass_histograms_syst[supersample + "_normalization"] = {}
@@ -974,7 +974,7 @@ if __name__ == "__main__":
 						else:
 							pass_histogram_name = "h_{}_{}_pass_{}".format(selection, args.jet_type, systematic)
 							fail_histogram_name = "h_{}_{}_fail_{}".format(selection, args.jet_type, systematic)
-							if supersample in ["wqq", "zqq", "hbb"] or "Sbb" in supersample:
+							if supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"] or "Sbb" in supersample:
 								pass_histogram_name += "_matched"
 								fail_histogram_name += "_matched"
 						if use_loose_template:
@@ -1075,6 +1075,30 @@ if __name__ == "__main__":
 					for systematic in systematics[selection]:
 						if pass_histograms_syst[supersample][systematic].Integral():
 							pass_histograms_syst[supersample][systematic].Scale(pass_histograms_syst[supersample + "_normalization"][systematic].Integral() / pass_histograms_syst[supersample][systematic].Integral())
+
+				# For muCR, project to 1D
+				if "muCR" in selection:
+					old_name = pass_histograms[supersample].GetName()
+					pass_histograms[supersample] = pass_histograms[supersample].ProjectionX()
+					pass_histograms[supersample].SetName(old_name)
+					old_name = fail_histograms[supersample].GetName()
+					fail_histograms[supersample] = fail_histograms[supersample].ProjectionX()
+					fail_histograms[supersample].SetName(old_name)
+					for systematic in systematics[selection]:
+						old_name = pass_histograms_syst[supersample][systematic].GetName()
+						pass_histograms_syst[supersample][systematic] = pass_histograms_syst[supersample][systematic].ProjectionX()
+						pass_histograms_syst[supersample][systematic].SetName(old_name)
+						old_name = fail_histograms_syst[supersample][systematic].GetName()
+						fail_histograms_syst[supersample][systematic] = fail_histograms_syst[supersample][systematic].ProjectionX()
+						fail_histograms_syst[supersample][systematic].SetName(old_name)
+					if use_loose_template:
+						old_name = pass_histograms[supersample + "_normalization"].GetName()
+						pass_histograms[supersample + "_normalization"] = pass_histograms[supersample + "_normalization"].ProjectionX()
+						pass_histograms[supersample + "_normalization"].SetName(old_name)
+						for systematic in systematics[selection]:
+							old_name = pass_histograms_syst[supersample + "_normalization"][systematic].GetName()
+							pass_histograms_syst[supersample + "_normalization"][systematic] = pass_histograms_syst[supersample + "_normalization"][systematic].ProjectionX()
+							pass_histograms_syst[supersample + "_normalization"][systematic].SetName(old_name)
 
 				pass_histograms[supersample].Write()
 				fail_histograms[supersample].Write()
