@@ -199,6 +199,8 @@ if __name__ == "__main__":
 		print "[signal_interpolations] ERROR : Must specify output_masses or output_range"
 		sys.exit(1)
 
+	models = ["Sbb", "PSbb", "ZPrime"]
+
 	if args.interpolate:
 		# Input and output files (uses David's configuration. Replace if you are not David.)
 		input_file = TFile(config.get_histogram_file("SR", args.jet_type), "READ")
@@ -206,7 +208,7 @@ if __name__ == "__main__":
 
 		# Top-level loop
 		for region in ["pass", "fail"]:
-			for model in ["Sbb", "PSbb"]:
+			for model in models:
 				for syst in ["", "_JESUp", "_JERUp", "_PUUp", "_TriggerUp", "_JESDown", "_JERDown", "_PUDown", "_TriggerDown"]:
 					input_histograms = {}
 					output_histograms_1D = {}
@@ -215,6 +217,8 @@ if __name__ == "__main__":
 						input_histograms[ptbin] = {}
 						output_histograms_1D[ptbin] = {}
 						for mass in input_masses:
+							if model == "ZPrime" and mass > 300:
+								continue
 							if not model_histogram:
 								model_histogram = input_file.Get("{}{}_{}{}".format(model, mass, region, syst))
 								if not model_histogram:
@@ -233,6 +237,8 @@ if __name__ == "__main__":
 						print input_histograms[ptbin]
 						interpolator = HistogramInterpolator(input_histograms[ptbin])
 						for mass in output_masses:
+							if model == "ZPrime" and mass > 300:
+								continue
 							output_histograms_1D[ptbin][mass] = interpolator.make_interpolation(mass)
 							output_histograms_1D[ptbin][mass].SetName("{}{}_{}{}_ptbin{}".format(model, mass, region, syst, ptbin))
 							#output_file.cd()
@@ -241,6 +247,8 @@ if __name__ == "__main__":
 					# Put 1D histograms back together into 2D
 					output_histograms = {}
 					for mass in output_masses:
+						if model == "ZPrime" and mass > 300:
+							continue
 						output_histograms[mass] = model_histogram.Clone()
 						output_histograms[mass].SetName("{}{}_{}{}".format(model, mass, region, syst))
 						for msdbin in xrange(1, model_histogram.GetNbinsX() + 1):
@@ -258,11 +266,14 @@ if __name__ == "__main__":
 		output_file = TFile(config.get_interpolation_file("muCR", args.jet_type), "RECREATE")
 		# Top-level loop
 		for region in ["pass", "fail"]:
-			for model in ["Sbb", "PSbb"]:
+			for model in models:
 				for syst in ['','_JERUp','_JERDown','_JESUp','_JESDown','_MuTriggerUp','_MuTriggerDown','_MuIDUp','_MuIDDown','_MuIsoUp','_MuIsoDown','_PUUp','_PUDown']:
 					input_histograms = {}
 					output_histograms = {}
 					for mass in input_masses:
+						if model == "ZPrime" and mass > 300:
+							continue
+						print "[debug] Trying to get " + "{}{}_{}{}".format(model, mass, region, syst) + " from file " + input_file.GetPath()
 						input_histograms[mass] = input_file.Get("{}{}_{}{}".format(model, mass, region, syst)).Clone()
 						if not input_histograms[mass]:
 							print "ERROR : Couldn't find histogram {}{}_{}{} in file {}".format(model, mass, region, syst, input_file.GetPath())
@@ -274,6 +285,8 @@ if __name__ == "__main__":
 					print input_histograms
 					interpolator = HistogramInterpolator(input_histograms)
 					for mass in output_masses:
+						if model == "ZPrime" and mass > 300:
+							continue
 						output_histograms[mass] = interpolator.make_interpolation(mass)
 						output_histograms[mass].SetName("{}{}_{}{}".format(model, mass, region, syst))
 						output_file.cd()
@@ -306,7 +319,7 @@ if __name__ == "__main__":
 
 		# Top-level loop
 		for region in ["pass", "fail"]:
-			for model in ["Sbb", "PSbb"]:
+			for model in models:
 				input_histograms = {}
 				output_histograms_1D = {}
 				model_histogram = None
@@ -348,7 +361,7 @@ if __name__ == "__main__":
 		sim_file = TFile(config.get_histogram_file("SR", args.jet_type), "READ")
 		int_file = TFile(config.get_interpolation_file("SR", args.jet_type), "READ")
 		for region in ["pass", "fail"]:
-			for model in ["Sbb", "PSbb"]:
+			for model in models:
 				for ptbin in xrange(0, 7):
 					sim_hists = {}
 					int_hists = {}

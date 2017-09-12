@@ -393,6 +393,21 @@ cross_sections = {
 "Spin0_ggPhi12j_g1_400_PseudoScalar":1,
 "Spin0_ggPhi12j_g1_500_PseudoScalar":1,
 
+"ZPrime10":1,
+"ZPrime20":1,
+"ZPrime50":1,
+"ZPrime75":1,
+"ZPrime100":1,
+"ZPrime125":1,
+"ZPrime150":1,
+"ZPrime200":1,
+"ZPrime250":1,
+"ZPrime300":1,
+"ZPrime350":1,
+"ZPrime400":1,
+"ZPrime450":1,
+"ZPrime500":1,
+
 }
 
 # Aliases

@@ -84,7 +84,7 @@ if __name__ == "__main__":
 	jet_types = ["AK8", "CA15"]
 	regions = ["SR", "muCR"]
 	supersamples = {
-		"SR":["data_obs", "Sbb100", "Sbb200", "Sbb300", "qcd", "tqq", "zqq", "wqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125",],
+		"SR":["data_obs", "ZPrime50", "ZPrime100", "ZPrime125", "ZPrime200", "Sbb100", "Sbb200", "Sbb300", "qcd", "tqq", "zqq", "wqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125",],
 		"muCR":["data_singlemu", "tqq", "qcd", "wlnu", "zll", "Sbb125"]
 	}
 	for jet_type in jet_types:

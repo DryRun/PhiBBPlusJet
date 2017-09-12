@@ -102,6 +102,14 @@ class EventSelectionHistograms(AnalysisBase):
 		self._histograms.GetTH1F("input_nevents").SetBinContent(1, self._input_nevents)
 		self._histograms.AddTH1D("processed_nevents", "processed_nevents", "", 1, -0.5, 0.5)
 
+		# Inclusive distributions
+		self._histograms.AddTH1D("inclusive_pt", "inclusive_pt", "p_{T} [GeV]", 100, 0., 1000.)
+		self._histograms.AddTH1D("inclusive_eta", "inclusive_eta", "#eta", 100, -5., 5.)
+		self._histograms.AddTH1D("inclusive_msd", "inclusive_msd", "", 100, 0., 1000.)
+		self._histograms.AddTH1D("inclusive_n2ddt", "inclusive_n2ddt", "", 40, -2., 2.)
+		self._histograms.AddTH1D("inclusive_dcsv", "inclusive_dcsv", "", 200, -1., 1.)
+
+
 		# tau21 optimization
 		if self._do_optimization:
 			for tau21_ddt_cut in [0.4, 0.45, 0.5, 0.525, 0.55, 0.575, 0.6, 0.65, 0.7]:
@@ -469,6 +477,13 @@ class EventSelectionHistograms(AnalysisBase):
 					fatjet_rho = self._data.CA15Puppijet0_rho
 					fatjet_phi = self._data.CA15Puppijet0_phi
 
+				# Inclusive histograms
+				self._histograms.GetTH1D("inclusive_pt").Fill(fatjet_pt, event_weight)
+				self._histograms.GetTH1D("inclusive_eta").Fill(fatjet_eta, event_weight)
+				self._histograms.GetTH1D("inclusive_msd").Fill(fatjet_msd, event_weight)
+				self._histograms.GetTH1D("inclusive_n2ddt").Fill(fatjet_n2ddt, event_weight)
+				self._histograms.GetTH1D("inclusive_dcsv").Fill(fatjet_dcsv, event_weight)
+
 				# Run selection and fill histograms
 				self._event_selectors[selection].process_event(self._data, event_weight)
 				if self._event_selectors[selection].event_pass():
@@ -747,7 +762,7 @@ if __name__ == "__main__":
 		#from joblib import delayed
 		for sample in samples:
 			print "\n *** Running sample {}".format(sample)
-			if "Sbb" in sample or args.skim_inputs:
+			if "Sbb" in sample or args.skim_inputs or "ZPrime" in sample:
 				tree_name = "Events"
 			else:
 				tree_name = "otree"
@@ -835,7 +850,7 @@ if __name__ == "__main__":
 					files_per_job = 5
 				elif "QCD" in sample:
 					files_per_job = 10
-				elif "Spin0" in sample or "Sbb" in sample:
+				elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 					files_per_job = 3
 			n_jobs = int(math.ceil(1. * len(sample_files[sample]) / files_per_job))
 
@@ -936,7 +951,7 @@ if __name__ == "__main__":
 				first = True
 				pass_histograms_syst[supersample] = {}
 				fail_histograms_syst[supersample] = {}
-				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample)
+				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
 				use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
 				if use_loose_template:
 					pass_histograms_syst[supersample + "_normalization"] = {}
@@ -974,7 +989,7 @@ if __name__ == "__main__":
 						else:
 							pass_histogram_name = "h_{}_{}_pass_{}".format(selection, args.jet_type, systematic)
 							fail_histogram_name = "h_{}_{}_fail_{}".format(selection, args.jet_type, systematic)
-							if supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"] or "Sbb" in supersample:
+							if supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"] or ("Sbb" in supersample) or ("ZPrime" in supersample):
 								pass_histogram_name += "_matched"
 								fail_histogram_name += "_matched"
 						if use_loose_template:
@@ -995,7 +1010,7 @@ if __name__ == "__main__":
 							sys.exit(1)
 
 						# Normalize histograms
-						if "Spin0" in sample or "Sbb" in sample:
+						if "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 							# Normalize to visible cross section of 1 pb
 							#print "\tNormalizing signal sample {} to visible cross section of 1 pb".format(sample)
 							#if this_pass_histogram.GetEntries():
@@ -1129,7 +1144,7 @@ if __name__ == "__main__":
 							# Normalize histograms
 							if supersample in config.background_names or supersample in config.simulated_signal_names:
 								n_input_events = input_file.Get("h_input_nevents").Integral()
-								if "Spin0" in sample or "Sbb" in sample:
+								if "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 									# Normalize to visible cross section of 1 pb
 									#print "\tNormalizing signal sample {} to visible cross section of 1 pb".format(sample)
 									#pass_events = input_file.Get("h_SR_{}_pass".format(args.jet_type)).Integral()
