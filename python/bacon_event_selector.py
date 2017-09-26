@@ -121,19 +121,19 @@ class BaconEventSelector(EventSelector):
 		return (self._event.neleLoose <= self._cut_parameters["Max_neleLoose"])
 
 	def Min_ntau(self):
-		self._return_data["Min_ntau"] = self._event.neleLoose
+		self._return_data["Min_ntau"] = self._event.ntau
 		return (self._event.ntau >= self._cut_parameters["Min_ntau"])
 
 	def Max_ntau(self):
-		self._return_data["Max_ntau"] = self._event.neleLoose
+		self._return_data["Max_ntau"] = self._event.ntau
 		return (self._event.ntau <= self._cut_parameters["Max_ntau"])
 
 	def Min_nphoLoose(self):
-		self._return_data["Min_nphoLoose"] = self._event.neleLoose
+		self._return_data["Min_nphoLoose"] = self._event.nphoLoose
 		return (self._event.nphoLoose >= self._cut_parameters["Min_nphoLoose"])
 
 	def Max_nphoLoose(self):
-		self._return_data["Max_nphoLoose"] = self._event.neleLoose
+		self._return_data["Max_nphoLoose"] = self._event.nphoLoose
 		return (self._event.nphoLoose <= self._cut_parameters["Max_nphoLoose"])
 
 	def AK8Puppijet0_isTightVJet(self):
