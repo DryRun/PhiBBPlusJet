@@ -41,6 +41,7 @@ class EventSelectionHistograms(AnalysisBase):
 		self._selections = ["Preselection", "SR", "muCR"]
 		self._do_optimization = False
 		self._data_source = "data"
+		self._prescale = -1
 
 		# Weight systematics: these only affect the weights used to fill histograms, so can easily be filled in normal running
 		self._weight_systematics = {
@@ -50,6 +51,9 @@ class EventSelectionHistograms(AnalysisBase):
 		}
 		# Jet systematics: these affect the jet pT, so modify the event selection
 		self._jet_systematics = ["JESUp", "JESDown", "JERUp", "JERDown"]
+
+	def set_prescale(self, prescale):
+		self._prescale = prescale
 
 	def do_optimization(self, do_opt=True):
 		self._do_optimization = do_opt
@@ -322,9 +326,15 @@ class EventSelectionHistograms(AnalysisBase):
 		self.start_timer()
 		for entry in xrange(first_event, limit_nevents):
 			self.print_progress(entry, first_event, limit_nevents, print_every)
+			self._data.GetEntry(entry)
+
+			# Prescale before anything
+			if self._prescale > 0:
+				if self._data.evtNum % self._prescale != 0:
+					continue
+
 			self._histograms.GetTH1D("processed_nevents").Fill(0)
 			self._processed_events += 1
-			self._data.GetEntry(entry)
 
 			npu = min(self._data.npu, 49.5)
 			pu_weight = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
@@ -695,6 +705,7 @@ if __name__ == "__main__":
 	parser.add_argument('--data_source', type=str, default="data", help="data or simulation")
 	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
 	parser.add_argument('--do_optimization', action='store_true', help="Make tau21DDT opt plots")
+	parser.add_argument('--prescale', type=int, help="'Prescale' the input events (using evtNum % ps == 0)")
 	args = parser.parse_args()
 
 	if args.run or args.condor_run:
@@ -706,7 +717,7 @@ if __name__ == "__main__":
 				supersamples = config.supersamples
 			elif args.all_lxplus:
 				# lxplus: JetHT, SingleMuon, QCD, signal
-				supersamples = ["data_obs", "data_singlemu", "qcd"]
+				supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "data_singlemu_ps10", "qcd"]
 				args.skim_inputs = True
 			elif args.all_cmslpc:
 				supersamples = ["stqq", "tqq", "wqq", "zqq", "zll", "wlnu", "vvqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]
@@ -797,10 +808,11 @@ if __name__ == "__main__":
 			limit_histogrammer = EventSelectionHistograms(sample, tree_name=tree_name)
 			if args.do_optimization:
 				limit_histogrammer.do_optimization()
+			output_file_basename ="InputHistograms_{}_{}.root".format(sample, args.jet_type) 
 			if args.output_folder:
-				limit_histogrammer.set_output_path("{}/InputHistograms_{}_{}.root".format(args.output_folder, sample, args.jet_type))
+				limit_histogrammer.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
 			else:
-				limit_histogrammer.set_output_path("/uscms/home/dryu/DAZSLE/data/LimitSetting/InputHistograms_{}_{}.root".format(sample, args.jet_type))
+				limit_histogrammer.set_output_path("/uscms/home/dryu/DAZSLE/data/LimitSetting/{}".format(output_file_basename))
 			for filename in sample_files[sample]:
 				print "Input file {}".format(filename)
 				limit_histogrammer.add_file(filename)
@@ -809,6 +821,8 @@ if __name__ == "__main__":
 				limit_histogrammer.set_data_source("data")
 			else:
 				limit_histogrammer.set_data_source("simulation")
+			if args.prescale:
+				limit_histogrammer.set_prescale(args.prescale)
 			limit_histogrammer.start()
 			limit_histogrammer.run()
 			limit_histogrammer.finish()
@@ -841,9 +855,15 @@ if __name__ == "__main__":
 			files_per_job = 1
 			if args.skim_inputs:
 				if "JetHTRun2016" in sample:
-					files_per_job = 30
+					if "ps10" in sample:
+						files_per_job = 100
+					else:
+						files_per_job = 30
 				elif "SingleMuRun2016" in sample:
-					files_per_job = 15
+					if "ps10" in sample:
+						files_per_job = 100
+					else:
+						files_per_job = 15
 				elif "QCD_HT500to700" in sample:
 					files_per_job = 30
 				elif "QCD_HT700to1000" in sample:
@@ -875,6 +895,9 @@ if __name__ == "__main__":
 				job_command += " --skim_inputs "
 			if args.do_optimization:
 				job_command += " --do_optimization "
+
+			if "ps10" in sample::
+				job_command += " --prescale {}".format(args.prescale)
 			job_command += " 2>&1\n"
 			job_script.write(job_command)
 			job_script.close()

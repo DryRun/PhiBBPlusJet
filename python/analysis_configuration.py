@@ -40,7 +40,7 @@ for model in signal_models:
 		signal_names.append(this_signal_name)
 		simulated_signal_names.append(this_signal_name)
 		signal_masses[this_signal_name] = mass
-data_names = ["data_obs", "data_singlemu"]
+data_names = ["data_obs", "data_singlemu", "data_obs_ps10", "data_singlemu_ps10"]
 supersamples = []
 supersamples.extend(background_names)
 supersamples.extend(signal_names)
@@ -125,6 +125,11 @@ samples = {
 	"ZPrime200":["ZPrime200"],
 	"ZPrime300":["ZPrime300"],
 }
+# 10% of the data aliases
+samples["data_obs_ps10"] = [x + "_ps10" for x in samples["data_obs"]]
+samples["data_singlemu_ps10"] = [x + "_ps10" for x in samples["data_singlemu"]]
+
+
 #for mass in signal_masses:
 #	for spin in ["Scalar", "PseudoScalar"]:
 #		samples["Pbb_{}_{}".format(mass, spin)] = ["Spin0_ggPhibb1j_{}_{}".format(mass, spin)]
@@ -145,6 +150,20 @@ skims["SingleMuRun2016E"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_
 skims["SingleMuRun2016F"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016F.txt"))] 
 skims["SingleMuRun2016G"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016G.txt"))] 
 skims["SingleMuRun2016H"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016H.txt"))] 
+skims["JetHTRun2016B_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016B.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016B_PromptReco_v2_resub.root"]
+skims["JetHTRun2016C_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016C.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016C_PromptReco_v2.root"]
+skims["JetHTRun2016D_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016D.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016D_PromptReco_v2.root"]
+skims["JetHTRun2016E_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016E.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016E_PromptReco_v2.root"]
+skims["JetHTRun2016F_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016F.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016F_PromptReco_v1.root"]
+skims["JetHTRun2016G_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016G.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016G_PromptReco_v1.root"]
+skims["JetHTRun2016H_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/JetHTRun2016H.txt"))] #["root://cmsxrootd-site.fnal.gov//store/user/jduarte1/zprimebits-v11.062/JetHTRun2016H_PromptReco_v2.root"]
+skims["SingleMuRun2016B_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016B.txt"))] 
+skims["SingleMuRun2016C_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016C.txt"))] 
+skims["SingleMuRun2016D_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016D.txt"))] 
+skims["SingleMuRun2016E_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016E.txt"))] 
+skims["SingleMuRun2016F_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016F.txt"))] 
+skims["SingleMuRun2016G_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016G.txt"))] 
+skims["SingleMuRun2016H_ps10"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/SingleMuRun2016H.txt"))] 
 skims["QCD_HT100to200"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/QCD_HT100to200_13TeV.txt"), "r")]
 skims["QCD_HT200to300"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/QCD_HT200to300_13TeV.txt"), "r")]
 skims["QCD_HT300to500"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/QCD_HT300to500_13TeV.txt"), "r")]
