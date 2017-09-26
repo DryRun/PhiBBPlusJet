@@ -705,7 +705,7 @@ if __name__ == "__main__":
 	parser.add_argument('--data_source', type=str, default="data", help="data or simulation")
 	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
 	parser.add_argument('--do_optimization', action='store_true', help="Make tau21DDT opt plots")
-	parser.add_argument('--prescale', type=int, help="'Prescale' the input events (using evtNum % ps == 0)")
+	#parser.add_argument('--prescale', type=int, help="'Prescale' the input events (using evtNum % ps == 0)") # Currently this is set from the sample name, i.e. JetHTRun2016B_ps10. 
 	args = parser.parse_args()
 
 	if args.run or args.condor_run:
@@ -821,8 +821,8 @@ if __name__ == "__main__":
 				limit_histogrammer.set_data_source("data")
 			else:
 				limit_histogrammer.set_data_source("simulation")
-			if args.prescale:
-				limit_histogrammer.set_prescale(args.prescale)
+			if "ps10" in sample:
+				limit_histogrammer.set_prescale(10)
 			limit_histogrammer.start()
 			limit_histogrammer.run()
 			limit_histogrammer.finish()
@@ -896,8 +896,6 @@ if __name__ == "__main__":
 			if args.do_optimization:
 				job_command += " --do_optimization "
 
-			if "ps10" in sample::
-				job_command += " --prescale {}".format(args.prescale)
 			job_command += " 2>&1\n"
 			job_script.write(job_command)
 			job_script.close()
