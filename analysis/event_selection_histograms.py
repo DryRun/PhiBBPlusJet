@@ -163,9 +163,19 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("pass_eta", "eta", "eta", 60, -3., 3.)
 			self._selection_histograms[selection].AddTH1D("fail_eta", "eta", "eta", 60, -3., 3.)
 
-			self._selection_histograms[selection].AddTH1D("rho", "rho", "rho", 60, -7., -1.)
-			self._selection_histograms[selection].AddTH1D("pass_rho", "rho", "rho", 60, -7., -1.)
-			self._selection_histograms[selection].AddTH1D("fail_rho", "rho", "rho", 60, -7., -1.)
+			self._selection_histograms[selection].AddTH1D("rho", "rho", "rho", 80, -8., 0.)
+			self._selection_histograms[selection].AddTH1D("pass_rho", "rho", "rho", 80, -8., 0.)
+			self._selection_histograms[selection].AddTH1D("fail_rho", "rho", "rho", 80, -8., 0.)
+
+			self._selection_histograms[selection].AddTH2D("dcsv_vs_rho", "dcsv_vs_rho", 
+				"dcsv", 100, -1., 1.,
+				"rho", 40, -8., 0.)
+			self._selection_histograms[selection].AddTH2D("dcsv_vs_pt", "dcsv_vs_pt", 
+				"dcsv", 100, -1., 1.,
+				"pt", 50, 0., 1000.)
+			self._selection_histograms[selection].AddTH2D("dcsv_vs_msd", "dcsv_vs_msd", 
+				"dcsv", 100, -1., 1.,
+				"msd", 60, 0., 600.)
 
 			if self._do_optimization:
 				for dcsv_cut in self._dcsv_cuts:
@@ -517,6 +527,9 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH1D("msd").Fill(fatjet_msd, event_weight)
 					self._selection_histograms[selection].GetTH1D("eta").Fill(fatjet_eta, event_weight)
 					self._selection_histograms[selection].GetTH1D("rho").Fill(fatjet_rho, event_weight)
+					self._selection_histograms[selection].GetTH2D("dcsv_vs_rho").Fill(fatjet_dcsv, fatjet_rho, event_weight)
+					self._selection_histograms[selection].GetTH2D("dcsv_vs_pt").Fill(fatjet_dcsv, fatjet_pt, event_weight)
+					self._selection_histograms[selection].GetTH2D("dcsv_vs_msd").Fill(fatjet_dcsv, fatjet_msd, event_weight)
 
 					# Pass and fail histograms
 					if fatjet_dcsv > self._dcsv_cut:
