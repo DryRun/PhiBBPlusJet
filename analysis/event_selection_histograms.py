@@ -175,7 +175,7 @@ class EventSelectionHistograms(AnalysisBase):
 				"pt", 50, 0., 1000.)
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_msd", "dcsv_vs_msd", 
 				"dcsv", 110, -1.1, 1.1,
-				"msd", 60, 0., 600.)
+				"msd", 100, 40, 740)
 
 			if self._do_optimization:
 				for dcsv_cut in self._dcsv_cuts:
