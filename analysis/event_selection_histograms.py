@@ -168,13 +168,13 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("fail_rho", "rho", "rho", 80, -8., 0.)
 
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_rho", "dcsv_vs_rho", 
-				"dcsv", 100, -1., 1.,
+				"dcsv", 110, -1.1, 1.1,
 				"rho", 40, -8., 0.)
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_pt", "dcsv_vs_pt", 
-				"dcsv", 100, -1., 1.,
+				"dcsv", 110, -1.1, 1.1,
 				"pt", 50, 0., 1000.)
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_msd", "dcsv_vs_msd", 
-				"dcsv", 100, -1., 1.,
+				"dcsv", 110, -1.1, 1.1,
 				"msd", 60, 0., 600.)
 
 			if self._do_optimization:
