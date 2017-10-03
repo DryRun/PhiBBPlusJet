@@ -168,14 +168,18 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("fail_rho", "rho", "rho", 80, -8., 0.)
 
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_rho", "dcsv_vs_rho", 
-				"dcsv", 110, -1.1, 1.1,
-				"rho", 40, -8., 0.)
+				"Double-b", 110, -1.1, 1.1,
+				"#rho", 40, -8., 0.)
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_pt", "dcsv_vs_pt", 
-				"dcsv", 110, -1.1, 1.1,
-				"pt", 50, 0., 1000.)
+				"Double-b", 110, -1.1, 1.1,
+				"p_{T} [GeV]", 50, 0., 1000.)
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_msd", "dcsv_vs_msd", 
-				"dcsv", 110, -1.1, 1.1,
-				"msd", 100, 40, 740)
+				"Double-b", 110, -1.1, 1.1,
+				"m_{SD} [GeV]", 100, 40, 740)
+			self._selection_histograms[selection].AddTH3D("dcsv_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt", 
+				"Double-b", 110, -1.1, 1.1,
+				"m_{SD} [GeV]", 100, 40, 740,
+				"p_{T} [GeV]", 6, 400, 1000)
 
 			if self._do_optimization:
 				for dcsv_cut in self._dcsv_cuts:
@@ -530,6 +534,7 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_rho").Fill(fatjet_dcsv, fatjet_rho, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_pt").Fill(fatjet_dcsv, fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_msd").Fill(fatjet_dcsv, fatjet_msd, event_weight)
+					self._selection_histograms[selection].GetTH3D("dcsv_vs_msd_vs_pt").Fill(fatjet_dcsv, fatjet_msd, fatjet_pt, event_weight)
 
 					# Pass and fail histograms
 					if fatjet_dcsv > self._dcsv_cut:
