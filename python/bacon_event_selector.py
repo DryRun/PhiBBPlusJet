@@ -36,6 +36,14 @@ class BaconEventSelector(EventSelector):
 		self._return_data["Max_AK8Puppijet0_msd_puppi"] = self._event.AK8Puppijet0_msd_puppi
 		return (self._event.AK8Puppijet0_msd_puppi <= self._cut_parameters["Max_AK8Puppijet0_msd_puppi"])
 
+	def Min_AK8Puppijet0_rho(self):
+		self._return_data["Min_AK8Puppijet0_rho"] = self._event.AK8Puppijet0_rho
+		return (self._event.AK8Puppijet0_rho >= self._cut_parameters["Min_AK8Puppijet0_rho"])
+
+	def Max_AK8Puppijet0_rho(self):
+		self._return_data["Max_AK8Puppijet0_rho"] = self._event.AK8Puppijet0_rho
+		return (self._event.AK8Puppijet0_rho <= self._cut_parameters["Max_AK8Puppijet0_rho"])
+
 	def Min_AK8Puppijet0_pt(self):
 		jet_pt = 0.
 		systematic = self._cut_parameters["Min_AK8Puppijet0_pt"]["systematic"].lower()
@@ -294,6 +302,14 @@ class BaconEventSelector(EventSelector):
 	def Max_CA15Puppijet0_msd_puppi(self):
 		self._return_data["Max_CA15Puppijet0_msd_puppi"] = self._event.CA15Puppijet0_msd_puppi
 		return (self._event.CA15Puppijet0_msd_puppi <= self._cut_parameters["Max_CA15Puppijet0_msd_puppi"])
+
+	def Min_CA15Puppijet0_rho(self):
+		self._return_data["Min_CA15Puppijet0_rho"] = self._event.CA15Puppijet0_rho
+		return (self._event.CA15Puppijet0_rho >= self._cut_parameters["Min_CA15Puppijet0_rho"])
+
+	def Max_CA15Puppijet0_rho(self):
+		self._return_data["Max_CA15Puppijet0_rho"] = self._event.CA15Puppijet0_rho
+		return (self._event.CA15Puppijet0_rho <= self._cut_parameters["Max_CA15Puppijet0_rho"])
 
 	def CA15Puppijet0_isTightVJet(self):
 		self._return_data["CA15Puppijet0_isTightVJet"] = self._event.CA15Puppijet0_isTightVJet
