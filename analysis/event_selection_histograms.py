@@ -742,7 +742,7 @@ if __name__ == "__main__":
 				args.skim_inputs = True
 			elif args.all_cmslpc:
 				supersamples = ["stqq", "tqq", "wqq", "zqq", "zll", "wlnu", "vvqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]
-				supersamples.extend(config.simulated_signal_names)
+				supersamples.extend([x for x in config.simulated_signal_names if not "ZPrime" in x])
 				args.skim_inputs = False
 			samples = [] 
 			for supersample in supersamples:
