@@ -38,7 +38,7 @@ class EventSelectionHistograms(AnalysisBase):
 		self._dcsv_cut_loose = 0.8
 		self._dcsv_min = -999.
 		self._jet_type = jet_type
-		self._selections = ["Preselection", "SR", "muCR"]
+		self._selections = ["Preselection", "SR", "muCR", "N2CR"]
 		self._do_optimization = False
 		self._data_source = "data"
 		self._prescale = -1
@@ -46,6 +46,7 @@ class EventSelectionHistograms(AnalysisBase):
 		# Weight systematics: these only affect the weights used to fill histograms, so can easily be filled in normal running
 		self._weight_systematics = {
 			"SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
+			"N2CR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"Preselection":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
@@ -219,11 +220,13 @@ class EventSelectionHistograms(AnalysisBase):
 		# Event selections
 		self._event_selectors = {}
 		self._event_selectors["SR"] = event_selections.MakeSRSelector(self._jet_type)
+		self._event_selectors["N2CR"] = event_selections.MakeN2CRSelector(self._jet_type)
 		self._event_selectors["Preselection"] = event_selections.MakePreselectionSelector(self._jet_type)
 		self._event_selectors["muCR"] = event_selections.MakeMuCRSelector(self._jet_type)
-		self._event_selectors_syst = {"SR":{}, "muCR":{}, "Preselection":{}}
+		self._event_selectors_syst = {"SR":{}, "muCR":{}, "Preselection":{}, "N2CR":{}}
 		for systematic in self._jet_systematics:
 			self._event_selectors_syst["SR"][systematic] = event_selections.MakeSRSelector(self._jet_type, jet_systematic=systematic)
+			self._event_selectors_syst["N2CR"][systematic] = event_selections.MakeN2CRSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["Preselection"][systematic] = event_selections.MakePreselectionSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["muCR"][systematic] = event_selections.MakeMuCRSelector(self._jet_type, jet_systematic=systematic)
 
@@ -381,7 +384,7 @@ class EventSelectionHistograms(AnalysisBase):
 				if self._data_source == "data":
 					event_weight = 1.
 					event_weight_syst = {}
-					if "SR" in selection or "Preselection" in selection:
+					if selection in ["SR", "Preselection", "N2CR"]:
 						event_weight_syst["TriggerUp"] = 1.
 						event_weight_syst["TriggerDown"] = 1.
 						event_weight_syst["PUUp"] = 1.
@@ -396,7 +399,7 @@ class EventSelectionHistograms(AnalysisBase):
 						event_weight_syst["PUUp"] = 1.
 						event_weight_syst["PUDown"] = 1.
 				else:
-					if "SR" in selection or "Preselection" in selection:
+					if selection in ["SR", "Preselection", "N2CR"]:
 						if self._jet_type == "AK8":
 							trigger_mass = min(self._data.AK8Puppijet0_msd, 300.)
 							trigger_pt = max(200., min(self._data.AK8Puppijet0_pt, 1000.))
@@ -953,10 +956,11 @@ if __name__ == "__main__":
 		from DAZSLE.PhiBBPlusJet.cross_sections import cross_sections
 		systematics = {
 			"SR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
+			"N2CR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"Preselection":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
-		selections = ["SR", "muCR", "Preselection"]
+		selections = ["SR", "muCR", "Preselection", "N2CR"]
 		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
@@ -970,6 +974,8 @@ if __name__ == "__main__":
 		for selection in selections:
 			if "SR" in selection:
 				selection_prefix = "SR"
+			if "N2CR" in selection:
+				selection_prefix = "N2CR"
 			elif "muCR" in selection:
 				selection_prefix = "muCR"
 			elif "Preselection" in selection:
@@ -1165,7 +1171,7 @@ if __name__ == "__main__":
 						pass_histograms_syst[supersample + "_normalization"][systematic].Write()
 
 				# Now do the extra histograms for plots
-				if selection in ["SR", "Preselection", "muCR"]:
+				if selection in ["SR", "Preselection", "muCR", "N2CR"]:
 					extra_histograms = {}
 					extra_histograms_pass = {}
 					extra_histograms_fail = {}
