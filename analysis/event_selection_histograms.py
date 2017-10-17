@@ -751,7 +751,6 @@ if __name__ == "__main__":
 					if args.skim_inputs:
 						sample_files[sample] = config.skims[sample]
 					else:
-						print config.sklims[sample]
 						sample_files[sample] = config.sklims[sample]
 		elif args.supersamples:
 			supersamples = args.supersamples.split(",")
