@@ -199,7 +199,8 @@ if __name__ == "__main__":
 		print "[signal_interpolations] ERROR : Must specify output_masses or output_range"
 		sys.exit(1)
 
-	models = ["Sbb", "PSbb", "ZPrime"]
+	#models = ["Sbb", "PSbb", "ZPrime"]
+	models = ["Sbb", "PSbb"]
 
 	if args.interpolate:
 		# Input and output files (uses David's configuration. Replace if you are not David.)
@@ -291,6 +292,7 @@ if __name__ == "__main__":
 						output_histograms[mass].SetName("{}{}_{}{}".format(model, mass, region, syst))
 						output_file.cd()
 						output_histograms[mass].Write()
+		print "Saved interpolations to {}".format(output_file.GetPath())
 		input_file.Close()
 		output_file.Close()
 
