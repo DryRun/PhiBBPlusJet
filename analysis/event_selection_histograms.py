@@ -384,7 +384,7 @@ class EventSelectionHistograms(AnalysisBase):
 				if self._data_source == "data":
 					event_weight = 1.
 					event_weight_syst = {}
-					if selection in ["SR", "Preselection", "N2CR"]:
+					if "SR" in selection or "Preselection" in selection or "N2CR" in selection:
 						event_weight_syst["TriggerUp"] = 1.
 						event_weight_syst["TriggerDown"] = 1.
 						event_weight_syst["PUUp"] = 1.
@@ -402,7 +402,7 @@ class EventSelectionHistograms(AnalysisBase):
 						print "[event_selection_histograms::run] ERROR : selection {} is not known. Fix!".format(selection)
 						sys.exit(1)
 				else:
-					if selection in ["SR", "Preselection", "N2CR"]:
+					if "SR" in selection or "Preselection" in selection or "N2CR" in selection:
 						if self._jet_type == "AK8":
 							trigger_mass = min(self._data.AK8Puppijet0_msd, 300.)
 							trigger_pt = max(200., min(self._data.AK8Puppijet0_pt, 1000.))
@@ -579,6 +579,7 @@ class EventSelectionHistograms(AnalysisBase):
 								print "[debug] ERROR : Systematic {} is not in event_weight_syst.".format(systematic)
 								print "[debug] Data source = " + self._data_source
 								print event_weight_syst
+								sys.exit(1)
 							self._selection_histograms[selection].GetTH2D("fail_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 							if self._data_source == "simulation":
 								if vmatched:
@@ -846,10 +847,8 @@ if __name__ == "__main__":
 				limit_histogrammer.add_file(filename)
 			limit_histogrammer.set_jet_type(args.jet_type)
 			if "JetHTRun2016" in sample or "SingleMuRun2016" in sample:
-				print "[debug] Setting data source to data"
 				limit_histogrammer.set_data_source("data")
 			else:
-				print "[debug] Setting data source to dasimulationta"
 				limit_histogrammer.set_data_source("simulation")
 			if "ps10" in sample:
 				limit_histogrammer.set_prescale(10)
@@ -1180,7 +1179,7 @@ if __name__ == "__main__":
 						pass_histograms_syst[supersample + "_normalization"][systematic].Write()
 
 				# Now do the extra histograms for plots
-				if selection in ["SR", "Preselection", "muCR", "N2CR"]:
+				if "SR" in selection or selection in ["Preselection", "muCR", "N2CR"]:
 					extra_histograms = {}
 					extra_histograms_pass = {}
 					extra_histograms_fail = {}
