@@ -842,8 +842,10 @@ if __name__ == "__main__":
 				limit_histogrammer.add_file(filename)
 			limit_histogrammer.set_jet_type(args.jet_type)
 			if "JetHTRun2016" in sample or "SingleMuRun2016" in sample:
+				print "[debug] Setting data source to data"
 				limit_histogrammer.set_data_source("data")
 			else:
+				print "[debug] Setting data source to dasimulationta"
 				limit_histogrammer.set_data_source("simulation")
 			if "ps10" in sample:
 				limit_histogrammer.set_prescale(10)
@@ -963,7 +965,7 @@ if __name__ == "__main__":
 			"Preselection":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
-		selections = ["SR", "muCR", "Preselection"] # N2CR
+		selections = ["SR", "muCR", "Preselection", "N2CR"] # N2CR
 		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
@@ -1174,7 +1176,7 @@ if __name__ == "__main__":
 						pass_histograms_syst[supersample + "_normalization"][systematic].Write()
 
 				# Now do the extra histograms for plots
-				if selection in ["SR", "Preselection", "muCR"]: #N2CR
+				if selection in ["SR", "Preselection", "muCR", "N2CR"]:
 					extra_histograms = {}
 					extra_histograms_pass = {}
 					extra_histograms_fail = {}
