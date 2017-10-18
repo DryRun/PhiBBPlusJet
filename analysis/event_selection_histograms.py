@@ -398,6 +398,9 @@ class EventSelectionHistograms(AnalysisBase):
 						event_weight_syst["MuIsoDown"] = 1.
 						event_weight_syst["PUUp"] = 1.
 						event_weight_syst["PUDown"] = 1.
+					else:
+						print "[event_selection_histograms::run] ERROR : selection {} is not known. Fix!".format(selection)
+						sys.exit(1)
 				else:
 					if selection in ["SR", "Preselection", "N2CR"]:
 						if self._jet_type == "AK8":
