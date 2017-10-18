@@ -574,6 +574,7 @@ class EventSelectionHistograms(AnalysisBase):
 						for systematic in self._weight_systematics[selection]:
 							if not systematic in event_weight_syst:
 								print "[debug] ERROR : Systematic {} is not in event_weight_syst.".format(systematic)
+								print "[debug] Data source = " + self._data_source
 								print event_weight_syst
 							self._selection_histograms[selection].GetTH2D("fail_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 							if self._data_source == "simulation":
