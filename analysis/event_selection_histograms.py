@@ -572,6 +572,9 @@ class EventSelectionHistograms(AnalysisBase):
 							else:
 								self._selection_histograms[selection].GetTH2D("fail_unmatched").Fill(fatjet_msd, fatjet_pt, event_weight)
 						for systematic in self._weight_systematics[selection]:
+							if not systematic in event_weight_syst:
+								print "[debug] ERROR : Systematic {} is not in event_weight_syst.".format(systematic)
+								print event_weight_syst
 							self._selection_histograms[selection].GetTH2D("fail_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 							if self._data_source == "simulation":
 								if vmatched:
@@ -960,7 +963,7 @@ if __name__ == "__main__":
 			"Preselection":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
-		selections = ["SR", "muCR", "Preselection", "N2CR"]
+		selections = ["SR", "muCR", "Preselection"] # N2CR
 		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
@@ -988,9 +991,9 @@ if __name__ == "__main__":
 			# data_obs, data_singlemu - not ready yet
 			# "zll", "wlnu", "vvqq" - you need to find the cross sections, and split into appropriate samples
 			if selection == "muCR":
-				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
+				supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
 			else:
-				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
+				supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
 			supersamples.extend(config.simulated_signal_names)
 			for supersample in supersamples:
 				first = True
@@ -1171,7 +1174,7 @@ if __name__ == "__main__":
 						pass_histograms_syst[supersample + "_normalization"][systematic].Write()
 
 				# Now do the extra histograms for plots
-				if selection in ["SR", "Preselection", "muCR", "N2CR"]:
+				if selection in ["SR", "Preselection", "muCR"]: #N2CR
 					extra_histograms = {}
 					extra_histograms_pass = {}
 					extra_histograms_fail = {}
