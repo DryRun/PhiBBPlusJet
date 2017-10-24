@@ -178,7 +178,7 @@ if __name__ == "__main__":
 	parser.add_argument('--validate', type=int, help="Validate interpolation at specified mass value (must be a simulated point with adjacent simulated points)")
 	parser.add_argument('--plots', action='store_true', help="Validate interpolation at specified mass value (must be a simulated point with adjacent simulated points)")
 	parser.add_argument('--input_masses', type=str, default="50,100,125,200,300,350,400,500", help="List of input masses (comma-separated)")
-	parser.add_argument('--region', type=str, default="SR", help="SR or muCR")
+	parser.add_argument('--region', type=str, default="SR", help="SR or N2CR or muCR")
 	output_group = parser.add_mutually_exclusive_group() 
 	output_group.add_argument('--output_masses', type=str, help="List of output masses (comma-separated)")
 	output_group.add_argument('--output_range', type=str, help="Range of output masses (e.g. 100,425,25 for 100-400 GeV in 25 GeV steps)")
@@ -204,8 +204,8 @@ if __name__ == "__main__":
 
 	if args.interpolate:
 		# Input and output files (uses David's configuration. Replace if you are not David.)
-		input_file = TFile(config.get_histogram_file("SR", args.jet_type), "READ")
-		output_file = TFile(config.get_interpolation_file("SR", args.jet_type), "RECREATE")
+		input_file = TFile(config.get_histogram_file(args.region, args.jet_type), "READ")
+		output_file = TFile(config.get_interpolation_file(args.region, args.jet_type), "RECREATE")
 
 		# Top-level loop
 		for region in ["pass", "fail"]:
@@ -301,7 +301,7 @@ if __name__ == "__main__":
 		if not validation_mass in input_masses:
 			print "ERROR : The validation mass must be in the list of input masses."
 			sys.exit(1)
-		input_file = TFile(config.get_histogram_file("SR", args.jet_type), "READ")
+		input_file = TFile(config.get_histogram_file(args.region, args.jet_type), "READ")
 
 		# Find the neighboring simulated masses
 		left_mass = -1
@@ -360,8 +360,8 @@ if __name__ == "__main__":
 				make_validation_plots(interpolated_histogram, simulated_histogram, save_tag, adjacent_histograms=adjacent_histograms, x_range=[left_mass-75.,right_mass+75.])
 
 	if args.plots:
-		sim_file = TFile(config.get_histogram_file("SR", args.jet_type), "READ")
-		int_file = TFile(config.get_interpolation_file("SR", args.jet_type), "READ")
+		sim_file = TFile(config.get_histogram_file(args.region, args.jet_type), "READ")
+		int_file = TFile(config.get_interpolation_file(args.region, args.jet_type), "READ")
 		for region in ["pass", "fail"]:
 			for model in models:
 				for ptbin in xrange(0, 7):
