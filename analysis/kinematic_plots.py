@@ -349,7 +349,7 @@ if __name__ == "__main__":
 	for var in vars:
 		for selection in selections:
 			for jet_type in jet_types:
-				if selection == "SR":
+				if selection == "SR" or selection == "N2CR":
 					blind = True
 				else:
 					blind = False
@@ -359,7 +359,7 @@ if __name__ == "__main__":
 	for var in ["msd{}".format(x) for x in xrange(1,7)]:
 		for selection in ["SR", "N2CR"]:
 			for jet_type in jet_types:
-				if selection == "SR":
+				if selection == "SR" or selection == "N2CR":
 					blind = True
 				else:
 					blind = False
