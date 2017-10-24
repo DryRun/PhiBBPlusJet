@@ -1,6 +1,7 @@
 import os
 import sys
 from array import array
+import re
 import ROOT
 from ROOT import *
 gROOT.SetBatch(True)
@@ -15,9 +16,19 @@ import DAZSLE.PhiBBPlusJet.style as style
 seaborn = Root.SeabornInterface()
 seaborn.Initialize()
 
+signal_xsecs = {}
+signal_xsecs["Sbb50"] = 1.574e-02
+signal_xsecs["Sbb100"] = 1.526e-02
+signal_xsecs["Sbb125"] = 1.486e-02
+signal_xsecs["Sbb200"] = 1.359e-02
+signal_xsecs["Sbb300"] = 1.251e-02
+signal_xsecs["Sbb350"] = 1.275e-02
+signal_xsecs["Sbb400"] = 1.144e-02
+signal_xsecs["Sbb500"] = 7.274e-03
 
-def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None):
+def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10):
 	print "Welcome to DataMCPlot({}, {}, {}, {})".format(var, selection, jet_type, data_name)
+	re_msdcat = re.compile("msd(?P<cat>\d+)") # Cat = 1 through 6, [450,500,600,700,800,1000]
 	for what in ["pass", "fail", "inclusive"]:
 		print "Input file: " + config.get_histogram_file(selection, jet_type)
 		histogram_file = TFile(config.get_histogram_file(selection, jet_type), "READ")
@@ -25,27 +36,58 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		total_bkgd_histogram = None
 		first = True
 		for background in backgrounds:
-			if var == "msd":
-				if what == "pass":
-					hname = "{}_pass".format(background)
-					background_histograms[background] = histogram_file.Get(hname).ProjectionX()
-				elif what == "fail":
-					hname = "{}_fail".format(background)
-					background_histograms[background] = histogram_file.Get(hname).ProjectionX()
-				else:
-					hname1 = "{}_pass".format(background)
-					background_histograms[background] = histogram_file.Get(hname1).ProjectionX()
-					hname2 = "{}_fail".format(background)
-					background_histograms[background].Add(histogram_file.Get(hname2).ProjectionX())
+			if background in subbackgrounds:
+				this_subbackgrounds = subbackgrounds[background]
 			else:
-				hname = "{}_{}".format(background, var)
-				if what == "pass":
-					hname += "_pass"
-				elif what == "fail":
-					hname += "_fail"
-				background_histograms[background] = histogram_file.Get(hname)
-			if not background_histograms[background]:
-				print "[DataMCPlot] ERROR : Couldn't find histogram {} in file {}".format(hname, histogram_file.GetPath())
+				this_subbackgrounds = [background]
+			background_histograms[background] = None
+			for subbackground in this_subbackgrounds:
+				if var == "msd":
+					if what == "pass":
+						hname = "{}_pass".format(subbackground)
+						this_histogram = histogram_file.Get(hname).ProjectionX()
+					elif what == "fail":
+						hname = "{}_fail".format(subbackground)
+						this_histogram = histogram_file.Get(hname).ProjectionX()
+					else:
+						hname1 = "{}_pass".format(subbackground)
+						this_histogram = histogram_file.Get(hname1).ProjectionX()
+						hname2 = "{}_fail".format(subbackground)
+						this_histogram.Add(histogram_file.Get(hname2).ProjectionX())
+				elif "msd" in var:
+					re_match = re_msdcat.search(var)
+					if re_match:
+						cat = re_match.group("cat")
+						ybin = int(cat)
+						if what == "pass":
+							hname = "{}_pass".format(data_name)
+							this_histogram = histogram_file.Get(hname).ProjectionX("_px{}".format(ybin), ybin, ybin)
+						elif what == "fail":
+							hname = "{}_fail".format(data_name)
+							this_histogram = histogram_file.Get(hname).ProjectionX("_px{}".format(ybin), ybin, ybin)
+						else:
+							hname1 = "{}_pass".format(data_name)
+							this_histogram = histogram_file.Get(hname1).ProjectionX("_px{}".format(ybin), ybin, ybin)
+							hname2 = "{}_fail".format(data_name)
+							this_histogram.Add(histogram_file.Get(hname2).ProjectionX("_px{}".format(ybin), ybin, ybin))
+					else:
+						print "I don't know what to do with var " + var
+						sys.exit(1)
+				else:
+					hname = "{}_{}".format(subbackground, var)
+					if what == "pass":
+						hname += "_pass"
+					elif what == "fail":
+						hname += "_fail"
+					this_histogram = histogram_file.Get(hname)
+				if not this_histogram:
+					print "[DataMCPlot] ERROR : Couldn't find histogram {} in file {}".format(hname, histogram_file.GetPath())
+					sys.exit(1)
+				if not background_histograms[background]:
+					background_histograms[background] = this_histogram.Clone()
+					background_histograms[background].SetDirectory(0)
+				else:
+					background_histograms[background].Add(this_histogram)
 			background_histograms[background].SetDirectory(0)
 			background_histograms[background].SetFillColor(style.background_colors[background])
 			if first:
@@ -68,6 +110,25 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				data_histogram = histogram_file.Get(hname1).ProjectionX()
 				hname2 = "{}_fail".format(data_name)
 				data_histogram.Add(histogram_file.Get(hname2).ProjectionX())
+		elif "msd" in var:
+			re_match = re_msdcat.search(var)
+			if re_match:
+				cat = re_match.group("cat")
+				ybin = int(cat)
+				if what == "pass":
+					hname = "{}_pass".format(data_name)
+					data_histogram = histogram_file.Get(hname).ProjectionX("_px{}".format(ybin), ybin, ybin)
+				elif what == "fail":
+					hname = "{}_fail".format(data_name)
+					data_histogram = histogram_file.Get(hname).ProjectionX("_px{}".format(ybin), ybin, ybin)
+				else:
+					hname1 = "{}_pass".format(data_name)
+					data_histogram = histogram_file.Get(hname1).ProjectionX("_px{}".format(ybin), ybin, ybin)
+					hname2 = "{}_fail".format(data_name)
+					data_histogram.Add(histogram_file.Get(hname2).ProjectionX("_px{}".format(ybin), ybin, ybin))
+			else:
+				print "I don't know what to do with var " + var
+				sys.exit(1)
 		else:
 			hname = "{}_{}".format(data_name, var)
 			if what == "pass":
@@ -76,6 +137,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				hname += "_fail"
 			data_histogram = histogram_file.Get(hname)
 		data_histogram.SetDirectory(0)
+		if blind and what == "pass":
+			data_histogram.Scale(0.)
 
 		# Signal histograms
 		signal_histograms = {}
@@ -92,6 +155,25 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 					signal_histograms[signal_name] = histogram_file.Get(hname1).ProjectionX()
 					hname2 = "{}_fail".format(signal_name)
 					signal_histograms[signal_name].Add(histogram_file.Get(hname2).ProjectionX())
+			elif "msd" in var:
+				re_match = re_msdcat.search(var)
+				if re_match:
+					cat = re_match.group("cat")
+					ybin = int(cat)
+					if what == "pass":
+						hname = "{}_pass".format(data_name)
+						signal_histograms[signal_name] = histogram_file.Get(hname).ProjectionX("_px{}".format(ybin), ybin, ybin)
+					elif what == "fail":
+						hname = "{}_fail".format(data_name)
+						signal_histograms[signal_name] = histogram_file.Get(hname).ProjectionX("_px{}".format(ybin), ybin, ybin)
+					else:
+						hname1 = "{}_pass".format(data_name)
+						signal_histograms[signal_name] = histogram_file.Get(hname1).ProjectionX("_px{}".format(ybin), ybin, ybin)
+						hname2 = "{}_fail".format(data_name)
+						signal_histograms[signal_name].Add(histogram_file.Get(hname2).ProjectionX("_px{}".format(ybin), ybin, ybin))
+				else:
+					print "I don't know what to do with var " + var
+					sys.exit(1)
 			else:
 				hname = "{}_{}".format(signal_name, var)
 				if what == "pass":
@@ -100,6 +182,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 					hname += "_fail"
 				signal_histograms[signal_name] = histogram_file.Get(hname)
 			signal_histograms[signal_name].SetDirectory(0)
+
+			signal_histograms[signal_name].Scale(signal_xsecs[signal_name] * signal_sf)
 
 		if rebin:
 			for background_name, background_histogram in background_histograms.iteritems():
@@ -111,9 +195,9 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 
 		# Sort backgrounds by integral, and make THStack (and legend)
 		if legend_position == "right":
-			l = TLegend(0.6, 0.4, 0.88, 0.88)
+			l = TLegend(0.68, 0.4, 0.88, 0.88)
 		elif legend_position == "left":
-			l = TLegend(0.2, 0.4, 0.48, 0.88)
+			l = TLegend(0.15, 0.4, 0.35, 0.88)
 		l.SetFillColor(0)
 		l.SetBorderSize(0)
 		l.AddEntry(data_histogram, "Data 2016", "p")
@@ -124,9 +208,12 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		for bkgd in bkgds_sorted:
 			bkgd_stack.Add(background_histograms[bkgd])
 		for bkgd in reversed(bkgds_sorted):
-			l.AddEntry(background_histograms[bkgd], bkgd, "f")
+			legend_entry = bkgd
+			if bkgd in legend_entries:
+				legend_entry = legend_entries[bkgd]
+			l.AddEntry(background_histograms[bkgd], legend_entry, "f")
 		for signal_name in signal_names:
-			l.AddEntry(signal_histograms[signal_name], signal_name, "l")
+			l.AddEntry(signal_histograms[signal_name], signal_name + ("" if signal_sf == 1 else "#times{}".format(signal_sf)), "l")
 
 		cname = "c_{}_{}_{}_{}".format(var, selection, jet_type, what)
 		if logy:
@@ -192,7 +279,10 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		ratio_histogram.Divide(total_bkgd_histogram)
 		ratio_histogram.SetMinimum(0.)
 		ratio_histogram.SetMaximum(3.)
-		ratio_histogram.GetXaxis().SetTitle(style.axis_titles[var])
+		if var in style.axis_titles:
+			ratio_histogram.GetXaxis().SetTitle(style.axis_titles[var])
+		else:
+			ratio_histogram.GetXaxis().SetTitle(var)
 		ratio_histogram.GetXaxis().SetTitleSize(0.06)
 		ratio_histogram.GetXaxis().SetLabelSize(0.06)
 		ratio_histogram.GetYaxis().SetTitleSize(0.06)
@@ -214,27 +304,64 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 
 if __name__ == "__main__":
 	vars = ["pfmet","dcsv","n2ddt","pt","eta","rho", "msd"]
-	rebin = {"pfmet":1,"dcsv":4, "n2ddt":1, "pt":10, "eta":1, "rho":4, "msd":1}
-	legend_positions = {"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"}
+	rebin = {"pfmet":1,"dcsv":1, "n2ddt":1, "pt":10, "eta":1, "rho":4, "msd":1}
+	legend_positions = {
+		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"muCR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"Preselection":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2CR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+	}
+
 	x_ranges = {
 		"pfmet":[0,500],
 		"dcsv":[-1,1],
 		"n2ddt":[-0.4, 0.2],
 		"pt":[0,2000],
 		"eta":[-3.,3.],
-		"rho":[-7.5, -1.],
+		"rho":[-9, 0.],
 		"msd":[0., 400.]
 	}
-	selections = ["SR", "Preselection", "muCR"]
+	selections = ["SR", "Preselection", "muCR", "N2CR"]
 	backgrounds = {
 		"SR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
 		"Preselection":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
-		"muCR":["qcd","zll","wlnu","tqq","wqq","zqq","hbb","stqq","vvqq"]
+		"muCR":["qcd","zll","wlnu","tqq","wqq","zqq","hbb","stqq","vvqq"],
+		"N2CR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
 	}
+	subbackgrounds = {
+		"hbb":["hqq125", "tthqq125", "vbfhqq125", "whqq125", "zhqq125"]
+	}
+	legend_entries = {
+		"qcd":"QCD",
+		"tqq":"t#bar{t}",
+		"wqq":"W",
+		"zqq":"Z",
+		"hbb":"H(bb)",
+		"stqq":"Single t",
+		"vvqq":"Diboson",
+		"zll":"Z(ll)",
+		"wlnu":"W(l#nu)",
+	}
+  
+
 	jet_types = ["AK8", "CA15"]
-	data_names = {"SR":"data_obs", "Preselection":"data_obs", "muCR":"data_singlemu"}
+	data_names = {"SR":"data_obs", "Preselection":"data_obs", "muCR":"data_singlemu", "N2CR":"data_obs"}
 	for var in vars:
 		for selection in selections:
 			for jet_type in jet_types:
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[var], x_range=x_ranges[var])
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[var], x_range=x_ranges[var])
+				if selection == "SR":
+					blind = True
+				else:
+					blind = False
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+	# mSD in pT categories, for SR and N2CR
+	for var in ["msd{}".format(x) for x in xrange(1,7)]:
+		for selection in ["SR", "N2CR"]:
+			for jet_type in jet_types:
+				if selection == "SR":
+					blind = True
+				else:
+					blind = False
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
