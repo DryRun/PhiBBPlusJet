@@ -68,11 +68,12 @@ class EventSelectionHistograms(AnalysisBase):
 			print "[EventSelectionHistograms::set_cut] ERROR : Unknown customizable cut {}. Exiting.".format(cut_name)
 			sys.exit(1)
 
-	def set_jet_type(self, jet_type):
-		if jet_type != "AK8" and jet_type != "CA15":
-			print "[EventSelectionHistograms::set_jet_type] ERROR : Unknown jet type {}. Exiting.".format(jet_type)
-			sys.exit(1)
-		self._jet_type = jet_type 
+	# Commented out on 17/10/24: setting this later can lead to inconsistencies, so instead specify in CONSTRUCTOR, and never change again.
+	#def set_jet_type(self, jet_type):
+	#	if jet_type != "AK8" and jet_type != "CA15":
+	#		print "[EventSelectionHistograms::set_jet_type] ERROR : Unknown jet type {}. Exiting.".format(jet_type)
+	#		sys.exit(1)
+	#	self._jet_type = jet_type 
 
 	def set_data_source(self, data_source):
 		print "[EventSelectionHistograms::set_data_source] INFO : Setting data source to " + data_source
@@ -156,9 +157,9 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("pass_pt", "pt", "pt", 400, 0., 2000.)
 			self._selection_histograms[selection].AddTH1D("fail_pt", "pt", "pt", 400, 0., 2000.)
 
-			self._selection_histograms[selection].AddTH1D("msd", "msd", "msd", 120, 0., 600.)
-			self._selection_histograms[selection].AddTH1D("pass_msd", "msd", "msd", 120, 0., 600.)
-			self._selection_histograms[selection].AddTH1D("fail_msd", "msd", "msd", 120, 0., 600.)
+			self._selection_histograms[selection].AddTH1D("msd", "msd", "msd", 85, 5, 600)
+			self._selection_histograms[selection].AddTH1D("pass_msd", "msd", "msd", 85, 5, 600)
+			self._selection_histograms[selection].AddTH1D("fail_msd", "msd", "msd", 85, 5, 600)
 
 			self._selection_histograms[selection].AddTH1D("eta", "eta", "eta", 60, -3., 3.)
 			self._selection_histograms[selection].AddTH1D("pass_eta", "eta", "eta", 60, -3., 3.)
@@ -834,7 +835,7 @@ if __name__ == "__main__":
 						print "[setup_limits] WARNING : NEvents histogram in not in this file! It is probably corrupt. This is MC, so I am skipping the file. But, you probably want to remove from the input list."
 						sample_files[sample].remove(filename)
 				
-			limit_histogrammer = EventSelectionHistograms(sample, tree_name=tree_name)
+			limit_histogrammer = EventSelectionHistograms(sample, tree_name=tree_name, jet_type=args.jet_type)
 			if args.do_optimization:
 				limit_histogrammer.do_optimization()
 			output_file_basename ="InputHistograms_{}_{}.root".format(sample, args.jet_type) 
@@ -845,7 +846,7 @@ if __name__ == "__main__":
 			for filename in sample_files[sample]:
 				print "Input file {}".format(filename)
 				limit_histogrammer.add_file(filename)
-			limit_histogrammer.set_jet_type(args.jet_type)
+			#limit_histogrammer.set_jet_type(args.jet_type)
 			if "JetHTRun2016" in sample or "SingleMuRun2016" in sample:
 				limit_histogrammer.set_data_source("data")
 			else:
@@ -1147,25 +1148,25 @@ if __name__ == "__main__":
 				# For muCR, project to 1D
 				if "muCR" in selection:
 					old_name = pass_histograms[supersample].GetName()
-					pass_histograms[supersample] = pass_histograms[supersample].ProjectionX()
+					pass_histograms[supersample].RebinY(pass_histograms[supersample].GetNbinsY())
 					pass_histograms[supersample].SetName(old_name)
 					old_name = fail_histograms[supersample].GetName()
-					fail_histograms[supersample] = fail_histograms[supersample].ProjectionX()
+					fail_histograms[supersample].RebinY(fail_histograms[supersample].GetNbinsY())
 					fail_histograms[supersample].SetName(old_name)
 					for systematic in systematics[selection]:
 						old_name = pass_histograms_syst[supersample][systematic].GetName()
-						pass_histograms_syst[supersample][systematic] = pass_histograms_syst[supersample][systematic].ProjectionX()
+						pass_histograms_syst[supersample][systematic].RebinY(pass_histograms_syst[supersample][systematic].GetNbinsY())
 						pass_histograms_syst[supersample][systematic].SetName(old_name)
 						old_name = fail_histograms_syst[supersample][systematic].GetName()
-						fail_histograms_syst[supersample][systematic] = fail_histograms_syst[supersample][systematic].ProjectionX()
+						fail_histograms_syst[supersample][systematic].RebinY(fail_histograms_syst[supersample][systematic].GetNbinsY())
 						fail_histograms_syst[supersample][systematic].SetName(old_name)
 					if use_loose_template:
 						old_name = pass_histograms[supersample + "_normalization"].GetName()
-						pass_histograms[supersample + "_normalization"] = pass_histograms[supersample + "_normalization"].ProjectionX()
+						pass_histograms[supersample + "_normalization"].RebinY(pass_histograms[supersample + "_normalization"].GetNbinsY())
 						pass_histograms[supersample + "_normalization"].SetName(old_name)
 						for systematic in systematics[selection]:
 							old_name = pass_histograms_syst[supersample + "_normalization"][systematic].GetName()
-							pass_histograms_syst[supersample + "_normalization"][systematic] = pass_histograms_syst[supersample + "_normalization"][systematic].ProjectionX()
+							pass_histograms_syst[supersample + "_normalization"][systematic].RebinY(pass_histograms_syst[supersample + "_normalization"][systematic].GetNbinsY())
 							pass_histograms_syst[supersample + "_normalization"][systematic].SetName(old_name)
 
 				pass_histograms[supersample].Write()
