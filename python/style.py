@@ -16,6 +16,8 @@ background_colors = {
 	"zll":seaborn.GetColorRoot("cubehelixlarge", 21, 24),
 	"wlnu":seaborn.GetColorRoot("cubehelixlarge", 23, 24),
 }
+# Higgs aliases
+background_colors["hqq"] = background_colors["hbb"]
 
 axis_titles = {
 	"msd":"m_{SD} [GeV]",
