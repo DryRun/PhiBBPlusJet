@@ -183,6 +183,21 @@ class EventSelectionHistograms(AnalysisBase):
 				"m_{SD} [GeV]", 100, 40, 740,
 				"p_{T} [GeV]", 6, 400, 1000)
 
+			if self._jet_type == "CA15":
+				self._selection_histograms[selection].AddTH2D("dcsvalt_vs_rho", "dcsvalt_vs_rho", 
+					"Double-b (alternate)", 110, -1.1, 1.1,
+					"#rho", 40, -8., 0.)
+				self._selection_histograms[selection].AddTH2D("dcsvalt_vs_pt", "dcsvalt_vs_pt", 
+					"Double-b (alternate)", 110, -1.1, 1.1,
+					"p_{T} [GeV]", 50, 0., 1000.)
+				self._selection_histograms[selection].AddTH2D("dcsvalt_vs_msd", "dcsvalt_vs_msd", 
+					"Double-b (alternate)", 110, -1.1, 1.1,
+					"m_{SD} [GeV]", 100, 40, 740)
+				self._selection_histograms[selection].AddTH3D("dcsvalt_vs_msd_vs_pt", "dcsvalt_vs_msd_vs_pt", 
+					"Double-b (alternate)", 110, -1.1, 1.1,
+					"m_{SD} [GeV]", 100, 40, 740,
+					"p_{T} [GeV]", 6, 400, 1000)
+
 			if self._do_optimization:
 				for dcsv_cut in self._dcsv_cuts:
 					self._selection_histograms[selection].AddTH2D("pass_dcsv{}".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
@@ -496,6 +511,7 @@ class EventSelectionHistograms(AnalysisBase):
 					fatjet_eta = self._data.AK8Puppijet0_eta
 					fatjet_msd = self._data.AK8Puppijet0_msd_puppi
 					fatjet_dcsv = self._data.AK8Puppijet0_doublecsv
+					fatjet_dcsv_alt = 0.
 					fatjet_n2ddt = self._data.AK8Puppijet0_N2DDT
 					fatjet_rho = self._data.AK8Puppijet0_rho
 					fatjet_phi = self._data.AK8Puppijet0_phi
@@ -504,6 +520,7 @@ class EventSelectionHistograms(AnalysisBase):
 					fatjet_eta = self._data.CA15Puppijet0_eta
 					fatjet_msd = self._data.CA15Puppijet0_msd_puppi
 					fatjet_dcsv = self._data.CA15Puppijet0_doublesub
+					fatjet_dcsv_alt = self._data.CA15Puppijet0_doublecsv
 					fatjet_n2ddt = self._data.CA15Puppijet0_N2DDT
 					fatjet_rho = self._data.CA15Puppijet0_rho
 					fatjet_phi = self._data.CA15Puppijet0_phi
@@ -542,6 +559,12 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_pt").Fill(fatjet_dcsv, fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_msd").Fill(fatjet_dcsv, fatjet_msd, event_weight)
 					self._selection_histograms[selection].GetTH3D("dcsv_vs_msd_vs_pt").Fill(fatjet_dcsv, fatjet_msd, fatjet_pt, event_weight)
+
+					if self._jet_type == "CA15":
+						self._selection_histograms[selection].GetTH2D("dcsvalt_vs_rho").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_rho, event_weight)
+						self._selection_histograms[selection].GetTH2D("dcsvalt_vs_pt").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_pt, event_weight)
+						self._selection_histograms[selection].GetTH2D("dcsvalt_vs_msd").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_msd, event_weight)
+						self._selection_histograms[selection].GetTH3D("dcsvalt_vs_msd_vs_pt").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_msd, fatjet_pt, event_weight)
 
 					# Pass and fail histograms
 					if fatjet_dcsv > self._dcsv_cut:
@@ -619,6 +642,8 @@ class EventSelectionHistograms(AnalysisBase):
 							elif fatjet_dcsv > self._dcsv_min:
 								self._selection_histograms[selection].GetTH2D("fail_dcsv{}".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
 								self._selection_histograms[selection].GetTH2D("fail_unweighted_dcsv{}".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt)
+
+
 
 				# Run systematics that affect event selection
 				for systematic in self._jet_systematics:
