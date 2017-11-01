@@ -28,3 +28,15 @@ axis_titles = {
 	"pfmet":"PF E_{T}^{miss}",
 	"eta":"#eta"
 }
+
+background_legends = {
+	"qcd":"QCD",
+	"tqq":"t#bar{t}",
+	"zqq":"Z#rightarrowq#bar{q}",
+	"wqq":"W#rightarrowq#bar{q}",
+	"hbb":"H#rightarrow b#bar{b}",
+	"vvqq":"Diboson",
+	"stqq":"Single t",
+	"zll":"Z#rightarrowll",
+	"wlnu":"W#rightarrowl#nu"
+}
