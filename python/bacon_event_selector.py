@@ -96,6 +96,20 @@ class BaconEventSelector(EventSelector):
 		self._return_data["AK8Puppijet0_tau32"] = self._event.AK8Puppijet0_tau32
 		return (self._event.AK8CHSjet0_doublecsv <= self._cut_parameters["Max_AK8CHSjet0_doublecsv"])
 
+	def Min_AK8Puppijet0_doublecsv(self):
+		self._return_data["Min_AK8Puppijet0_doublecsv"] = self._event.AK8Puppijet0_doublecsv
+		self._return_data["AK8Puppijet0_pt"] = self._event.AK8Puppijet0_pt
+		self._return_data["AK8Puppijet0_tau21"] = self._event.AK8Puppijet0_tau21
+		self._return_data["AK8Puppijet0_tau32"] = self._event.AK8Puppijet0_tau32
+		return (self._event.AK8Puppijet0_doublecsv >= self._cut_parameters["Min_AK8Puppijet0_doublecsv"])
+
+	def Max_AK8Puppijet0_doublecsv(self):
+		self._return_data["Max_AK8Puppijet0_doublecsv"] = self._event.AK8Puppijet0_doublecsv
+		self._return_data["AK8Puppijet0_pt"] = self._event.AK8Puppijet0_pt
+		self._return_data["AK8Puppijet0_tau21"] = self._event.AK8Puppijet0_tau21
+		self._return_data["AK8Puppijet0_tau32"] = self._event.AK8Puppijet0_tau32
+		return (self._event.AK8Puppijet0_doublecsv <= self._cut_parameters["Max_AK8Puppijet0_doublecsv"])
+
 	def Min_nmuLoose(self):
 		self._return_data["Min_nmuLoose"] = self._event.nmuLoose
 		return (self._event.nmuLoose >= self._cut_parameters["Min_nmuLoose"])

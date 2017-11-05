@@ -177,7 +177,7 @@ def MakeN2SRSelector(jet_type, dbtag_cut=0., jet_systematic="nominal", tag=None)
 	if jet_type == "AK8":
 		event_selector.add_cut("Min_AK8Puppijet0_doublecsv", dbtag_cut)
 	elif jet_type == "CA15":
-		event_selector.add_cut("Min_AK8Puppijet0_doublesub", dbtag_cut)
+		event_selector.add_cut("Min_CA15Puppijet0_doublesub", dbtag_cut)
 
 	if jet_type == "AK8":
 		event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
