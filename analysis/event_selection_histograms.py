@@ -38,7 +38,7 @@ class EventSelectionHistograms(AnalysisBase):
 		self._dcsv_cut_loose = 0.8
 		self._dcsv_min = -999.
 		self._jet_type = jet_type
-		self._selections = ["Preselection", "SR", "muCR", "N2CR"]
+		self._selections = ["Preselection", "SR", "muCR", "N2CR", "N2SR"]
 		self._do_optimization = False
 		self._data_source = "data"
 		self._prescale = -1
@@ -46,6 +46,7 @@ class EventSelectionHistograms(AnalysisBase):
 		# Weight systematics: these only affect the weights used to fill histograms, so can easily be filled in normal running
 		self._weight_systematics = {
 			"SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
+			"N2SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"N2CR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"Preselection":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
@@ -236,12 +237,14 @@ class EventSelectionHistograms(AnalysisBase):
 		# Event selections
 		self._event_selectors = {}
 		self._event_selectors["SR"] = event_selections.MakeSRSelector(self._jet_type)
+		self._event_selectors["N2SR"] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut)
 		self._event_selectors["N2CR"] = event_selections.MakeN2CRSelector(self._jet_type)
 		self._event_selectors["Preselection"] = event_selections.MakePreselectionSelector(self._jet_type)
 		self._event_selectors["muCR"] = event_selections.MakeMuCRSelector(self._jet_type)
-		self._event_selectors_syst = {"SR":{}, "muCR":{}, "Preselection":{}, "N2CR":{}}
+		self._event_selectors_syst = {"SR":{}, "muCR":{}, "Preselection":{}, "N2CR":{}, "N2SR":{}}
 		for systematic in self._jet_systematics:
 			self._event_selectors_syst["SR"][systematic] = event_selections.MakeSRSelector(self._jet_type, jet_systematic=systematic)
+			self._event_selectors_syst["N2SR"][systematic] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut, jet_systematic=systematic)
 			self._event_selectors_syst["N2CR"][systematic] = event_selections.MakeN2CRSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["Preselection"][systematic] = event_selections.MakePreselectionSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["muCR"][systematic] = event_selections.MakeMuCRSelector(self._jet_type, jet_systematic=systematic)
@@ -567,7 +570,15 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH3D("dcsvalt_vs_msd_vs_pt").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_msd, fatjet_pt, event_weight)
 
 					# Pass and fail histograms
-					if fatjet_dcsv > self._dcsv_cut:
+					if selection == "N2SR":
+						pass_box = (fatjet_n2ddt < 0.)
+						fail_box = (fatjet_n2ddt >= 0.)
+						pass_loose_box = (fatjet_n2ddt < 0.)
+					else:
+						pass_box = (fatjet_dcsv > self._dcsv_cut)
+						fail_box = (fatjet_dcsv > self._dcsv_min)
+						pass_loose_box = (fatjet_dcsv > self._dcsv_cut_loose)
+					if pass_box:
 						self._selection_histograms[selection].GetTH2D("pass").Fill(fatjet_msd, fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH2D("pass_unweighted").Fill(fatjet_msd, fatjet_pt)
 						if self._data_source == "simulation":
@@ -590,7 +601,7 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH1D("pass_eta").Fill(fatjet_eta, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_rho").Fill(fatjet_rho, event_weight)
 
-					elif fatjet_dcsv > self._dcsv_min:
+					elif fail_box:
 						self._selection_histograms[selection].GetTH2D("fail").Fill(fatjet_msd, fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH2D("fail_unweighted").Fill(fatjet_msd, fatjet_pt)
 						if self._data_source == "simulation":
@@ -683,14 +694,14 @@ class EventSelectionHistograms(AnalysisBase):
 								matching_dmass = abs(self._data.genVMass - fatjet_msd) / self._data.genVMass
 								vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3
 
-						if fatjet_dcsv > self._dcsv_cut:
+						if pass_box:
 							self._selection_histograms[selection].GetTH2D("pass_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt_syst, event_weight)
 							if self._data_source == "simulation":
 								if vmatched:
 									self._selection_histograms[selection].GetTH2D("pass_{}_matched".format(systematic)).Fill(fatjet_msd, fatjet_pt_syst, event_weight)
 								else:
 									self._selection_histograms[selection].GetTH2D("pass_{}_unmatched".format(systematic)).Fill(fatjet_msd, fatjet_pt_syst, event_weight)
-						elif fatjet_dcsv > self._dcsv_min:
+						elif fail_box:
 							self._selection_histograms[selection].GetTH2D("fail_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt_syst, event_weight)
 							if self._data_source == "simulation":
 								if vmatched:
