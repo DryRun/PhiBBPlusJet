@@ -943,6 +943,8 @@ if __name__ == "__main__":
 			job_script_path = "{}/run_csubjob.sh".format(submission_directory)
 			job_script = open(job_script_path, 'w')
 			job_script.write("#!/bin/bash\n")
+			job_script.write("which python\n")
+			job_script.write("python --version\n")
 			job_script.write("input_files=( " + " ".join(sample_files[sample]) + " )\n")
 			job_script.write("files_per_job=" + str(files_per_job) + "\n")
 			job_script.write("first_file_index=$(($1*$files_per_job))\n")
