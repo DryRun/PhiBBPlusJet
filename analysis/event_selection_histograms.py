@@ -945,6 +945,7 @@ if __name__ == "__main__":
 			job_script.write("#!/bin/bash\n")
 			job_script.write("which python\n")
 			job_script.write("python --version\n")
+			job_script.write("ll /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/\n")
 			job_script.write("input_files=( " + " ".join(sample_files[sample]) + " )\n")
 			job_script.write("files_per_job=" + str(files_per_job) + "\n")
 			job_script.write("first_file_index=$(($1*$files_per_job))\n")
