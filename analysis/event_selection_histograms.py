@@ -537,6 +537,14 @@ class EventSelectionHistograms(AnalysisBase):
 
 				# Run selection and fill histograms
 				self._event_selectors[selection].process_event(self._data, event_weight)
+				if selection == "N2SR":
+					pass_box = (fatjet_n2ddt < 0.)
+					fail_box = (fatjet_n2ddt >= 0.)
+					pass_loose_box = (fatjet_n2ddt < 0.)
+				else:
+					pass_box = (fatjet_dcsv > self._dcsv_cut)
+					fail_box = (fatjet_dcsv > self._dcsv_min)
+					pass_loose_box = (fatjet_dcsv > self._dcsv_cut_loose)
 				if self._event_selectors[selection].event_pass():
 					self._selection_histograms[selection].GetTH1D("pass_nevents").Fill(0)
 					self._selection_histograms[selection].GetTH1D("pass_nevents_weighted").Fill(0, event_weight)
@@ -570,14 +578,6 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH3D("dcsvalt_vs_msd_vs_pt").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_msd, fatjet_pt, event_weight)
 
 					# Pass and fail histograms
-					if selection == "N2SR":
-						pass_box = (fatjet_n2ddt < 0.)
-						fail_box = (fatjet_n2ddt >= 0.)
-						pass_loose_box = (fatjet_n2ddt < 0.)
-					else:
-						pass_box = (fatjet_dcsv > self._dcsv_cut)
-						fail_box = (fatjet_dcsv > self._dcsv_min)
-						pass_loose_box = (fatjet_dcsv > self._dcsv_cut_loose)
 					if pass_box:
 						self._selection_histograms[selection].GetTH2D("pass").Fill(fatjet_msd, fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH2D("pass_unweighted").Fill(fatjet_msd, fatjet_pt)
