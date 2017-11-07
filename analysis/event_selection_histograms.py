@@ -967,6 +967,14 @@ if __name__ == "__main__":
 
 			job_command += " 2>&1\n"
 			job_script.write(job_command)
+
+			# Check if the output file exists
+			job_script.write("if ls InputHistograms*{}_csubjob$1*root 1> /dev/null 2&>1; then\n".format(sample))
+			job_script.write("\techo \"1\" > jobstatus_csubjob$1.txt\n")
+			job_script.write("else\n")
+			job_script.write("\techo\"0\" > jobstatus_csubjob$1.txt\n")
+			job_script.write("fi\n")
+
 			job_script.close()
 			submission_command = "csub {} --cmssw --no_retar -n {}".format(job_script_path, n_jobs)
 			print submission_command
@@ -985,6 +993,10 @@ if __name__ == "__main__":
 			hadd_scripts.append("{}/hadd.sh".format(submission_directory))
 			hadd_script = open("{}/hadd.sh".format(submission_directory), "w")
 			hadd_script.write("#!/bin/bash\n")
+			hadd_script.write("for f in jobstatus_csubjob*.txt; do\n")
+			hadd_script.write("\tif grep -Fxq \"0\" f; then\n")
+			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
+			hadd_script.write("\tfi\n")
 			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/LimitSetting/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
 			hadd_script.close()
 			os.chdir(start_directory)
@@ -1008,7 +1020,7 @@ if __name__ == "__main__":
 			"Preselection":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
-		selections = ["SR", "muCR", "Preselection", "N2CR"] # N2CR
+		selections = ["SR", "muCR", "Preselection", "N2CR", "N2SR"] # N2CR
 		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
@@ -1024,6 +1036,8 @@ if __name__ == "__main__":
 				selection_prefix = "SR"
 			if "N2CR" in selection:
 				selection_prefix = "N2CR"
+			if "N2SR" in selection:
+				selection_prefix = "N2SR"
 			elif "muCR" in selection:
 				selection_prefix = "muCR"
 			elif "Preselection" in selection:
