@@ -40,12 +40,12 @@ def MakeSRSelector(jet_type, n2_ddt_cut=0., tau21_ddt_cut=None, jet_systematic="
 		else:
 			event_selector.add_cut("Max_CA15Puppijet0_N2DDT", n2_ddt_cut)
 
-	if jet_type == "AK8":
-		event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
-		event_selector.add_cut("Max_AK8Puppijet0_rho", -2.1)
-	elif jet_type == "CA15":
-		event_selector.add_cut("Min_CA15Puppijet0_rho", -4.7)
-		event_selector.add_cut("Max_CA15Puppijet0_rho", -1.0)
+	#if jet_type == "AK8":
+	#	event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
+	#	event_selector.add_cut("Max_AK8Puppijet0_rho", -2.1)
+	#elif jet_type == "CA15":
+	#	event_selector.add_cut("Min_CA15Puppijet0_rho", -4.7)
+	#	event_selector.add_cut("Max_CA15Puppijet0_rho", -1.0)
 
 	return event_selector
 
@@ -141,12 +141,12 @@ def MakeN2CRSelector(jet_type, n2_ddt_cut=0., tau21_ddt_cut=None, jet_systematic
 		else:
 			event_selector.add_cut("Min_CA15Puppijet0_N2DDT", n2_ddt_cut)
 
-	if jet_type == "AK8":
-		event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
-		event_selector.add_cut("Max_AK8Puppijet0_rho", -2.1)
-	elif jet_type == "CA15":
-		event_selector.add_cut("Min_CA15Puppijet0_rho", -4.7)
-		event_selector.add_cut("Max_CA15Puppijet0_rho", -1.0)
+	#if jet_type == "AK8":
+	#	event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
+	#	event_selector.add_cut("Max_AK8Puppijet0_rho", -2.1)
+	#elif jet_type == "CA15":
+	#	event_selector.add_cut("Min_CA15Puppijet0_rho", -4.7)
+	#	event_selector.add_cut("Max_CA15Puppijet0_rho", -1.0)
 
 	return event_selector
 
@@ -179,11 +179,11 @@ def MakeN2SRSelector(jet_type, dbtag_cut=0., jet_systematic="nominal", tag=None)
 	elif jet_type == "CA15":
 		event_selector.add_cut("Min_CA15Puppijet0_doublesub", dbtag_cut)
 
-	if jet_type == "AK8":
-		event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
-		event_selector.add_cut("Max_AK8Puppijet0_rho", -2.1)
-	elif jet_type == "CA15":
-		event_selector.add_cut("Min_CA15Puppijet0_rho", -4.7)
-		event_selector.add_cut("Max_CA15Puppijet0_rho", -1.0)
+	#if jet_type == "AK8":
+	#	event_selector.add_cut("Min_AK8Puppijet0_rho", -6.0)
+	#	event_selector.add_cut("Max_AK8Puppijet0_rho", -2.1)
+	#elif jet_type == "CA15":
+	#	event_selector.add_cut("Min_CA15Puppijet0_rho", -4.7)
+	#	event_selector.add_cut("Max_CA15Puppijet0_rho", -1.0)
 
 	return event_selector
