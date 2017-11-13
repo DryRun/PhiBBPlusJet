@@ -26,12 +26,12 @@ signal_xsecs["Sbb350"] = 1.275e-02
 signal_xsecs["Sbb400"] = 1.144e-02
 signal_xsecs["Sbb500"] = 7.274e-03
 
-def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10):
+def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False):
 	print "Welcome to DataMCPlot({}, {}, {}, {})".format(var, selection, jet_type, data_name)
 	re_msdcat = re.compile("msd(?P<cat>\d+)") # Cat = 1 through 6, [450,500,600,700,800,1000]
 	for what in ["pass", "fail", "inclusive"]:
-		print "Input file: " + config.get_histogram_file(selection, jet_type)
-		histogram_file = TFile(config.get_histogram_file(selection, jet_type), "READ")
+		print "Input file: " + config.get_histogram_file(selection.replace("_ps10", ""), jet_type)
+		histogram_file = TFile(config.get_histogram_file(selection.replace("_ps10", ""), jet_type), "READ")
 		background_histograms = {}
 		total_bkgd_histogram = None
 		first = True
@@ -83,6 +83,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				if not this_histogram:
 					print "[DataMCPlot] ERROR : Couldn't find histogram {} in file {}".format(hname, histogram_file.GetPath())
 					sys.exit(1)
+				if "ps10" in selection:
+					this_histogram.Scale(0.1)
 				if not background_histograms[background]:
 					background_histograms[background] = this_histogram.Clone()
 					background_histograms[background].SetDirectory(0)
@@ -182,8 +184,9 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 					hname += "_fail"
 				signal_histograms[signal_name] = histogram_file.Get(hname)
 			signal_histograms[signal_name].SetDirectory(0)
-
 			signal_histograms[signal_name].Scale(signal_xsecs[signal_name] * signal_sf)
+			if "ps10" in selection:
+				signal_histograms[signal_name].Scale(0.1)
 
 		if rebin:
 			for background_name, background_histogram in background_histograms.iteritems():
@@ -307,9 +310,13 @@ if __name__ == "__main__":
 	rebin = {"pfmet":1,"dcsv":1, "n2ddt":1, "pt":10, "eta":1, "rho":4, "msd":1}
 	legend_positions = {
 		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2SR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
 		"muCR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
 		"Preselection":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
 		"N2CR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2CR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
 	}
 
 	x_ranges = {
@@ -321,12 +328,16 @@ if __name__ == "__main__":
 		"rho":[-9, 0.],
 		"msd":[0., 400.]
 	}
-	selections = ["SR", "Preselection", "muCR", "N2CR"]
+	selections = ["SR", "Preselection", "muCR", "N2CR", "N2SR", "SR_ps10", "N2CR_ps10", "N2SR_ps10"]
 	backgrounds = {
 		"SR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
+		"N2SR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
 		"Preselection":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
 		"muCR":["qcd","zll","wlnu","tqq","wqq","zqq","hbb","stqq","vvqq"],
 		"N2CR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
+		"SR_ps10":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
+		"N2SR_ps10":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
+		"N2CR_ps10":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
 	}
 	subbackgrounds = {
 		"hbb":["hqq125", "tthqq125", "vbfhqq125", "whqq125", "zhqq125"]
@@ -345,11 +356,11 @@ if __name__ == "__main__":
   
 
 	jet_types = ["AK8", "CA15"]
-	data_names = {"SR":"data_obs", "Preselection":"data_obs", "muCR":"data_singlemu", "N2CR":"data_obs"}
+	data_names = {"SR":"data_obs", "N2SR":"data_obs", "Preselection":"data_obs", "muCR":"data_singlemu", "N2CR":"data_obs", "SR_ps10":"data_obs_ps10", "N2CR_ps10":"data_obs_ps10", "N2SR_ps10":"data_obs_ps10"}
 	for var in vars:
 		for selection in selections:
 			for jet_type in jet_types:
-				if selection == "SR" or selection == "N2CR":
+				if selection == "SR" or selection == "N2SR":
 					blind = True
 				else:
 					blind = False
@@ -357,9 +368,9 @@ if __name__ == "__main__":
 				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
 	# mSD in pT categories, for SR and N2CR
 	for var in ["msd{}".format(x) for x in xrange(1,7)]:
-		for selection in ["SR", "N2CR"]:
+		for selection in ["SR", "N2CR", "N2SR"]:
 			for jet_type in jet_types:
-				if selection == "SR" or selection == "N2CR":
+				if selection == "SR" or selection == "N2SR":
 					blind = True
 				else:
 					blind = False
