@@ -997,6 +997,7 @@ if __name__ == "__main__":
 			hadd_script.write("\tif grep -Fxq \"0\" f; then\n")
 			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
 			hadd_script.write("\tfi\n")
+			hadd_script.write("done\n")
 			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/LimitSetting/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
 			hadd_script.close()
 			os.chdir(start_directory)
