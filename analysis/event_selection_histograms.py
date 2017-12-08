@@ -181,8 +181,8 @@ class EventSelectionHistograms(AnalysisBase):
 				"m_{SD} [GeV]", 100, 40, 740)
 			self._selection_histograms[selection].AddTH3D("dcsv_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt", 
 				"Double-b", 110, -1.1, 1.1,
-				"m_{SD} [GeV]", 100, 40, 740,
-				"p_{T} [GeV]", 6, 400, 1000)
+				"m_{SD} [GeV]", 80, 40, 600,
+				"p_{T} [GeV]", 12, 400, 1000)
 
 			if self._jet_type == "CA15":
 				self._selection_histograms[selection].AddTH2D("dcsvalt_vs_rho", "dcsvalt_vs_rho", 
@@ -198,6 +198,11 @@ class EventSelectionHistograms(AnalysisBase):
 					"Double-b (alternate)", 110, -1.1, 1.1,
 					"m_{SD} [GeV]", 100, 40, 740,
 					"p_{T} [GeV]", 6, 400, 1000)
+
+			self._selection_histograms[selection].AddTH3D("n2ddt_vs_msd_vs_pt", "n2ddt_vs_msd_vs_pt", 
+				"N_{2}^{DDT}", 40, -0.5, 0.5,
+				"m_{SD} [GeV]", 40, 40, 600,
+				"p_{T} [GeV]", 12, 400, 1000)
 
 			if self._do_optimization:
 				for dcsv_cut in self._dcsv_cuts:
@@ -994,7 +999,7 @@ if __name__ == "__main__":
 			hadd_script = open("{}/hadd.sh".format(submission_directory), "w")
 			hadd_script.write("#!/bin/bash\n")
 			hadd_script.write("for f in jobstatus_csubjob*.txt; do\n")
-			hadd_script.write("\tif grep -Fxq \"0\" f; then\n")
+			hadd_script.write("\tif grep -Fxq \"0\" $f; then\n")
 			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
 			hadd_script.write("\tfi\n")
 			hadd_script.write("done\n")

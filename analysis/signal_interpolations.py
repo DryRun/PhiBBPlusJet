@@ -109,7 +109,7 @@ def make_validation_plots(interpolated_histogram, simulated_histogram, save_tag,
 				adj_hist_proj[adj_mass].SetMarkerSize(0)
 				adj_hist_proj[adj_mass].SetLineStyle(3)
 				adj_hist_proj[adj_mass].SetLineColor(seaborn.GetColorRoot("pastel", 3))
-				adj_hist_proj[adj_mass].SetLineWidth(2)
+				adj_hist_proj[adj_mass].SetLineWidth(3)
 				adj_hist_proj[adj_mass].Draw("hist same")
 				l_comparison.AddEntry(adj_hist_proj[adj_mass], "Sim, m={} GeV".format(adj_mass), "l")
 		l_comparison.Draw()
