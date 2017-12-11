@@ -1287,8 +1287,10 @@ if __name__ == "__main__":
 										print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
 										lumi_sf = 0.
 								this_histogram.Scale(lumi_sf)
-								this_histogram_pass.Scale(lumi_sf)
-								this_histogram_fail.Scale(lumi_sf)
+								if this_histogram_pass:
+									this_histogram_pass.Scale(lumi_sf)
+								if this_histogram_fail:
+									this_histogram_fail.Scale(lumi_sf)
 
 							# Add up
 							if first:
