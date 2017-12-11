@@ -1296,16 +1296,20 @@ if __name__ == "__main__":
 								extra_histograms[var] = this_histogram.Clone()
 								extra_histograms[var].SetDirectory(0)
 								extra_histograms[var].SetName(supersample + "_" + var)
-								extra_histograms_pass[var] = this_histogram_pass.Clone()
-								extra_histograms_pass[var].SetDirectory(0)
-								extra_histograms_pass[var].SetName(supersample + "_" + var + "_pass")
-								extra_histograms_fail[var] = this_histogram_fail.Clone()
-								extra_histograms_fail[var].SetDirectory(0)
-								extra_histograms_fail[var].SetName(supersample + "_" + var + "_fail")
+								if this_histogram_pass:
+									extra_histograms_pass[var] = this_histogram_pass.Clone()
+									extra_histograms_pass[var].SetDirectory(0)
+									extra_histograms_pass[var].SetName(supersample + "_" + var + "_pass")
+								if this_histogram_fail:
+									extra_histograms_fail[var] = this_histogram_fail.Clone()
+									extra_histograms_fail[var].SetDirectory(0)
+									extra_histograms_fail[var].SetName(supersample + "_" + var + "_fail")
 							else:
 								extra_histograms[var].Add(this_histogram)
-								extra_histograms_pass[var].Add(this_histogram_pass)
-								extra_histograms_fail[var].Add(this_histogram_fail)
+								if this_histogram_pass:
+									extra_histograms_pass[var].Add(this_histogram_pass)
+								if this_histogram_fail:
+									extra_histograms_fail[var].Add(this_histogram_fail)
 							input_file.Close()
 						output_file.cd()
 						extra_histograms[var].Write()
