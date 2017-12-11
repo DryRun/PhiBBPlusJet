@@ -1313,8 +1313,10 @@ if __name__ == "__main__":
 							input_file.Close()
 						output_file.cd()
 						extra_histograms[var].Write()
-						extra_histograms_pass[var].Write()
-						extra_histograms_fail[var].Write()
+						if var in extra_histograms_pass:
+							extra_histograms_pass[var].Write()
+						if var in extra_histograms_fail:
+							extra_histograms_fail[var].Write()
 					# End loop over extra vars
 				# End if SR or muCR
 				
