@@ -998,7 +998,7 @@ if __name__ == "__main__":
 			hadd_scripts.append("{}/hadd.sh".format(submission_directory))
 			hadd_script = open("{}/hadd.sh".format(submission_directory), "w")
 			hadd_script.write("#!/bin/bash\n")
-			hadd_script.write("for f in jobstatus_csubjob*.txt; do\n")
+			hadd_script.write("for f in ./jobstatus_csubjob*.txt; do\n")
 			hadd_script.write("\tif grep -Fxq \"0\" $f; then\n")
 			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
 			hadd_script.write("\tfi\n")
@@ -1028,7 +1028,7 @@ if __name__ == "__main__":
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
 		selections = ["SR", "muCR", "Preselection", "N2CR", "N2SR"] # N2CR
-		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho"]
+		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
 		if args.do_optimization:
