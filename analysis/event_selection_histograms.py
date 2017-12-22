@@ -239,6 +239,22 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].AddTH2D("fail_{}_matched".format(systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
 					self._selection_histograms[selection].AddTH2D("fail_{}_unmatched".format(systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)					
 
+				if self._do_optimization:
+					for dcsv_cut in self._dcsv_cuts:
+						self._selection_histograms[selection].AddTH2D("pass_dcsv{}_matched".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						self._selection_histograms[selection].AddTH2D("pass_dcsv{}_unmatched".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						self._selection_histograms[selection].AddTH2D("passloose_dcsv{}_matched".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						self._selection_histograms[selection].AddTH2D("passloose_dcsv{}_unmatched".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						self._selection_histograms[selection].AddTH2D("fail_dcsv{}_matched".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						self._selection_histograms[selection].AddTH2D("fail_dcsv{}_unmatched".format(dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						for systematic in self._weight_systematics[selection] + self._jet_systematics:
+							self._selection_histograms[selection].AddTH2D("pass_{}_dcsv{}_matched".format(systematic, dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+							self._selection_histograms[selection].AddTH2D("pass_{}_dcsv{}_unmatched".format(systematic, dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)					
+							self._selection_histograms[selection].AddTH2D("passloose_{}_dcsv{}_matched".format(systematic, dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+							self._selection_histograms[selection].AddTH2D("passloose_{}_dcsv{}_unmatched".format(systematic, dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)					
+							self._selection_histograms[selection].AddTH2D("fail_{}_dcsv{}_matched".format(systematic, dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+							self._selection_histograms[selection].AddTH2D("fail_{}_dcsv{}_unmatched".format(systematic, dcsv_cut), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)					
+
 		# Event selections
 		self._event_selectors = {}
 		self._event_selectors["SR"] = event_selections.MakeSRSelector(self._jet_type)
@@ -655,10 +671,33 @@ class EventSelectionHistograms(AnalysisBase):
 							if fatjet_dcsv > dcsv_cut:
 								self._selection_histograms[selection].GetTH2D("pass_dcsv{}".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
 								self._selection_histograms[selection].GetTH2D("pass_unweighted_dcsv{}".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt)
+								if self._data_source == "simulation":
+									if vmatched:
+										self._selection_histograms[selection].GetTH2D("pass_dcsv{}_matched".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
+									else:
+										self._selection_histograms[selection].GetTH2D("pass_dcsv{}_unmatched".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
+								for systematic in self._weight_systematics[selection]:
+									self._selection_histograms[selection].GetTH2D("pass_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+									if self._data_source == "simulation":
+										if vmatched:
+											self._selection_histograms[selection].GetTH2D("pass_{}_dcsv{}_matched".format(systematic, dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+										else:
+											self._selection_histograms[selection].GetTH2D("pass_{}_dcsv{}_unmatched".format(systematic, dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 							elif fatjet_dcsv > self._dcsv_min:
 								self._selection_histograms[selection].GetTH2D("fail_dcsv{}".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
 								self._selection_histograms[selection].GetTH2D("fail_unweighted_dcsv{}".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt)
-
+								if self._data_source == "simulation":
+									if vmatched:
+										self._selection_histograms[selection].GetTH2D("fail_dcsv{}_matched".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
+									else:
+										self._selection_histograms[selection].GetTH2D("fail_dcsv{}_unmatched".format(dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight)
+								for systematic in self._weight_systematics[selection]:
+									self._selection_histograms[selection].GetTH2D("fail_{}".format(systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+									if self._data_source == "simulation":
+										if vmatched:
+											self._selection_histograms[selection].GetTH2D("fail_{}_dcsv{}_matched".format(systematic, dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+										else:
+											self._selection_histograms[selection].GetTH2D("fail_{}_dcsv{}_unmatched".format(systematic, dcsv_cut)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 
 
 				# Run systematics that affect event selection
@@ -1079,8 +1118,8 @@ if __name__ == "__main__":
 						fail_histogram_name = "h_{}_tau21ddt{}_{}_fail_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
 						nevents_histogram_name = "h_{}_tau21ddt{}_{}_pass_nevents".format(selection_prefix, selection_tau21s[selection], args.jet_type)
 					else:
-						pass_histogram_name = "h_{}_{}_pass".format(selection_prefix, args.jet_type)
-						fail_histogram_name = "h_{}_{}_fail".format(selection_prefix, args.jet_type)
+						pass_histogram_name = "h_{}_{}_pass_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
+						fail_histogram_name = "h_{}_{}_fail_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
 						nevents_histogram_name = "h_{}_{}_pass_nevents".format(selection_prefix, args.jet_type)
 						if use_Vmatched_histograms:
 							pass_histogram_name += "_matched"
