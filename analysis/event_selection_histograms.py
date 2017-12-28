@@ -971,7 +971,7 @@ if __name__ == "__main__":
 					else:
 						files_per_job = 15
 				elif "QCD_HT500to700" in sample:
-					files_per_job = 30
+					files_per_job = 5
 				elif "QCD_HT700to1000" in sample:
 					files_per_job = 5
 				elif "QCD" in sample:
@@ -1009,11 +1009,16 @@ if __name__ == "__main__":
 			job_script.write(job_command)
 
 			# Check if the output file exists
-			job_script.write("if ls InputHistograms*{}_csubjob$1*root 1> /dev/null 2&>1; then\n".format(sample))
-			job_script.write("\techo \"1\" > jobstatus_csubjob$1.txt\n")
-			job_script.write("else\n")
-			job_script.write("\techo\"0\" > jobstatus_csubjob$1.txt\n")
-			job_script.write("fi\n")
+			job_script.write("for f in ./InputHistograms*_csubjob$1*root; do\n")
+			job_script.write("\t[ -e \"$f\" ] && echo \"1\" > jobstatus_csubjob$1.txt || echo \"0\" > jobstatus_csubjob$1.txt \n")
+			job_script.write("\tbreak\n")
+			job_script.write("done\n")
+
+			#job_script.write("if ls InputHistograms*{}_csubjob$1*root 1> /dev/null 2&>1; then\n".format(sample))
+			#job_script.write("\techo \"1\" > jobstatus_csubjob$1.txt\n")
+			#job_script.write("else\n")
+			#job_script.write("\techo\"0\" > jobstatus_csubjob$1.txt\n")
+			#job_script.write("fi\n")
 
 			job_script.close()
 			submission_command = "csub {} --cmssw --no_retar -n {}".format(job_script_path, n_jobs)
