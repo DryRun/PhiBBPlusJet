@@ -1127,7 +1127,7 @@ if __name__ == "__main__":
 							fail_histogram_name += "_matched"
 					if use_loose_template:
 						pass_histogram_name_normalization = pass_histogram_name
-						pass_histogram_name = pass_histogram_name.replace("pass", "passloose")
+						pass_histogram_name = pass_histogram_name.replace("dcsv{}".format(params[args.jet_type]["DCSV"]), "dcsv{}".format(params[args.jet_type]["DCSV_LOOSE"]))
 					this_pass_histogram = input_file.Get(pass_histogram_name)
 					if not this_pass_histogram:
 						print "[event_selection_histograms] ERROR : Couldn't find histogram {} in file {}".format(pass_histogram_name, input_file.GetPath())
@@ -1260,7 +1260,7 @@ if __name__ == "__main__":
 						old_name = fail_histograms_syst[supersample][systematic].GetName()
 						fail_histograms_syst[supersample][systematic].RebinY(fail_histograms_syst[supersample][systematic].GetNbinsY())
 						fail_histograms_syst[supersample][systematic].SetName(old_name)
-					if use_loose_template:
+					if c:
 						old_name = pass_histograms[supersample + "_normalization"].GetName()
 						pass_histograms[supersample + "_normalization"].RebinY(pass_histograms[supersample + "_normalization"].GetNbinsY())
 						pass_histograms[supersample + "_normalization"].SetName(old_name)
