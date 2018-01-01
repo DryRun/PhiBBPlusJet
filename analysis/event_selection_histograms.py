@@ -1260,7 +1260,7 @@ if __name__ == "__main__":
 						old_name = fail_histograms_syst[supersample][systematic].GetName()
 						fail_histograms_syst[supersample][systematic].RebinY(fail_histograms_syst[supersample][systematic].GetNbinsY())
 						fail_histograms_syst[supersample][systematic].SetName(old_name)
-					if c:
+					if use_loose_template:
 						old_name = pass_histograms[supersample + "_normalization"].GetName()
 						pass_histograms[supersample + "_normalization"].RebinY(pass_histograms[supersample + "_normalization"].GetNbinsY())
 						pass_histograms[supersample + "_normalization"].SetName(old_name)
