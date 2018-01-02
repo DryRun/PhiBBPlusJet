@@ -1107,6 +1107,8 @@ if __name__ == "__main__":
 				fail_histograms_syst[supersample] = {}
 				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
 				use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
+				if selection == "N2SR":
+					use_loose_template = False # N2SR doesn't have loose templates yet.
 				if use_loose_template:
 					pass_histograms_syst[supersample + "_normalization"] = {}
 
@@ -1118,6 +1120,13 @@ if __name__ == "__main__":
 						pass_histogram_name = "h_{}_tau21ddt{}_{}_pass_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
 						fail_histogram_name = "h_{}_tau21ddt{}_{}_fail_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
 						nevents_histogram_name = "h_{}_tau21ddt{}_{}_pass_nevents".format(selection_prefix, selection_tau21s[selection], args.jet_type)
+					elif selection == "N2SR":
+						pass_histogram_name = "h_{}_{}_pass".format(selection_prefix, args.jet_type)
+						fail_histogram_name = "h_{}_{}_fail".format(selection_prefix, args.jet_type)
+						nevents_histogram_name = "h_{}_{}_pass_nevents".format(selection_prefix, args.jet_type)
+						if use_Vmatched_histograms:
+							pass_histogram_name += "_matched"
+							fail_histogram_name += "_matched"
 					else:
 						pass_histogram_name = "h_{}_{}_pass_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
 						fail_histogram_name = "h_{}_{}_fail_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
