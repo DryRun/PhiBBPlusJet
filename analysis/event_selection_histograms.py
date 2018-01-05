@@ -259,7 +259,7 @@ class EventSelectionHistograms(AnalysisBase):
 		self._event_selectors["N2CR"] = event_selections.MakeN2CRSelector(self._jet_type)
 		self._event_selectors["Preselection"] = event_selections.MakePreselectionSelector(self._jet_type)
 		self._event_selectors["muCR"] = event_selections.MakeMuCRSelector(self._jet_type)
-		self._event_selectors_syst = {"SR":{}, "muCR":{}, "Preselection":{}, "N2CR":{}, "N2SR":{}}
+		self._event_selectors_syst = {"SR":{}, "muCR":{}, "Preselection":{}, "N2CR":{}, "N2SR":{}, "N2SR_loose":{}}
 		for systematic in self._jet_systematics:
 			self._event_selectors_syst["SR"][systematic] = event_selections.MakeSRSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["N2SR"][systematic] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut, jet_systematic=systematic)
@@ -987,7 +987,7 @@ if __name__ == "__main__":
 			job_script.write("#!/bin/bash\n")
 			job_script.write("which python\n")
 			job_script.write("python --version\n")
-			job_script.write("ll /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/\n")
+			job_script.write("ls -lrth /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/\n")
 			job_script.write("input_files=( " + " ".join(sample_files[sample]) + " )\n")
 			job_script.write("files_per_job=" + str(files_per_job) + "\n")
 			job_script.write("first_file_index=$(($1*$files_per_job))\n")
