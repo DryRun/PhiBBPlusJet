@@ -35,7 +35,7 @@ class EventSelectionHistograms(AnalysisBase):
 		self._input_nevents = 0
 		self._n2_ddt_cut = 0.
 		self._dcsv_cut = params[jet_type]["DCSV"]
-		self._dcsv_cut_loose = 0.8
+		self._dcsv_cut_loose = params[jet_type]["DCSV_LOOSE"]
 		self._dcsv_min = -999.
 		self._jet_type = jet_type
 		self._selections = ["Preselection", "SR", "muCR", "N2CR", "N2SR"]
@@ -255,6 +255,7 @@ class EventSelectionHistograms(AnalysisBase):
 		self._event_selectors = {}
 		self._event_selectors["SR"] = event_selections.MakeSRSelector(self._jet_type)
 		self._event_selectors["N2SR"] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut)
+		self._event_selectors["N2SR_loose"] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut_loose)
 		self._event_selectors["N2CR"] = event_selections.MakeN2CRSelector(self._jet_type)
 		self._event_selectors["Preselection"] = event_selections.MakePreselectionSelector(self._jet_type)
 		self._event_selectors["muCR"] = event_selections.MakeMuCRSelector(self._jet_type)
@@ -262,6 +263,7 @@ class EventSelectionHistograms(AnalysisBase):
 		for systematic in self._jet_systematics:
 			self._event_selectors_syst["SR"][systematic] = event_selections.MakeSRSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["N2SR"][systematic] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut, jet_systematic=systematic)
+			self._event_selectors_syst["N2SR_loose"][systematic] = event_selections.MakeN2SRSelector(self._jet_type, dbtag_cut=self._dcsv_cut_loose, jet_systematic=systematic)
 			self._event_selectors_syst["N2CR"][systematic] = event_selections.MakeN2CRSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["Preselection"][systematic] = event_selections.MakePreselectionSelector(self._jet_type, jet_systematic=systematic)
 			self._event_selectors_syst["muCR"][systematic] = event_selections.MakeMuCRSelector(self._jet_type, jet_systematic=systematic)
@@ -554,10 +556,10 @@ class EventSelectionHistograms(AnalysisBase):
 
 				# Run selection and fill histograms
 				self._event_selectors[selection].process_event(self._data, event_weight)
-				if selection == "N2SR":
+				if "N2SR" in selection:
 					pass_box = (fatjet_n2ddt < 0.)
 					fail_box = (fatjet_n2ddt >= 0.)
-					pass_loose_box = (fatjet_n2ddt < 0.)
+					pass_loose_box = (fatjet_n2ddt < 0.) # Same as pass... technically annoying to make a loose N2SR, since dcsv is inside the selector.
 				else:
 					pass_box = (fatjet_dcsv > self._dcsv_cut)
 					fail_box = (fatjet_dcsv > self._dcsv_min)
@@ -1063,6 +1065,7 @@ if __name__ == "__main__":
 		systematics = {
 			"SR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"N2SR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
+			"N2SR_loose":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"N2CR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"Preselection":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
@@ -1107,8 +1110,6 @@ if __name__ == "__main__":
 				fail_histograms_syst[supersample] = {}
 				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
 				use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
-				if selection == "N2SR":
-					use_loose_template = False # N2SR doesn't have loose templates yet.
 				if use_loose_template:
 					pass_histograms_syst[supersample + "_normalization"] = {}
 
@@ -1136,7 +1137,11 @@ if __name__ == "__main__":
 							fail_histogram_name += "_matched"
 					if use_loose_template:
 						pass_histogram_name_normalization = pass_histogram_name
-						pass_histogram_name = pass_histogram_name.replace("dcsv{}".format(params[args.jet_type]["DCSV"]), "dcsv{}".format(params[args.jet_type]["DCSV_LOOSE"]))
+						if selection == "N2SR":
+							pass_histogram_name.replace("N2SR", "N2SR_loose")
+							fail_histogram_name.replace("N2SR", "N2SR_loose")
+						else:
+							pass_histogram_name = pass_histogram_name.replace("dcsv{}".format(params[args.jet_type]["DCSV"]), "dcsv{}".format(params[args.jet_type]["DCSV_LOOSE"]))
 					this_pass_histogram = input_file.Get(pass_histogram_name)
 					if not this_pass_histogram:
 						print "[event_selection_histograms] ERROR : Couldn't find histogram {} in file {}".format(pass_histogram_name, input_file.GetPath())
@@ -1157,7 +1162,11 @@ if __name__ == "__main__":
 								fail_histogram_name += "_matched"
 						if use_loose_template:
 							pass_histogram_name_normalization = pass_histogram_name
-							pass_histogram_name = pass_histogram_name.replace("pass", "passloose")
+							if selection == "N2SR":
+								pass_histogram_name.replace("N2SR", "N2SR_loose")
+								fail_histogram_name.replace("N2SR", "N2SR_loose")
+							else:
+								pass_histogram_name = pass_histogram_name.replace("pass", "passloose")
 						this_pass_histogram_syst[systematic] = input_file.Get(pass_histogram_name)
 						this_fail_histogram_syst[systematic] = input_file.Get(fail_histogram_name)
 						if use_loose_template:
