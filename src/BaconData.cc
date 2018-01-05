@@ -7,12 +7,14 @@ BaconData::BaconData(TTree *tree) : BaconTree(tree) {
 	// Histogram for N2 DDT
 	TFile *f_n2ddt_AK8 = new TFile("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ZqqJet/h3_n2ddt_26eff_36binrho11pt_Spring16.root","read");
 	n2_ddt_transformation_AK8_ = (TH1D*)f_n2ddt_AK8->Get("h2ddt");
+	n2_ddt_transformation_AK8_->SetName("h2ddt_AK8");
 	n2_ddt_transformation_AK8_->SetDirectory(0);
 	f_n2ddt_AK8->Close();
 	delete f_n2ddt_AK8;
 
 	TFile *f_n2ddt_CA15 = new TFile("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/PbbJet/h3_n2ddt_CA15.root","read");
 	n2_ddt_transformation_CA15_ = (TH1D*)f_n2ddt_CA15->Get("h2ddt");
+	n2_ddt_transformation_CA15_->SetName("h2ddt_CA15");
 	n2_ddt_transformation_CA15_->SetDirectory(0);
 	f_n2ddt_CA15->Close();
 	delete f_n2ddt_CA15;
