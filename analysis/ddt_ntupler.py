@@ -45,7 +45,7 @@ class DDTNtupler(AnalysisBase):
 		self._output_file.cd()
 		self._output_tree = TTree("ddttree", "ddttree")
 		self._containers = {}
-		branches_double = ["rho", "pT", "msd", "N2", "weight", "weight_pu", "weight_trigger", "pfmet"] # kfNLO
+		branches_double = ["rho", "pT", "msd", "N2", "weight_trigger", "weight"] # kfNLO
 		for jet_type in ["AK8", "CA15"]:
 			self._containers[jet_type] = {}
 			for branch in branches_double:
@@ -59,7 +59,7 @@ class DDTNtupler(AnalysisBase):
 				self._containers[jet_type][branch] = array.array("i", [0])
 				self._output_tree.Branch(branch + "_" + jet_type, self._containers[jet_type][branch], branch + "_" + jet_type + "/I")
 
-		branches_global_double = ["pfmet"]
+		branches_global_double = ["pfmet", "weight_pu"]
 		for branch in branches_global_double:
 			self._containers[branch] = array.array("d", [0.])
 			self._output_tree.Branch(branch, self._containers[branch], branch + "/D")
@@ -115,30 +115,34 @@ class DDTNtupler(AnalysisBase):
 			self._data.GetEntry(entry)
 
 			npu = min(self._data.npu, 49.5)
-			self._containers["weight_pu"] = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
+			self._containers["weight_pu"][0] = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
 			#self._containers["kfNLO"] = 1.
-			self._containers["pfmet"] = self._data.pfmet
+			self._containers["pfmet"][0] = self._data.pfmet
 
-			self._containers["AK8"]["msd"] = self._data.AK8Puppijet0_msd_puppi
-			self._containers["AK8"]["pt"] = self._data.AK8Puppijet0_pt
-			self._containers["AK8"]["rho"] = self._data.AK8Puppijet0_rho
-			self._containers["AK8"]["N2"] = self._data.AK8Puppijet0_N2sdb1
+			self._containers["AK8"]["msd"][0] = self._data.AK8Puppijet0_msd_puppi
+			self._containers["AK8"]["pt"][0] = self._data.AK8Puppijet0_pt
+			self._containers["AK8"]["rho"][0] = self._data.AK8Puppijet0_rho
+			self._containers["AK8"]["N2"][0] = self._data.AK8Puppijet0_N2sdb1
+			self._containers["AK8"]["dcsv"][0] = self._data.AK8Puppijet0_doublecsv
+			self._containers["AK8"]["dsub"][0] = self._data.AK8Puppijet0_doublesub
 
 
 			trigger_mass_AK8 = min(self._data.AK8Puppijet0_msd, 300.)
 			trigger_pt_AK8 = max(200., min(self._data.AK8Puppijet0_pt, 1000.))
-			self._containers["AK8"]["weight_trigger"] = self._trig_eff["AK8"].GetEfficiency(self._trig_eff["AK8"].FindFixBin(trigger_mass_AK8, trigger_pt_AK8))
-			self._containers["AK8"]["weight"] = 1.
+			self._containers["AK8"]["weight_trigger"][0] = self._trig_eff["AK8"].GetEfficiency(self._trig_eff["AK8"].FindFixBin(trigger_mass_AK8, trigger_pt_AK8))
+			self._containers["AK8"]["weight"][0] = 1.
 
 			self._containers["CA15"]["msd"] = self._data.CA15Puppijet0_msd_puppi
 			self._containers["CA15"]["pt"] = self._data.CA15Puppijet0_pt
 			self._containers["CA15"]["rho"] = self._data.CA15Puppijet0_rho
 			self._containers["CA15"]["N2"] = self._data.CA15Puppijet0_N2sdb1
+			self._containers["CA15"]["dcsv"][0] = self._data.CA15Puppijet0_doublecsv
+			self._containers["CA15"]["dsub"][0] = self._data.CA15Puppijet0_doublesub
 
 			trigger_mass_CA15 = min(self._data.CA15Puppijet0_msd, 300.)
 			trigger_pt_CA15 = max(200., min(self._data.CA15Puppijet0_pt, 1000.))
 			self._containers["CA15"]["weight_trigger"] = self._trig_eff["CA15"].GetEfficiency(self._trig_eff["CA15"].FindFixBin(trigger_mass_CA15, trigger_pt_CA15))
-			self._containers["CA15"]["weight"] = 1.
+			self._containers["CA15"]["weight"][0] = 1.
 
 			self._output_tree.Fill()
 
