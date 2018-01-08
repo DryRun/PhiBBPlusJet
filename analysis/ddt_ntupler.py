@@ -232,7 +232,7 @@ if __name__ == "__main__":
 			for filename in sample_files[sample]:
 				ddt_ntupler.add_file(filename)
 			ddt_ntupler.start()
-			ddt_ntupler.run(max_nevents=100)
+			ddt_ntupler.run()
 			ddt_ntupler.finish()
 
 	# Setup pipeline jobs on HTCondor
