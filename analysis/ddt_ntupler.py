@@ -225,7 +225,7 @@ if __name__ == "__main__":
 				output_filename = "{}/ddt_ntuple_{}.root".format(args.output_folder, sample)
 			else:
 				output_filename = "/uscms/home/dryu/DAZSLE/data/DDT/tmp/ddt_ntuple_{}.root".format(sample)
-			ddt_ntupler = DDTNtupler(sample, tree_name=tree_name, jet_type=args.jet_type, output_filename=output_filename)
+			ddt_ntupler = DDTNtupler(sample, tree_name=tree_name, output_filename=output_filename)
 			ddt_ntupler.start()
 			ddt_ntupler.run()
 			ddt_ntupler.finish()
@@ -236,7 +236,7 @@ if __name__ == "__main__":
 		hadd_scripts = []
 		for sample in samples:
 			start_directory = os.getcwd()
-			job_tag = "job_{}_{}_{}".format(sample, args.jet_type, int(floor(time.time())))
+			job_tag = "job_{}_{}".format(sample, int(floor(time.time())))
 			submission_directory = os.path.expandvars("$HOME/DAZSLE/data/DDT/condor/{}".format(job_tag))
 			os.system("mkdir -pv {}".format(submission_directory))
 			os.chdir(submission_directory)
@@ -269,7 +269,7 @@ if __name__ == "__main__":
 			job_script.write("echo \"Input files:\"\n")
 			job_script.write("echo $this_input_files_string\n")
 
-			job_command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/ddt_ntupler.py --jet_type {} --files $this_input_files_string --label {}_csubjob$1 --output_folder . --run ".format(args.jet_type, sample)
+			job_command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/ddt_ntupler.py --files $this_input_files_string --label {}_csubjob$1 --output_folder . --run ".format(sample)
 			job_command += " 2>&1\n"
 			job_script.write(job_command)
 
@@ -304,7 +304,7 @@ if __name__ == "__main__":
 			hadd_script.close()
 			os.chdir(start_directory)
 		# One hadd script to rule them all
-		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/DDT/condor/master_hadd_{}".format(args.jet_type))
+		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/DDT/condor/master_hadd")
 		if not args.all:
 			master_hadd_script_path += "_" + str(int(floor(time.time())))
 		master_hadd_script_path += ".sh"
