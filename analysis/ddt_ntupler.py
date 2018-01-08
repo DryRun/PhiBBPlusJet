@@ -148,6 +148,7 @@ class DDTNtupler(AnalysisBase):
 		self._output_file.Close()
 
 if __name__ == "__main__":
+	import argparse
 	parser = argparse.ArgumentParser(description='Produce and plot ieta-iphi histograms to look for buggy events')
 	input_group = parser.add_mutually_exclusive_group() 
 	input_group.add_argument('--all', action="store_true", help="Run over all supersamples")
@@ -157,7 +158,6 @@ if __name__ == "__main__":
 	action_group = parser.add_mutually_exclusive_group() 
 	action_group.add_argument('--run', action="store_true", help="Run on condor")
 	action_group.add_argument('--condor_run', action="store_true", help="Run on condor")
-	action_group.add_argument('--combine_outputs', action="store_true", help="Compile results into one file for next step (buildRhalphabet). Also applies luminosity weights to MC.")
 	parser.add_argument('--output_folder', type=str, help="Output folder")
 	args = parser.parse_args()
 
