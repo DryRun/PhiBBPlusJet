@@ -54,7 +54,6 @@ class DDTNtupler(AnalysisBase):
 
 		branches_int = []
 		for jet_type in ["AK8", "CA15"]:
-			self._containers[jet_type] = {}
 			for branch in branches_int:
 				self._containers[jet_type][branch] = array.array("i", [0])
 				self._output_tree.Branch(branch + "_" + jet_type, self._containers[jet_type][branch], branch + "_" + jet_type + "/I")
@@ -65,7 +64,7 @@ class DDTNtupler(AnalysisBase):
 			self._output_tree.Branch(branch, self._containers[branch], branch + "/D")
 
 		branches_global_int = ["n_el", "n_mu", "n_tau"]
-		for branch in branches_global_double:
+		for branch in branches_global_int:
 			self._containers[branch] = array.array("i", [0])
 			self._output_tree.Branch(branch, self._containers[branch], branch + "/I")
 
@@ -118,6 +117,8 @@ class DDTNtupler(AnalysisBase):
 			print self._h_pu_weight.FindBin(npu)
 			print self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
 			print self._containers
+			print self._containers["weight_pu"]
+			print self._containers["weight_pu"][0]
 			self._containers["weight_pu"][0] = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
 			#self._containers["kfNLO"] = 1.
 			self._containers["pfmet"][0] = self._data.pfmet
