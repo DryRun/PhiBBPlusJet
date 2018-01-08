@@ -50,24 +50,24 @@ class DDTNtupler(AnalysisBase):
 			self._containers[jet_type] = {}
 			for branch in branches_double:
 				self._containers[jet_type][branch] = array.array("d", [0.])
-				self._output_tree.Branch(branch + "_" + jet_type, self._containers[jet_type][branch][0])
+				self._output_tree.Branch(branch + "_" + jet_type, self._containers[jet_type][branch])
 
 		branches_int = []
 		for jet_type in ["AK8", "CA15"]:
 			self._containers[jet_type] = {}
 			for branch in branches_int:
 				self._containers[jet_type][branch] = array.array("i", [0])
-				self._output_tree.Branch(branch + "_" + jet_type, self._containers[jet_type][branch][0])
+				self._output_tree.Branch(branch + "_" + jet_type, self._containers[jet_type][branch])
 
 		branches_global_double = ["pfmet"]
 		for branch in branches_global_double:
 			self._containers[branch] = array.array("d", [0.])
-			self._output_tree.Branch(branch , self._containers[branch][0])
+			self._output_tree.Branch(branch , self._containers[branch])
 
 		branches_global_int = ["n_el", "n_mu", "n_tau"]
 		for branch in branches_global_double:
 			self._containers[branch] = array.array("d", [0.])
-			self._output_tree.Branch(branch , self._containers[branch][0])
+			self._output_tree.Branch(branch , self._containers[branch])
 
 		f_pu = TFile.Open("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ggH/puWeights_All.root", "read")
 		self._h_pu_weight = f_pu.Get("puw")
