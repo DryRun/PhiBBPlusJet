@@ -43,7 +43,7 @@ class DDTNtupler(AnalysisBase):
 	def start(self):
 		self._processed_events = 0
 		self._output_file.cd()
-		self._output_tree = TTree("ddttree")
+		self._output_tree = TTree("ddttree", "ddttree")
 		self._containers = {}
 		branches_double = ["rho", "pT", "msd", "N2", "weight", "weight_pu", "weight_trigger", "pfmet"] # kfNLO
 		for jet_type in ["AK8", "CA15"]:
