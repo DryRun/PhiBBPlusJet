@@ -114,16 +114,10 @@ class DDTNtupler(AnalysisBase):
 			self._data.GetEntry(entry)
 
 			npu = min(self._data.npu, 49.5)
-			print self._h_pu_weight.FindBin(npu)
-			print self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
-			print self._containers
-			print self._containers["weight_pu"]
-			print self._containers["weight_pu"][0]
 			self._containers["weight_pu"][0] = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
 			#self._containers["kfNLO"] = 1.
 			self._containers["pfmet"][0] = self._data.pfmet
 
-			print "[debug] self._data.AK8Puppijet0_msd_puppi = " + str(self._data.AK8Puppijet0_msd_puppi)
 			self._containers["AK8"]["msd"][0] = self._data.AK8Puppijet0_msd_puppi
 			self._containers["AK8"]["pt"][0] = self._data.AK8Puppijet0_pt
 			self._containers["AK8"]["rho"][0] = self._data.AK8Puppijet0_rho
