@@ -127,7 +127,7 @@ class DDTNtupler(AnalysisBase):
 
 			trigger_mass_AK8 = min(self._data.AK8Puppijet0_msd, 300.)
 			trigger_pt_AK8 = max(200., min(self._data.AK8Puppijet0_pt, 1000.))
-			self._containers["AK8"]["weight_trigger"] = self._trig_eff["AK8"].GetEfficiency(self._trig_eff.FindFixBin(trigger_mass_AK8, trigger_pt_AK8))
+			self._containers["AK8"]["weight_trigger"] = self._trig_eff["AK8"].GetEfficiency(self._trig_eff["AK8"].FindFixBin(trigger_mass_AK8, trigger_pt_AK8))
 			self._containers["AK8"]["weight"] = 1.
 
 			self._containers["CA15"]["msd"] = self._data.CA15Puppijet0_msd_puppi
@@ -137,7 +137,7 @@ class DDTNtupler(AnalysisBase):
 
 			trigger_mass_CA15 = min(self._data.CA15Puppijet0_msd, 300.)
 			trigger_pt_CA15 = max(200., min(self._data.CA15Puppijet0_pt, 1000.))
-			self._containers["CA15"]["weight_trigger"] = self._trig_eff["CA15"].GetEfficiency(self._trig_eff.FindFixBin(trigger_mass_CA15, trigger_pt_CA15))
+			self._containers["CA15"]["weight_trigger"] = self._trig_eff["CA15"].GetEfficiency(self._trig_eff["CA15"].FindFixBin(trigger_mass_CA15, trigger_pt_CA15))
 			self._containers["CA15"]["weight"] = 1.
 
 			self._output_tree.Fill()
@@ -229,7 +229,7 @@ if __name__ == "__main__":
 			for filename in sample_files[sample]:
 				ddt_ntupler.add_file(filename)
 			ddt_ntupler.start()
-			ddt_ntupler.run()
+			ddt_ntupler.run(max_nevents=100)
 			ddt_ntupler.finish()
 
 	# Setup pipeline jobs on HTCondor
