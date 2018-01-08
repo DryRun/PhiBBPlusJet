@@ -226,6 +226,8 @@ if __name__ == "__main__":
 			else:
 				output_filename = os.path.expandvars("$HOME/DAZSLE/data/DDT/tmp/ddt_ntuple_{}.root".format(sample))
 			ddt_ntupler = DDTNtupler(sample, tree_name=tree_name, output_filename=output_filename)
+			for filename in sample_files[sample]:
+				ddt_ntupler.add_file(filename)
 			ddt_ntupler.start()
 			ddt_ntupler.run()
 			ddt_ntupler.finish()
