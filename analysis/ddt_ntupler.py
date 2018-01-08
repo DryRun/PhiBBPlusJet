@@ -171,10 +171,7 @@ if __name__ == "__main__":
 		elif args.samples:
 			samples = args.samples.split(",")
 			for sample in samples:
-				if args.skim_inputs:
-					sample_files[sample] = config.skims[sample]
-				else:
-					sample_files[sample] = config.sklims[sample]
+				sample_files[sample] = config.skims[sample]
 		elif args.files:
 			files = args.files.split(",")
 			for filename in files:
