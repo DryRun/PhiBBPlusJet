@@ -45,7 +45,7 @@ class DDTNtupler(AnalysisBase):
 		self._output_file.cd()
 		self._output_tree = TTree("ddttree", "ddttree")
 		self._containers = {}
-		branches_double = ["rho", "pT", "msd", "N2", "weight_trigger", "weight"] # kfNLO
+		branches_double = ["rho", "pt", "msd", "N2", "weight_trigger", "weight"] # kfNLO
 		for jet_type in ["AK8", "CA15"]:
 			self._containers[jet_type] = {}
 			for branch in branches_double:
@@ -66,7 +66,7 @@ class DDTNtupler(AnalysisBase):
 
 		branches_global_int = ["n_el", "n_mu", "n_tau"]
 		for branch in branches_global_double:
-			self._containers[branch] = array.array("d", [0.])
+			self._containers[branch] = array.array("i", [0])
 			self._output_tree.Branch(branch, self._containers[branch], branch + "/I")
 
 		f_pu = TFile.Open("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ggH/puWeights_All.root", "read")
