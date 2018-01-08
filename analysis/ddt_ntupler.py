@@ -131,10 +131,10 @@ class DDTNtupler(AnalysisBase):
 			self._containers["AK8"]["weight_trigger"][0] = self._trig_eff["AK8"].GetEfficiency(self._trig_eff["AK8"].FindFixBin(trigger_mass_AK8, trigger_pt_AK8))
 			self._containers["AK8"]["weight"][0] = 1.
 
-			self._containers["CA15"]["msd"] = self._data.CA15Puppijet0_msd_puppi
-			self._containers["CA15"]["pt"] = self._data.CA15Puppijet0_pt
-			self._containers["CA15"]["rho"] = self._data.CA15Puppijet0_rho
-			self._containers["CA15"]["N2"] = self._data.CA15Puppijet0_N2sdb1
+			self._containers["CA15"]["msd"][0] = self._data.CA15Puppijet0_msd_puppi
+			self._containers["CA15"]["pt"][0] = self._data.CA15Puppijet0_pt
+			self._containers["CA15"]["rho"][0] = self._data.CA15Puppijet0_rho
+			self._containers["CA15"]["N2"][0] = self._data.CA15Puppijet0_N2sdb1
 			self._containers["CA15"]["dcsv"][0] = self._data.CA15Puppijet0_doublecsv
 			self._containers["CA15"]["dsub"][0] = self._data.CA15Puppijet0_doublesub
 
