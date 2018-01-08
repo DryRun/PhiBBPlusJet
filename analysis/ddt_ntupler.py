@@ -227,7 +227,7 @@ if __name__ == "__main__":
 			if args.output_folder:
 				output_filename = "{}/{}/ddt_ntuple_{}.root".format(args.output_folder, output_file_basename, sample)
 			else:
-				output_filename = "/uscms/home/dryu/DAZSLE/data/LimitSetting/{}/ddt_ntuple_{}.root".format(output_file_basename, sample)
+				output_filename = "/uscms/home/dryu/DAZSLE/data/DDT/{}/ddt_ntuple_{}.root".format(output_file_basename, sample)
 			ddt_ntupler = DDTNtupler(sample, tree_name=tree_name, jet_type=args.jet_type, output_filename=output_filename)
 			ddt_ntupler.start()
 			ddt_ntupler.run()
