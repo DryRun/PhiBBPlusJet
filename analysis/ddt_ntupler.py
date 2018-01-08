@@ -117,6 +117,7 @@ class DDTNtupler(AnalysisBase):
 			npu = min(self._data.npu, 49.5)
 			print self._h_pu_weight.FindBin(npu)
 			print self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
+			print self._containers
 			self._containers["weight_pu"][0] = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))
 			#self._containers["kfNLO"] = 1.
 			self._containers["pfmet"][0] = self._data.pfmet
