@@ -222,9 +222,9 @@ if __name__ == "__main__":
 						print "[setup_limits] WARNING : NEvents histogram in not in this file! It is probably corrupt. This is MC, so I am skipping the file. But, you probably want to remove from the input list."
 						sample_files[sample].remove(filename)
 			if args.output_folder:
-				output_filename = "{}/{}/ddt_ntuple_{}.root".format(args.output_folder, output_file_basename, sample)
+				output_filename = "{}/ddt_ntuple_{}.root".format(args.output_folder, sample)
 			else:
-				output_filename = "/uscms/home/dryu/DAZSLE/data/DDT/{}/ddt_ntuple_{}.root".format(output_file_basename, sample)
+				output_filename = "/uscms/home/dryu/DAZSLE/data/DDT/tmp/ddt_ntuple_{}.root".format(sample)
 			ddt_ntupler = DDTNtupler(sample, tree_name=tree_name, jet_type=args.jet_type, output_filename=output_filename)
 			ddt_ntupler.start()
 			ddt_ntupler.run()
