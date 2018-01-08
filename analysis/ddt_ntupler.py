@@ -297,24 +297,4 @@ if __name__ == "__main__":
 			# Submit jobs
 			os.system(submission_command)
 
-			hadd_scripts.append("{}/hadd.sh".format(submission_directory))
-			hadd_script = open("{}/hadd.sh".format(submission_directory), "w")
-			hadd_script.write("#!/bin/bash\n")
-			hadd_script.write("for f in ./jobstatus_csubjob*.txt; do\n")
-			hadd_script.write("\tif grep -Fxq \"0\" $f; then\n")
-			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
-			hadd_script.write("\tfi\n")
-			hadd_script.write("done\n")
-			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/DDT/ddt_ntuple_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, submission_directory)))
-			hadd_script.close()
 			os.chdir(start_directory)
-		# One hadd script to rule them all
-		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/DDT/condor/master_hadd")
-		if not args.all:
-			master_hadd_script_path += "_" + str(int(floor(time.time())))
-		master_hadd_script_path += ".sh"
-		master_hadd_script = open(master_hadd_script_path, "w")
-		master_hadd_script.write("#!/bin/bash\n")
-		for hadd_script_path in hadd_scripts:
-			master_hadd_script.write("source " + hadd_script_path + "\n")
-		master_hadd_script.close()		
