@@ -140,7 +140,7 @@ class DDTNtupler(AnalysisBase):
 
 			trigger_mass_CA15 = min(self._data.CA15Puppijet0_msd, 300.)
 			trigger_pt_CA15 = max(200., min(self._data.CA15Puppijet0_pt, 1000.))
-			self._containers["CA15"]["weight_trigger"] = self._trig_eff["CA15"].GetEfficiency(self._trig_eff["CA15"].FindFixBin(trigger_mass_CA15, trigger_pt_CA15))
+			self._containers["CA15"]["weight_trigger"][0] = self._trig_eff["CA15"].GetEfficiency(self._trig_eff["CA15"].FindFixBin(trigger_mass_CA15, trigger_pt_CA15))
 			self._containers["CA15"]["weight"][0] = 1.
 
 			self._output_tree.Fill()
