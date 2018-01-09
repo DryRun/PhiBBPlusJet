@@ -43,6 +43,21 @@ class DDTNtupler(AnalysisBase):
 	def start(self):
 		self._processed_events = 0
 		self._output_file.cd()
+
+		# Record number of input events
+		h_nevents = None
+		for input_filename in self._files:
+			input_file = TFile(input_filename, "READ")
+			if not h_nevents:
+				h_nevents = input_file.Get("NEvents").Clone()
+				h_nevents.SetDirectory(0)
+			else:
+				h_nevents.Add(input_file.Get("NEvents"))
+			input_file.Close()
+		self._output_file.cd()
+		h_nevents.Write()
+
+		# Setup output tree
 		self._output_tree = TTree("ddttree", "ddttree")
 		self._containers = {}
 		branches_double = ["rho", "pt", "msd", "N2", "weight_trigger", "weight", "dcsv", "dsub"] # kfNLO
