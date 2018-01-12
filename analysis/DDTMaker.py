@@ -189,6 +189,7 @@ if __name__ == '__main__':
 	parser.add_argument("--smoothing_subjob", type=int, help="For condor, run a specific subjob")
 	parser.add_argument("--var", type=str, help="N2, dcsv, or dsub")
 	parser.add_argument("--condor", action="store_true", help="Flag for running on condor")
+	args = parser.parse_args()
 
 	if args.condor:
 		input_folder = "./"
