@@ -56,6 +56,7 @@ class DDTNtupler(AnalysisBase):
 			input_file.Close()
 		self._output_file.cd()
 		h_nevents.Write()
+		h_nevents = TH1D("NEvents", "NEvents")
 
 		# Setup output tree
 		self._output_tree = TTree("ddttree", "ddttree")

@@ -13,6 +13,7 @@ import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 from DAZSLE.PhiBBPlusJet.cross_sections import cross_sections
 
 input_folder = "/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT"
+output_folder = "/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT/tmp"
 
 rho_bins = [35, -7., -0.]
 pt_bins = [8, 200., 1000.]
@@ -191,6 +192,7 @@ if __name__ == '__main__':
 
 	if args.condor:
 		input_folder = "./"
+		output_folder = "./"
 
 	if args.run:
 		ddt, ddt1, ddt2, ddt3 = do_ddt_simple(args.jet_type)
@@ -258,7 +260,7 @@ if __name__ == '__main__':
 		job_script_path = "{}/run_csubjob.sh".format(submission_dir)
 		job_script = open(job_script_path, 'w')
 		job_script.write("#!/bin/bash\n")
-		command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/DDTMaker.py --run --smoothing_subjob $1 --jet_type {} --var {}".format(args.jet_type, args.var)
+		command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/DDTMaker.py --run --condor --smoothing_subjob $1 --jet_type {} --var {}".format(args.jet_type, args.var)
 		if args.drho_cut:
 			command += " --drho_cut {}".format(args.drho_cut)
 		job_script.write(command + "\n")
