@@ -226,7 +226,7 @@ if __name__ == '__main__':
 			ddt_smooth_results = do_ddt_smoothing(rho_pt_points_subjob, args.jet_type, var=args.var, drho_cut=drho_cut)
 
 		# Save
-		output_file = TFile("ddt_output.root", "RECREATE")
+		output_file = TFile("{}/ddt_output.root".format(output_folder), "RECREATE")
 		ddt.Write()
 		ddt1.Write()
 		ddt2.Write()
