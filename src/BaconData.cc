@@ -12,8 +12,9 @@ BaconData::BaconData(TTree *tree) : BaconTree(tree) {
 	f_n2ddt_AK8->Close();
 	delete f_n2ddt_AK8;
 
-	TFile *f_n2ddt_CA15 = new TFile("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/PbbJet/h3_n2ddt_CA15.root","read");
-	n2_ddt_transformation_CA15_ = (TH1D*)f_n2ddt_CA15->Get("h2ddt");
+	//TFile *f_n2ddt_CA15 = new TFile("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/PbbJet/h3_n2ddt_CA15.root","read");
+	TFile *f_n2ddt_CA15 = new TFile("$CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/data/DDT_N2_CA15_wp0.26.root","read");
+	n2_ddt_transformation_CA15_ = (TH1D*)f_n2ddt_CA15->Get("DDT");
 	n2_ddt_transformation_CA15_->SetName("h2ddt_CA15");
 	n2_ddt_transformation_CA15_->SetDirectory(0);
 	f_n2ddt_CA15->Close();
