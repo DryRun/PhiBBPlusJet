@@ -966,12 +966,12 @@ if __name__ == "__main__":
 					if "ps10" in sample:
 						files_per_job = 100
 					else:
-						files_per_job = 30
+						files_per_job = 20
 				elif "SingleMuRun2016" in sample:
 					if "ps10" in sample:
 						files_per_job = 100
 					else:
-						files_per_job = 15
+						files_per_job = 10
 				elif "QCD_HT500to700" in sample:
 					files_per_job = 5
 				elif "QCD_HT700to1000" in sample:
