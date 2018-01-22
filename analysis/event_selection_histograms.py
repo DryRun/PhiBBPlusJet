@@ -589,6 +589,7 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_pt").Fill(fatjet_dcsv, fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_msd").Fill(fatjet_dcsv, fatjet_msd, event_weight)
 					self._selection_histograms[selection].GetTH3D("dcsv_vs_msd_vs_pt").Fill(fatjet_dcsv, fatjet_msd, fatjet_pt, event_weight)
+					self._selection_histograms[selection].GetTH3D("n2ddt_vs_msd_vs_pt").Fill(fatjet_n2ddt, fatjet_msd, fatjet_pt, event_weight)
 
 					if self._jet_type == "CA15":
 						self._selection_histograms[selection].GetTH2D("dcsvalt_vs_rho").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_rho, event_weight)
