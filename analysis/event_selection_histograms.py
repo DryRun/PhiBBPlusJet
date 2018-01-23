@@ -978,7 +978,7 @@ if __name__ == "__main__":
 				elif "QCD_HT700to1000" in sample:
 					files_per_job = 5
 				elif "QCD_HT1000to1500" in sample:
-					files_per_job = 4
+					files_per_job = 1
 				elif "QCD" in sample:
 					files_per_job = 10
 				elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
