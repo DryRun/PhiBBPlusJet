@@ -216,10 +216,16 @@ def do_ddt_simple_step1(jet_type, wp, zvar="N2"):
 	H_nevents = TH2F("H_nevents", ";Jet #rho;Jet p_{T} (GeV)", len(rho_bins_array)-1, rho_bins_array, len(pt_bins_array)-1, pt_bins_array)
 
 	H3_samples = {}
+	H3_samples_dbtag_pass = {}
+	H3_samples_dbtag_fail = {}
 	for sample in config.samples["qcd"]:
 		print "Processing sample {}".format(sample)
 		H3_samples[sample] = TH3F("H3_{}".format(sample), ";Jet #rho;Jet p_{T} (GeV)", len(rho_bins_array)-1, rho_bins_array, len(pt_bins_array)-1, pt_bins_array, len(z_bins_array[zvar])-1, z_bins_array[zvar])
 		H3_samples[sample].SetDirectory(0)
+		H3_samples_dbtag_pass[sample] = TH3F("H3_{}_dbtag_pass".format(sample), ";Jet #rho;Jet p_{T} (GeV)", len(rho_bins_array)-1, rho_bins_array, len(pt_bins_array)-1, pt_bins_array, len(z_bins_array[zvar])-1, z_bins_array[zvar])
+		H3_samples_dbtag_pass[sample].SetDirectory(0)
+		H3_samples_dbtag_fail[sample] = TH3F("H3_{}_dbtag_fail".format(sample), ";Jet #rho;Jet p_{T} (GeV)", len(rho_bins_array)-1, rho_bins_array, len(pt_bins_array)-1, pt_bins_array, len(z_bins_array[zvar])-1, z_bins_array[zvar])
+		H3_samples_dbtag_fail[sample].SetDirectory(0)
 		f = TFile("{}/ddt_ntuple_{}.root".format(input_folder, sample))
 		nevents = f.Get("NEvents").Integral()
 		xs = cross_sections[sample]
@@ -253,16 +259,18 @@ def do_ddt_simple_step1(jet_type, wp, zvar="N2"):
 			if entry % 3 == 2:
 				H33.Fill(containers["rho"][0], containers["pt"][0], total_weight)
 
-			if containers[dbtag_var][0] > 0.7:
+			if containers[dbtag_var][0] > 0.8:
 				H3_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
+				H3_samples_dbtag_pass[sample].Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 0:
 					H31_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], total_weight)
 				if entry % 3 == 1:
 					H32_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], total_weight)
 				if entry % 3 == 2:
 					H33_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], total_weight)
-			elif containers[dbtag_var][0] < 0.7:
+			elif containers[dbtag_var][0] < 0.8:
 				H3_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
+				H3_samples_dbtag_fail[sample].Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 0:
 					H31_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], total_weight)
 				if entry % 3 == 1:
@@ -287,6 +295,10 @@ def do_ddt_simple_step1(jet_type, wp, zvar="N2"):
 	H33_dbtag_fail.Write()
 	H_nevents.Write()
 	for sample, hist in H3_samples.iteritems():
+		hist.Write()
+	for sample, hist in H3_samples_dbtag_pass.iteritems():
+		hist.Write()
+	for sample, hist in H3_samples_dbtag_fail.iteritems():
 		hist.Write()
 	f_h3.Close()
 
@@ -322,6 +334,7 @@ def do_ddt_simple_step2(jet_type, wp, zvar="N2", dbtag_pass=False, dbtag_fail=Fa
 	ddt3 = compute_ddt("DDT3", wp, pt_bins[0], rho_bins[0], H33)
 
 	# Save
+	print "Saving to " + get_ddttransf_path(jet_type ,zvar, wp, dbtag_pass=dbtag_pass, dbtag_fail=dbtag_fail)
 	output_file = TFile(get_ddttransf_path(jet_type ,zvar, wp, dbtag_pass=dbtag_pass, dbtag_fail=dbtag_fail), "RECREATE")
 	ddt.Write()
 	ddt1.Write()
@@ -401,8 +414,8 @@ if __name__ == '__main__':
 		do_ddt_simple_step1(args.jet_type, wp, args.zvar)
 	if args.run_simple2:
 		do_ddt_simple_step2(args.jet_type, wp, args.zvar)
-		#do_ddt_simple_step2(args.jet_type, wp, args.zvar, dbtag_pass=True)
-		#do_ddt_simple_step2(args.jet_type, wp, args.zvar, dbtag_fail=True)
+		do_ddt_simple_step2(args.jet_type, wp, args.zvar, dbtag_pass=True)
+		do_ddt_simple_step2(args.jet_type, wp, args.zvar, dbtag_fail=True)
 
 
 	if args.run_smoothing:

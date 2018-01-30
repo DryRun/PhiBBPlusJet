@@ -56,7 +56,6 @@ class DDTNtupler(AnalysisBase):
 			input_file.Close()
 		self._output_file.cd()
 		h_nevents.Write()
-		h_nevents = TH1D("NEvents", "NEvents")
 
 		# Setup output tree
 		self._output_tree = TTree("ddttree", "ddttree")
@@ -112,7 +111,6 @@ class DDTNtupler(AnalysisBase):
 				self._trig_eff[jet_type].SetDirectory(0)
 			f_trig.Close()
 
-
 	def run(self, max_nevents=-1, first_event=0):
 		if max_nevents > 0:
 			limit_nevents = min(max_nevents, self._chain.GetEntries())
@@ -128,6 +126,15 @@ class DDTNtupler(AnalysisBase):
 		for entry in xrange(first_event, limit_nevents):
 			self.print_progress(entry, first_event, limit_nevents, print_every)
 			self._data.GetEntry(entry)
+
+			# Require an AK8 or CA15 jet with pT>400 GeV and mSD>40 GeV and -7.<rho<0.
+			event_pass = False
+			if self._data.AK8Puppijet0_msd_puppi > 40. and self._data.AK8Puppijet0_pt > 400. and -7. < self._data.AK8Puppijet0_rho and self._data.AK8Puppijet0_rho < 0.:
+				event_pass = True
+			if self._data.CA15Puppijet0_msd_puppi > 40. and self._data.CA15Puppijet0_pt > 400. and -7. < self._data.CA15Puppijet0_rho and self._data.CA15Puppijet0_rho < 0.:
+				event_pass = True
+			if not event_pass:
+				continue
 
 			npu = min(self._data.npu, 49.5)
 			self._containers["weight_pu"][0] = self._h_pu_weight.GetBinContent(self._h_pu_weight.FindBin(npu))

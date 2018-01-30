@@ -26,12 +26,15 @@ signal_xsecs["Sbb350"] = 1.275e-02
 signal_xsecs["Sbb400"] = 1.144e-02
 signal_xsecs["Sbb500"] = 7.274e-03
 
-def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False):
+def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False, old_N2DDT=False):
 	print "Welcome to DataMCPlot({}, {}, {}, {})".format(var, selection, jet_type, data_name)
 	re_msdcat = re.compile("msd(?P<cat>\d+)") # Cat = 1 through 6, [450,500,600,700,800,1000]
 	for what in ["pass", "fail", "inclusive"]:
 		print "Input file: " + config.get_histogram_file(selection.replace("_ps10", ""), jet_type)
-		histogram_file = TFile(config.get_histogram_file(selection.replace("_ps10", ""), jet_type), "READ")
+		if old_N2DDT:
+			histogram_file = TFile(config.get_histogram_file(selection.replace("_ps10", ""), jet_type).replace("Xbb_inputs", "Xbb_inputs/old/old_N2DDT"), "READ")
+		else:
+			histogram_file = TFile(config.get_histogram_file(selection.replace("_ps10", ""), jet_type), "READ")
 		background_histograms = {}
 		total_bkgd_histogram = None
 		first = True
@@ -54,7 +57,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 						this_histogram = histogram_file.Get(hname1).ProjectionX()
 						hname2 = "{}_fail".format(subbackground)
 						this_histogram.Add(histogram_file.Get(hname2).ProjectionX())
-				elif "msd" in var:
+				elif "msd" in var: # For msd1, msd2, ... 
 					re_match = re_msdcat.search(var)
 					if re_match:
 						cat = re_match.group("cat")
@@ -68,6 +71,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 						else:
 							hname1 = "{}_pass".format(subbackground)
 							this_histogram = histogram_file.Get(hname1).ProjectionX("{}_px{}".format(hname, ybin), ybin, ybin)
+							this_histogram.SetName("{}_inclusive_{}".format(subbackground, var))
 							hname2 = "{}_fail".format(subbackground)
 							this_histogram.Add(histogram_file.Get(hname2).ProjectionX("{}_px{}".format(hname, ybin), ybin, ybin))
 					else:
@@ -92,6 +96,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 					background_histograms[background].Add(this_histogram)
 			background_histograms[background].SetDirectory(0)
 			background_histograms[background].SetFillColor(style.background_colors[background])
+			background_histograms[background].SetLineWidth(2)
+			background_histograms[background].SetLineColor(1)
 			if first:
 				first = False
 				total_bkgd_histogram = background_histograms[background].Clone()
@@ -126,6 +132,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				else:
 					hname1 = "{}_pass".format(data_name)
 					data_histogram = histogram_file.Get(hname1).ProjectionX("{}_px{}".format(hname, ybin), ybin, ybin)
+					data_histogram.SetName("{}_inclusive_{}".format(data_name, var))
 					hname2 = "{}_fail".format(data_name)
 					data_histogram.Add(histogram_file.Get(hname2).ProjectionX("{}_px{}".format(hname, ybin), ybin, ybin))
 			else:
@@ -139,6 +146,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				hname += "_fail"
 			data_histogram = histogram_file.Get(hname)
 		data_histogram.SetDirectory(0)
+		data_histogram.SetName("data_{}_{}".format(what, var))
 		if blind and what == "pass":
 			data_histogram.Scale(0.)
 
@@ -171,6 +179,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 					else:
 						hname1 = "{}_pass".format(signal_name)
 						signal_histograms[signal_name] = histogram_file.Get(hname1).ProjectionX("{}_px{}".format(hname, ybin), ybin, ybin)
+						signal_histograms[signal_name].SetName("{}_inclusive_{}".format(signal_name, var))
 						hname2 = "{}_fail".format(signal_name)
 						signal_histograms[signal_name].Add(histogram_file.Get(hname2).ProjectionX("{}_px{}".format(hname, ybin), ybin, ybin))
 				else:
@@ -183,10 +192,13 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				elif what == "fail":
 					hname += "_fail"
 				signal_histograms[signal_name] = histogram_file.Get(hname)
+			signal_histograms[signal_name].SetName("{}_{}_{}".format(signal_name, what, var))
 			signal_histograms[signal_name].SetDirectory(0)
 			signal_histograms[signal_name].Scale(signal_xsecs[signal_name] * signal_sf)
 			if "ps10" in selection:
 				signal_histograms[signal_name].Scale(0.1)
+			signal_histograms[signal_name].SetLineStyle(3)
+			signal_histograms[signal_name].SetLineColor(seaborn.GetColorRoot("default", 2))
 
 		if rebin:
 			for background_name, background_histogram in background_histograms.iteritems():
@@ -221,6 +233,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		cname = "c_{}_{}_{}_{}".format(var, selection, jet_type, what)
 		if logy:
 			cname += "_logy"
+		if old_N2DDT:
+			cname += "_oldN2DDT"
 		c = TCanvas(cname, var, 800, 1000)
 		top = TPad("top", "top", 0., 0.5, 1., 1.)
 		top.SetBottomMargin(0.02)
@@ -353,7 +367,6 @@ if __name__ == "__main__":
 		"zll":"Z(ll)",
 		"wlnu":"W(l#nu)",
 	}
-  
 
 	jet_types = ["AK8", "CA15"]
 	data_names = {"SR":"data_obs", "N2SR":"data_obs", "Preselection":"data_obs", "muCR":"data_singlemu", "N2CR":"data_obs", "SR_ps10":"data_obs_ps10", "N2CR_ps10":"data_obs_ps10", "N2SR_ps10":"data_obs_ps10"}
@@ -366,6 +379,7 @@ if __name__ == "__main__":
 					blind = False
 				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
 				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				pass
 	# mSD in pT categories, for SR and N2CR
 	for var in ["msd{}".format(x) for x in xrange(1,7)]:
 		for selection in ["SR", "N2CR", "N2SR", "SR_ps10"]:
@@ -374,5 +388,8 @@ if __name__ == "__main__":
 					blind = True
 				else:
 					blind = False
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, old_N2DDT=True)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, old_N2DDT=True)
