@@ -307,9 +307,6 @@ class JetComparison(AnalysisBase):
 			event_pass["AK8"] = self._event_selectors["AK8"].process_event(self._data, event_weight)
 			event_pass["CA15"] = self._event_selectors["CA15"].process_event(self._data, event_weight)
 
-		self._histograms.AddTH1D("CA15_pass_nevents", "pass_nevents", "", 1, -0.5, 0.5)
-		self._histograms.AddTH1D("CA15_pass_nevents_weighted", "pass_nevents_weighted", "", 1, -0.5, 0.5)
-
 			if event_pass["AK8"]:
 				self._histograms.GetTH1D("AK8_pass_nevents")
 				self._histograms.GetTH1D("AK8_pass_nevents_weighted", event_weights["AK8"])
