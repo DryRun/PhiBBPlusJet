@@ -486,7 +486,7 @@ if __name__ == "__main__":
 			if args.output_folder:
 				jet_comparisoner.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
 			else:
-				jet_comparisoner.set_output_path("/uscms/home/dryu/DAZSLE/data/JetComparison/{}".format(output_file_basename))
+				jet_comparisoner.set_output_path("/afs/cern.ch/user/d/dryu/DAZSLE/data/JetComparison/{}".format(output_file_basename))
 			for filename in sample_files[sample]:
 				print "Input file {}".format(filename)
 				jet_comparisoner.add_file(filename)
