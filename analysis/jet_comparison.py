@@ -131,25 +131,25 @@ class JetComparison(AnalysisBase):
 		f_pu.Close()
 
 		# Trigger efficiency weight stuff
-		if jet_type == "AK8":
-			f_trig = ROOT.TFile.Open("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ggH/RUNTriggerEfficiencies_AK8_SingleMuon_Run2016_V2p1_v03.root", "read")
-			self._trig_den = f_trig.Get("DijetTriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtDenom_cutJet")
-			self._trig_num = f_trig.Get("DijetTriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtPassing_cutJet")
-		elif jet_type == "CA15":
-			f_trig = ROOT.TFile.Open("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ggH/RUNTriggerEfficiencies_CA15_SingleMuon_Run2016_V2p4_v08.root", "read")
-			self._trig_den = f_trig.Get("DijetCA15TriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtDenom_cutJet")
-			self._trig_num = f_trig.Get("DijetCA15TriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtPassing_cutJet")
-		self._trig_den.SetDirectory(0)
-		self._trig_num.SetDirectory(0)
-		self._trig_den.RebinX(2)
-		self._trig_num.RebinX(2)
-		self._trig_den.RebinY(5)
-		self._trig_num.RebinY(5)
-		self._trig_eff = ROOT.TEfficiency()
-		if (ROOT.TEfficiency.CheckConsistency(self._trig_num, self._trig_den)):
-			self._trig_eff = ROOT.TEfficiency(self._trig_num, self._trig_den)
-			self._trig_eff.SetDirectory(0)
-		f_trig.Close()
+		self._trig_eff = {}
+		for jet_type in ["AK8", "CA15"]:
+			if jet_type == "AK8":
+				f_trig = ROOT.TFile.Open("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ggH/RUNTriggerEfficiencies_AK8_SingleMuon_Run2016_V2p1_v03.root", "read")
+				trig_den = f_trig.Get("DijetTriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtDenom_cutJet")
+				trig_num = f_trig.Get("DijetTriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtPassing_cutJet")
+			elif jet_type == "CA15":
+				f_trig = ROOT.TFile.Open("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ggH/RUNTriggerEfficiencies_CA15_SingleMuon_Run2016_V2p4_v08.root", "read")
+				trig_den = f_trig.Get("DijetCA15TriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtDenom_cutJet")
+				trig_num = f_trig.Get("DijetCA15TriggerEfficiencySeveralTriggers/jet1SoftDropMassjet1PtPassing_cutJet")
+			trig_den.RebinX(2)
+			trig_num.RebinX(2)
+			trig_den.RebinY(5)
+			trig_num.RebinY(5)
+			self._trig_eff[jet_type] = ROOT.TEfficiency()
+			if (ROOT.TEfficiency.CheckConsistency(trig_num, trig_den)):
+				self._trig_eff[jet_type] = ROOT.TEfficiency(trig_num, trig_den)
+				self._trig_eff[jet_type].SetDirectory(0)
+			f_trig.Close()
 
 		# get muon trigger efficiency object
 
@@ -274,10 +274,10 @@ class JetComparison(AnalysisBase):
 					elif jet_type == "CA15":
 						trigger_mass = min(self._data.CA15Puppijet0_msd, 300.)
 						trigger_pt = max(200., min(self._data.CA15Puppijet0_pt, 1000.))
-					trigger_weight = self._trig_eff.GetEfficiency(self._trig_eff.FindFixBin(trigger_mass, trigger_pt))
-					trigger_weight_up = trigger_weight + self._trig_eff.GetEfficiencyErrorUp(self._trig_eff.FindFixBin(trigger_mass, trigger_pt))
-					trigger_weight_down = trigger_weight - self._trig_eff.GetEfficiencyErrorLow(
-						self._trig_eff.FindFixBin(trigger_mass, trigger_pt))
+					trigger_weight = self._trig_eff[jet_type].GetEfficiency(self._trig_eff[jet_type].FindFixBin(trigger_mass, trigger_pt))
+					trigger_weight_up = trigger_weight + self._trig_eff[jet_type].GetEfficiencyErrorUp(self._trig_eff[jet_type].FindFixBin(trigger_mass, trigger_pt))
+					trigger_weight_down = trigger_weight - self._trig_eff[jet_type].GetEfficiencyErrorLow(
+						self._trig_eff[jet_type].FindFixBin(trigger_mass, trigger_pt))
 					if trigger_weight <= 0 or trigger_weight_down <= 0 or trigger_weight_up <= 0:
 						#print 'trigger_weights are %f, %f, %f, setting all to 1' % (trigger_weight, trigger_weight_up, trigger_weight_down)
 						trigger_weight = 1
