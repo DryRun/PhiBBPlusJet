@@ -364,6 +364,7 @@ if __name__ == "__main__":
 	input_group.add_argument('--supersamples', type=str, help="Supersample name(s), comma separated. Must correspond to something in analysis_configuration.(background_names, signal_names, or data_names).")
 	input_group.add_argument('--samples', type=str, help="Sample name(s), comma separated. Must be a key in analysis_configuration.skims.")
 	input_group.add_argument('--files', type=str, help="Input file name(s), comma separated")
+	parser.add_argument('--max_nevents', type=int, help="Max nevents (for development)")
 	parser.add_argument('--n_jobs', type=int, default=4, help="For --run, specify the number of parallel jobs.")
 	action_group = parser.add_mutually_exclusive_group() 
 	action_group.add_argument('--combine_outputs', action="store_true", help="Compile results into one file for next step (buildRhalphabet). Also applies luminosity weights to MC.")
@@ -477,26 +478,29 @@ if __name__ == "__main__":
 						print "[setup_limits] WARNING : NEvents histogram in not in this file! It is probably corrupt. This is MC, so I am skipping the file. But, you probably want to remove from the input list."
 						sample_files[sample].remove(filename)
 				
-			limit_histogrammer = JetComparison(sample, tree_name=tree_name)
+			jet_comparisoner = JetComparison(sample, tree_name=tree_name)
 			if args.do_optimization:
-				limit_histogrammer.do_optimization()
+				jet_comparisoner.do_optimization()
 			output_file_basename ="JetComparison_{}.root".format(sample) 
 			if args.output_folder:
-				limit_histogrammer.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
+				jet_comparisoner.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
 			else:
-				limit_histogrammer.set_output_path("/uscms/home/dryu/DAZSLE/data/JetComparison/{}".format(output_file_basename))
+				jet_comparisoner.set_output_path("/uscms/home/dryu/DAZSLE/data/JetComparison/{}".format(output_file_basename))
 			for filename in sample_files[sample]:
 				print "Input file {}".format(filename)
-				limit_histogrammer.add_file(filename)
+				jet_comparisoner.add_file(filename)
 			if "JetHTRun2016" in sample or "SingleMuRun2016" in sample:
-				limit_histogrammer.set_data_source("data")
+				jet_comparisoner.set_data_source("data")
 			else:
-				limit_histogrammer.set_data_source("simulation")
+				jet_comparisoner.set_data_source("simulation")
 			if "ps10" in sample:
-				limit_histogrammer.set_prescale(10)
-			limit_histogrammer.start()
-			limit_histogrammer.run()
-			limit_histogrammer.finish()
+				jet_comparisoner.set_prescale(10)
+			jet_comparisoner.start()
+			if args.max_nevents:
+				jet_comparisoner.run(max_nevents=args.max_nevents)
+			else:
+				jet_comparisoner.run()
+			jet_comparisoner.finish()
 
 	if args.condor_run:
 		import time
