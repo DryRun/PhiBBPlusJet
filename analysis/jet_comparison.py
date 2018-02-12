@@ -38,6 +38,7 @@ class JetComparison(AnalysisBase):
 		self._n2_ddt_cut = 0.
 		self._data_source = "data"
 		jet_types = ["AK8", "CA15"]
+		self._prescale = -1
 
 	def set_data_source(self, data_source):
 		print "[JetComparison::set_data_source] INFO : Setting data source to " + data_source
