@@ -263,7 +263,7 @@ class JetComparison(AnalysisBase):
 				k_ttbar = self._data.topPtWeight
 
 			# Weights: should be product of AK8*CA15, I think (event must pass both to be considered)
-			events_weights = {}
+			event_weights = {}
 			for jet_type  in ["AK8", "CA15"]:
 				# Get weights
 				if self._data_source == "data":
