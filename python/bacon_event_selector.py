@@ -577,6 +577,10 @@ class BaconEventSelector(EventSelector):
 			self.add_nminusone_histogram(cut_name, cut_name, "Double b-tag", 40, -2., 2.);
 		elif cut_name == "Max_AK8CHSjet0_doublecsv":
 			self.add_nminusone_histogram(cut_name, cut_name, "Double b-tag", 40, -2., 2.);
+		elif cut_name == "Min_AK8Puppijet0_doublecsv":
+			self.add_nminusone_histogram(cut_name, cut_name, "Double b-tag", 40, -2., 2.);
+		elif cut_name == "Max_AK8Puppijet0_doublecsv":
+			self.add_nminusone_histogram(cut_name, cut_name, "Double b-tag", 40, -2., 2.);
 		elif cut_name == "Min_nmuLoose":
 			self.add_nminusone_histogram(cut_name, cut_name, "n_{#mu}", 11, -0.5, 10.5);
 		elif cut_name == "Max_nmuLoose":
