@@ -311,8 +311,10 @@ class JetComparison(AnalysisBase):
 			dR = sqrt((AK8_eta - CA15_eta)**2 + acos(cos(AK8_phi - CA15_phi))**2);
 
 			event_pass = {}
-			event_pass["AK8"] = self._event_selectors["AK8"].process_event(self._data, event_weight)
-			event_pass["CA15"] = self._event_selectors["CA15"].process_event(self._data, event_weight)
+			self._event_selectors["AK8"].process_event(self._data, event_weight)
+			self._event_selectors["CA15"].process_event(self._data, event_weight)			
+			event_pass["AK8"] = self._event_selectors["AK8"].event_pass()
+			event_pass["CA15"] = self._event_selectors["CA15"].event_pass()
 
 			if event_pass["AK8"]:
 				self._histograms.GetTH1D("AK8_pass_nevents")
