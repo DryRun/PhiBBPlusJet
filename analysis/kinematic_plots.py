@@ -374,22 +374,22 @@ if __name__ == "__main__":
 		for selection in selections:
 			for jet_type in jet_types:
 				if selection == "SR" or selection == "N2SR":
-					blind = True
+					blind = False
 				else:
 					blind = False
-				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
-				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
 				pass
 	# mSD in pT categories, for SR and N2CR
 	for var in ["msd{}".format(x) for x in xrange(1,7)]:
 		for selection in ["SR", "N2CR", "N2SR", "SR_ps10"]:
 			for jet_type in jet_types:
 				if selection == "SR" or selection == "N2SR":
-					blind = True
+					blind = False
 				else:
 					blind = False
-				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
-				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
 
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, old_N2DDT=True)
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, old_N2DDT=True)
+				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, old_N2DDT=True)
+				#DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=1, legend_position="right", x_range=[0., 500.], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, old_N2DDT=True)
