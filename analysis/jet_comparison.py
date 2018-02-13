@@ -539,7 +539,7 @@ if __name__ == "__main__":
 					if "ps10" in sample:
 						files_per_job = 100
 					else:
-						files_per_job = 20
+						files_per_job = 10
 				elif "SingleMuRun2016" in sample:
 					if "ps10" in sample:
 						files_per_job = 100
