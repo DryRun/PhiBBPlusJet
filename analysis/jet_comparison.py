@@ -92,13 +92,13 @@ class JetComparison(AnalysisBase):
 		self._histograms.AddTH1D("CA15_dcsv", "inclusive_dcsv", "CA15 dsub", 200, -1., 1.)
 		self._histograms.AddTH1D("CA15_rho", "rho", "CA15 #rho", 80, -8., 0.)
 
-		self._histograms.AddTH2D("mAK8_vs_mCA15", "mAK8_vs_mCA15", "AK8 m_{SD} [GeV]", 85, 5, 600, "CA15 m_{SD} [GeV]", 85, 5, 600)
+		self._histograms.AddTH2D("mAK8_vs_mCA15", "mAK8_vs_mCA15", "AK8 m_{SD} [GeV]", 86, -2, 600, "CA15 m_{SD} [GeV]", 86, -2, 600)
 		self._histograms.AddTH2D("mCA15_over_mAK8_vs_mAK8", "mCA15_over_mAK8_vs_mAK8", "m_{CA15}/m_{AK8}", 40, 0., 4., "AK8 m_{SD} [GeV]", 80, 40, 600)
-		self._histograms.AddTH2D("ptAK8_vs_ptCA15", "ptAK8_vs_ptCA15", "AK8 p_{T} [GeV]", 100, 0., 1000., "CA15 p_{T} [GeV]", 100, 0., 1000.)
+		self._histograms.AddTH2D("ptAK8_vs_ptCA15", "ptAK8_vs_ptCA15", "AK8 p_{T} [GeV]", 101, -10., 1000., "CA15 p_{T} [GeV]", 101, -10., 1000.)
 
-		self._histograms.AddTH2D("mAK8_vs_mCA15_dR1p5", "mAK8_vs_mCA15", "AK8 m_{SD} [GeV]", 85, 5, 600, "CA15 m_{SD} [GeV]", 85, 5, 600)
+		self._histograms.AddTH2D("mAK8_vs_mCA15_dR1p5", "mAK8_vs_mCA15", "AK8 m_{SD} [GeV]", 86, -2, 600, "CA15 m_{SD} [GeV]", 86, -2, 600)
 		self._histograms.AddTH2D("mCA15_over_mAK8_vs_mAK8_dR1p5", "mCA15_over_mAK8_vs_mAK8", "m_{CA15}/m_{AK8}", 40, 0., 4., "AK8 m_{SD} [GeV]", 80, 40, 600)
-		self._histograms.AddTH2D("ptAK8_vs_ptCA15_dR1p5", "ptAK8_vs_ptCA15", "AK8 p_{T} [GeV]", 100, 0., 1000., "CA15 p_{T} [GeV]", 100, 0., 1000.)
+		self._histograms.AddTH2D("ptAK8_vs_ptCA15_dR1p5", "ptAK8_vs_ptCA15", "AK8 p_{T} [GeV]", 101, -10., 1000., "CA15 p_{T} [GeV]", 101, -10., 1000.)
 
 
 		# Event selections
@@ -348,19 +348,26 @@ class JetComparison(AnalysisBase):
 						self._histograms.GetTH2D("mCA15_over_mAK8_vs_mAK8_dR1p5").Fill(CA15_msd / AK8_msd, AK8_msd, event_weights["AK8"] * event_weights["CA15"])
 
 			# If events fail one or the other selection, fill that jet type with -1
-			if event_pass["AK8"] and not event_pass["CA15"]:
-				self._histograms.GetTH2D("mAK8_vs_mCA15").Fill(AK8_msd, -1, event_weights["AK8"] * event_weights["CA15"])
-				self._histograms.GetTH2D("ptAK8_vs_ptCA15").Fill(AK8_pt, -1, event_weights["AK8"] * event_weights["CA15"])
-			elif not event_pass["AK8"] and event_pass["CA15"]:
-				self._histograms.GetTH2D("mAK8_vs_mCA15").Fill(-1, CA15_msd, event_weights["AK8"] * event_weights["CA15"])
-				self._histograms.GetTH2D("ptAK8_vs_ptCA15").Fill(-1, CA15_pt, event_weights["AK8"] * event_weights["CA15"])
+			if (event_pass["AK8"]) and (not event_pass["CA15"]):
+				self._histograms.GetTH2D("mAK8_vs_mCA15").Fill(AK8_msd, -1000., event_weights["AK8"] * event_weights["CA15"])
+				self._histograms.GetTH2D("ptAK8_vs_ptCA15").Fill(AK8_pt, -1000., event_weights["AK8"] * event_weights["CA15"])
+			elif (not event_pass["AK8"]) and (event_pass["CA15"]):
+				self._histograms.GetTH2D("mAK8_vs_mCA15").Fill(-1000., CA15_msd, event_weights["AK8"] * event_weights["CA15"])
+				self._histograms.GetTH2D("ptAK8_vs_ptCA15").Fill(-1000., CA15_pt, event_weights["AK8"] * event_weights["CA15"])
+			elif (not event_pass["AK8"]) and (not event_pass["CA15"]):
+				self._histograms.GetTH2D("mAK8_vs_mCA15").Fill(-1000., -1000., event_weights["AK8"] * event_weights["CA15"])
+				self._histograms.GetTH2D("ptAK8_vs_ptCA15").Fill(-1000., -1000., event_weights["AK8"] * event_weights["CA15"])
+
 			if dR < 1.5:
-				if event_pass["AK8"] and not event_pass["CA15"]:
-					self._histograms.GetTH2D("mAK8_vs_mCA15_dR1p5").Fill(AK8_msd, -1, event_weights["AK8"] * event_weights["CA15"])
-					self._histograms.GetTH2D("ptAK8_vs_ptCA15_dR1p5").Fill(AK8_pt, -1, event_weights["AK8"] * event_weights["CA15"])
-				elif not event_pass["AK8"] and event_pass["CA15"]:
-					self._histograms.GetTH2D("mAK8_vs_mCA15_dR1p5").Fill(-1, CA15_msd, event_weights["AK8"] * event_weights["CA15"])
-					self._histograms.GetTH2D("ptAK8_vs_ptCA15_dR1p5").Fill(-1, CA15_pt, event_weights["AK8"] * event_weights["CA15"])
+				if (event_pass["AK8"]) and (not event_pass["CA15"]):
+					self._histograms.GetTH2D("mAK8_vs_mCA15_dR1p5").Fill(AK8_msd, -1000., event_weights["AK8"] * event_weights["CA15"])
+					self._histograms.GetTH2D("ptAK8_vs_ptCA15_dR1p5").Fill(AK8_pt, -1000., event_weights["AK8"] * event_weights["CA15"])
+				elif (not event_pass["AK8"]) and (event_pass["CA15"]):
+					self._histograms.GetTH2D("mAK8_vs_mCA15_dR1p5").Fill(-1000., CA15_msd, event_weights["AK8"] * event_weights["CA15"])
+					self._histograms.GetTH2D("ptAK8_vs_ptCA15_dR1p5").Fill(-1000., CA15_pt, event_weights["AK8"] * event_weights["CA15"])
+				elif (not event_pass["AK8"]) and (not event_pass["CA15"]):
+					self._histograms.GetTH2D("mAK8_vs_mCA15_dR1p5").Fill(-1000., -1000., event_weights["AK8"] * event_weights["CA15"])
+					self._histograms.GetTH2D("ptAK8_vs_ptCA15_dR1p5").Fill(-1000., -1000., event_weights["AK8"] * event_weights["CA15"])
 
 	def finish(self):
 		if self._output_path == "":
