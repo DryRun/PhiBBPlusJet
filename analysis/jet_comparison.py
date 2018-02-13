@@ -317,8 +317,8 @@ class JetComparison(AnalysisBase):
 			event_pass["CA15"] = self._event_selectors["CA15"].event_pass()
 
 			if event_pass["AK8"]:
-				self._histograms.GetTH1D("AK8_pass_nevents")
-				self._histograms.GetTH1D("AK8_pass_nevents_weighted", event_weights["AK8"])
+				self._histograms.GetTH1D("AK8_pass_nevents").Fill(0)
+				self._histograms.GetTH1D("AK8_pass_nevents_weighted").Fill(0, event_weights["AK8"])
 				self._histograms.GetTH1D("AK8_pt").Fill(AK8_pt, event_weights["AK8"])
 				self._histograms.GetTH1D("AK8_eta").Fill(AK8_eta, event_weights["AK8"])
 				self._histograms.GetTH1D("AK8_msd").Fill(AK8_msd, event_weights["AK8"])
@@ -326,8 +326,8 @@ class JetComparison(AnalysisBase):
 				self._histograms.GetTH1D("AK8_dcsv").Fill(AK8_dcsv, event_weights["AK8"])
 				self._histograms.GetTH1D("AK8_rho").Fill(AK8_rho, event_weights["AK8"])
 			if event_pass["CA15"]:
-				self._histograms.GetTH1D("CA15_pass_nevents")
-				self._histograms.GetTH1D("CA15_pass_nevents_weighted", event_weights["CA15"])
+				self._histograms.GetTH1D("CA15_pass_nevents").Fill(0)
+				self._histograms.GetTH1D("CA15_pass_nevents_weighted").Fill(0, event_weights["CA15"])
 				self._histograms.GetTH1D("CA15_pt").Fill(CA15_pt, event_weights["CA15"])
 				self._histograms.GetTH1D("CA15_eta").Fill(CA15_eta, event_weights["CA15"])
 				self._histograms.GetTH1D("CA15_msd").Fill(CA15_msd, event_weights["CA15"])
