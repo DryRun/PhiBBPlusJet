@@ -100,6 +100,9 @@ class JetComparison(AnalysisBase):
 		self._histograms.AddTH2D("mCA15_over_mAK8_vs_mAK8_dR1p5", "mCA15_over_mAK8_vs_mAK8", "m_{CA15}/m_{AK8}", 40, 0., 4., "AK8 m_{SD} [GeV]", 80, 40, 600)
 		self._histograms.AddTH2D("ptAK8_vs_ptCA15_dR1p5", "ptAK8_vs_ptCA15", "AK8 p_{T} [GeV]", 101, -10., 1000., "CA15 p_{T} [GeV]", 101, -10., 1000.)
 
+		# Explicit 2D histogram for trigger investigation: fraction of CA15 jets with an AK8 jet passing the trigger
+		self._histograms.AddTH2D("CA15_pt_msd", "CA15_pt_msd", "m_{SD} [GeV]", 86, -2, 600., "p_{T} [GeV]", 20, 0., 1000.)
+		self._histograms.AddTH2D("CA15_pt_msd_trigAK8", "CA15_pt_msd", "m_{SD} [GeV]", 86, -2, 600., "p_{T} [GeV]", 20, 0., 1000.)
 
 		# Event selections
 		self._event_selectors = {}
@@ -268,6 +271,7 @@ class JetComparison(AnalysisBase):
 
 			# Weights: should be product of AK8*CA15, I think (event must pass both to be considered)
 			event_weights = {}
+			event_weights_notrig = {}
 			for jet_type  in ["AK8", "CA15"]:
 				# Get weights
 				if self._data_source == "data":
@@ -289,6 +293,7 @@ class JetComparison(AnalysisBase):
 						trigger_weight_down = 1
 						trigger_weight_up = 1
 					event_weights[jet_type] = pu_weight * k_vjets * trigger_weight * k_ttbar
+					event_weights_notrig[jet_type] = pu_weight * k_vjets * k_ttbar
 			event_weight = event_weights["AK8"] * event_weights["CA15"]
 
 			# Pick up AK8 and CA15 event variables here, to avoid mistakes later
@@ -309,6 +314,12 @@ class JetComparison(AnalysisBase):
 			CA15_phi = self._data.CA15Puppijet0_phi
 
 			dR = sqrt((AK8_eta - CA15_eta)**2 + acos(cos(AK8_phi - CA15_phi))**2);
+
+			# CA15 jets: fraction with an AK8 jet that should have passed the trigger
+			self._histograms.GetTH2D("CA15_pt_msd").Fill(CA15_msd, CA15_pt, event_weights_notrig["CA15"])
+			if ((self._data.AK8Puppijet0_pt > 360. and self._data.AK8Puppijet0_msd > 30.) or (self._data.AK8Puppijet1_pt > 360. and self._data.AK8Puppijet1_msd > 30.):
+				self._histograms.GetTH2D("CA15_pt_msd_trigAK8").Fill(CA15_msd, CA15_pt, event_weights_notrig["CA15"])
+
 
 			event_pass = {}
 			self._event_selectors["AK8"].process_event(self._data, event_weight)
