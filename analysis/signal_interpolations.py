@@ -13,7 +13,15 @@ gStyle.SetOptTitle(0)
 seaborn = Root.SeabornInterface()
 seaborn.Initialize()
 
-def make_validation_plots(interpolated_histogram, simulated_histogram, save_tag, adjacent_histograms=None, x_range=None):
+# 0 = normalization
+# 1 = mean
+# 2 = gaussian mean
+# 3 = lorentzian mean
+# r = something related to the approximation... default is 4. Should be fixed.
+def fvoigt(x, p, r=4):
+	return p[0] * TMath.Voigt(x[0] - p[1], p[2], p[3], r)
+
+def make_validation_plots(interpolated_histogram, simulated_histogram, save_tag, adjacent_histograms=None, x_range=None, do_fits=False):
 	# 2D ratio plot
 	ratio_histogram = interpolated_histogram.Clone()
 	ratio_histogram.Divide(simulated_histogram)
@@ -47,8 +55,12 @@ def make_validation_plots(interpolated_histogram, simulated_histogram, save_tag,
 	c_pull.SaveAs("/uscms/home/dryu/DAZSLE/data/Validation/figures/{}.eps".format(c_pull.GetName()))
 	c_pull.SaveAs("/uscms/home/dryu/DAZSLE/data/Validation/figures/{}.C".format(c_pull.GetName()))
 
+	return_data = {}
+
 	# 1D plots
 	for ptbin in xrange(0, interpolated_histogram.GetNbinsY() + 1):
+		print "[debug] Starting ptbin {}".format(ptbin)
+		return_data[ptbin] = {}
 		if ptbin == 0:
 			interpolated_histogram_1D = interpolated_histogram.ProjectionX("{}_int_ptbinAll".format(interpolated_histogram.GetName()))
 			simulated_histogram_1D = simulated_histogram.ProjectionX("{}_sim_ptbinAll".format(simulated_histogram.GetName()))
@@ -112,6 +124,57 @@ def make_validation_plots(interpolated_histogram, simulated_histogram, save_tag,
 				adj_hist_proj[adj_mass].SetLineWidth(3)
 				adj_hist_proj[adj_mass].Draw("hist same")
 				l_comparison.AddEntry(adj_hist_proj[adj_mass], "Sim, m={} GeV".format(adj_mass), "l")
+
+		if do_fits:
+			fits = {}
+			mean = 0.5 * (interpolated_histogram_1D.GetMean() + simulated_histogram_1D.GetMean())
+			rms = 0.5 * (interpolated_histogram_1D.GetRMS() + simulated_histogram_1D.GetRMS())
+			for hist_name, hist in {"int":interpolated_histogram_1D, "sim":simulated_histogram_1D}.iteritems():
+				return_data[ptbin][hist_name] = {}
+				#fits[hist_name] = TF1("voigt_{}".format(hist_name), fvoigt, mean - 1.5*rms, mean + 1.5*rms, 4)
+				#fits[hist_name].SetParameter(0, hist.Integral())
+				#fits[hist_name].SetParameter(1, mean)
+				#fits[hist_name].SetParameter(2, rms/2.)
+				#fits[hist_name].SetParameter(3, rms/2.)
+				#hist.Fit(fits[hist_name], "QR0")
+				#if hist_name == "int":
+				#	fits[hist_name].SetLineColor(seaborn.GetColorRoot("pastel", 2))
+				#else:
+				#	fits[hist_name].SetLineColor(seaborn.GetColorRoot("pastel", 3))
+				#fits[hist_name].Draw("same")
+				#fl = fits[hist_name].GetParameter(3)
+				#dfl = fits[hist_name].GetParError(3)
+				#fg = fits[hist_name].GetParameter(2)
+				#dfg = fits[hist_name].GetParError(2)
+
+				#fwhm = 0.5346 * fl + sqrt(0.2166 * fl**2 + fg**2)
+				#dfwhm = fwhm * sqrt(dfg**2 * (fg / sqrt(0.2166*fl**2+fg**2))**2 + dfl**2 * (0.5346 + 0.2166 * fl / sqrt(0.2166*fl**2+fg**2))**2)
+
+				print "[debug] Fit range {} - {}".format(mean - 1.5*rms, mean + 1.5*rms)
+				fits[hist_name] = TF1("gauss_{}".format(hist_name), "gaus(0)", mean - 2*rms, mean + 2*rms)
+				fits[hist_name].SetParameter(0, hist.Integral())
+				fits[hist_name].SetParameter(1, mean)
+				fits[hist_name].SetParameter(2, rms)
+				fits[hist_name].SetParLimits(2, rms/2., 2. * rms)
+				hist.Fit(fits[hist_name], "R0")
+				if hist_name == "int":
+					fits[hist_name].SetLineColor(seaborn.GetColorRoot("pastel", 2))
+				else:
+					fits[hist_name].SetLineColor(seaborn.GetColorRoot("pastel", 3))
+				fits[hist_name].Draw("same")
+
+				fwhm = fits[hist_name].GetParameter(2) * sqrt(2.)
+				dfwhm = fits[hist_name].GetParError(2) * sqrt(2.)
+				l_comparison.AddEntry(fits[hist_name], "Fit {}, FWHM={:0.2f}#pm{:0.2f}, x_{{0}}={:0.2f}#pm{:0.2f})".format(hist_name, fwhm, dfwhm, fits[hist_name].GetParameter(1), fits[hist_name].GetParError(1)), "l")
+
+				return_data[ptbin][hist_name]["fwhm"] = fwhm
+				return_data[ptbin][hist_name]["dfwhm"] = dfwhm
+				return_data[ptbin][hist_name]["x0"] = fits[hist_name].GetParameter(1)
+				return_data[ptbin][hist_name]["dx0"] = fits[hist_name].GetParError(1)
+				return_data[ptbin][hist_name]["rms"] = hist.GetRMS()
+				return_data[ptbin][hist_name]["norm"] = hist.Integral()
+				return_data[ptbin][hist_name]["mean"] = hist.GetMean()
+
 		l_comparison.Draw()
 
 		c_comparison.cd()
@@ -126,6 +189,15 @@ def make_validation_plots(interpolated_histogram, simulated_histogram, save_tag,
 
 		c_comparison.cd()
 		c_comparison.SaveAs("/uscms/home/dryu/DAZSLE/data/Validation/figures/{}.pdf".format(c_comparison.GetName()))
+
+		SetOwnership(top, False)
+		SetOwnership(bottom, False)
+		SetOwnership(c_comparison, False)
+		top.IsA().Destructor(top)
+		bottom.IsA().Destructor(bottom)
+		c_comparison.IsA().Destructor(c_comparison)
+
+	return return_data
 
 def make_summary_plot(sim_hists, int_hists, save_tag):
 	c = TCanvas("c_intp_summary_{}".format(save_tag), "c_intp_summary_{}".format(save_tag), 800, 600)
@@ -320,8 +392,11 @@ if __name__ == "__main__":
 			sys.exit(1)
 
 		# Top-level loop
+		total_return_data = {}
 		for region in ["pass", "fail"]:
+			total_return_data[region] = {}
 			for model in models:
+
 				input_histograms = {}
 				output_histograms_1D = {}
 				model_histogram = None
@@ -357,8 +432,19 @@ if __name__ == "__main__":
 					adjacent_histograms[adj_mass] = input_file.Get("{}{}_{}".format(model, adj_mass, region))
 
 				save_tag = "{}_{}_{}_{}".format(args.jet_type, region, model, validation_mass)
-				make_validation_plots(interpolated_histogram, simulated_histogram, save_tag, adjacent_histograms=adjacent_histograms, x_range=[left_mass-75.,right_mass+75.])
-
+				total_return_data[region][model] = make_validation_plots(interpolated_histogram, simulated_histogram, save_tag, adjacent_histograms=adjacent_histograms, x_range=[left_mass-75.,right_mass+75.], do_fits=True)
+				with open("peakdata_{}_{}_{}{}.txt".format(args.jet_type, region, model, validation_mass), 'w') as f:
+					f.write("rms[\"{}\"][\"{}\"][\"int\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["int"]["rms"]))
+					f.write("rms[\"{}\"][\"{}\"][\"sim\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["sim"]["rms"]))
+					f.write("fwhm[\"{}\"][\"{}\"][\"int\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["int"]["fwhm"]))
+					f.write("fwhm[\"{}\"][\"{}\"][\"sim\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["sim"]["fwhm"]))
+					f.write("dfwhm[\"{}\"][\"{}\"][\"int\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["int"]["dfwhm"]))
+					f.write("dfwhm[\"{}\"][\"{}\"][\"sim\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["sim"]["dfwhm"]))
+					f.write("norm[\"{}\"][\"{}\"][\"int\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["int"]["norm"]))
+					f.write("norm[\"{}\"][\"{}\"][\"sim\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["sim"]["norm"]))
+					f.write("mean[\"{}\"][\"{}\"][\"int\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["int"]["mean"]))
+					f.write("mean[\"{}\"][\"{}\"][\"sim\"][{}]={}\n".format(args.jet_type, region, validation_mass, total_return_data[region][model][0]["sim"]["mean"]))
+		#print total_return_data
 	if args.plots:
 		sim_file = TFile(config.get_histogram_file(args.region, args.jet_type), "READ")
 		int_file = TFile(config.get_interpolation_file(args.region, args.jet_type), "READ")

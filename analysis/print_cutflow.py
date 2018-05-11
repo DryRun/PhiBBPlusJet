@@ -17,7 +17,24 @@ import DAZSLE.PhiBBPlusJet.style as style
 seaborn = Root.SeabornInterface()
 seaborn.Initialize()
 
-formatted_samples = {}
+formatted_samples = {
+	"data_obs":"Data 2016",
+	"Sbb50":"$50$",
+	"Sbb100":"$100$",
+	"Sbb125":"$120$",
+	"Sbb200":"$200$",
+	"Sbb300":"$300$",
+	"Sbb350":"$350$",
+	"qcd":"QCD",
+	"tqq":"$t\\bar{t}$",
+	"zqq":"$Z(qq)$",
+	"wqq":"$W(qq)$",
+	"hqq125":"ggF H",
+	"tthqq125":"$t\bar{t}$H",
+	"vbfhqq125":"VBF H",
+	"whqq125":"WH",
+	"zhqq125":"ZH",
+}
 formatted_labels = {
 	"SR":{
 		"Inclusive":"Inclusive",

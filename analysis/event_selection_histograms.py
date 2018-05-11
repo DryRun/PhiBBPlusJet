@@ -170,6 +170,11 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("pass_rho", "rho", "rho", 80, -8., 0.)
 			self._selection_histograms[selection].AddTH1D("fail_rho", "rho", "rho", 80, -8., 0.)
 
+			self._selection_histograms[selection].AddTH2D("met_msd_pass", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
+			self._selection_histograms[selection].AddTH2D("met_msd_fail", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
+
+			self._selection_histograms[selection].AddTH2D("fail", "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_rho", "dcsv_vs_rho", 
 				"Double-b", 110, -1.1, 1.1,
 				"#rho", 40, -8., 0.)
@@ -585,6 +590,8 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH1D("msd").Fill(fatjet_msd, event_weight)
 					self._selection_histograms[selection].GetTH1D("eta").Fill(fatjet_eta, event_weight)
 					self._selection_histograms[selection].GetTH1D("rho").Fill(fatjet_rho, event_weight)
+					self._selection_histograms[selection].GetTH2D("met_msd_pass").Fill(fatjet_msd, data.pfmet, event_weight)
+					self._selection_histograms[selection].GetTH2D("met_msd_fail").Fill(fatjet_msd, data.pfmet, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_rho").Fill(fatjet_dcsv, fatjet_rho, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_pt").Fill(fatjet_dcsv, fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_msd").Fill(fatjet_dcsv, fatjet_msd, event_weight)

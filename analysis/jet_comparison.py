@@ -317,7 +317,7 @@ class JetComparison(AnalysisBase):
 
 			# CA15 jets: fraction with an AK8 jet that should have passed the trigger
 			self._histograms.GetTH2D("CA15_pt_msd").Fill(CA15_msd, CA15_pt, event_weights_notrig["CA15"])
-			if ((self._data.AK8Puppijet0_pt > 360. and self._data.AK8Puppijet0_msd > 30.) or (self._data.AK8Puppijet1_pt > 360. and self._data.AK8Puppijet1_msd > 30.):
+			if ((self._data.AK8Puppijet0_pt > 360. and self._data.AK8Puppijet0_msd > 30.) or (self._data.AK8Puppijet1_pt > 360. and self._data.AK8Puppijet1_msd > 30.)):
 				self._histograms.GetTH2D("CA15_pt_msd_trigAK8").Fill(CA15_msd, CA15_pt, event_weights_notrig["CA15"])
 
 
