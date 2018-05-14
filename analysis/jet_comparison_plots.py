@@ -27,6 +27,7 @@ gStyle.SetOptTitle(0)
 seaborn = Root.SeabornInterface()
 seaborn.Initialize()
 
+print cross_sections
 
 h_num = None
 h_den = None
