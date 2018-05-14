@@ -6,7 +6,7 @@ import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 import DAZSLE.PhiBBPlusJet.event_selections as event_selections
 from DAZSLE.PhiBBPlusJet.bacon_event_selector import *
 from DAZSLE.ZPrimePlusJet.xbb_config import analysis_parameters as params
-from DAZSLE.ZPrimePlusJet.cross_sections import cross_sections
+from DAZSLE.PhiBBPlusJet.cross_sections import cross_sections
 from math import ceil, sqrt, floor, cos, acos
 import array
 
@@ -26,8 +26,6 @@ gStyle.SetOptStat(0)
 gStyle.SetOptTitle(0)
 seaborn = Root.SeabornInterface()
 seaborn.Initialize()
-
-print cross_sections
 
 h_num = None
 h_den = None
