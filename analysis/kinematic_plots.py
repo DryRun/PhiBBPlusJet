@@ -26,7 +26,7 @@ signal_xsecs["Sbb350"] = 1.275e-02
 signal_xsecs["Sbb400"] = 1.144e-02
 signal_xsecs["Sbb500"] = 7.274e-03
 
-def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb100"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False, old_N2DDT=False):
+def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb50", "Sbb125", "Sbb200", "Sbb300"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False, old_N2DDT=False):
 	print "Welcome to DataMCPlot({}, {}, {}, {})".format(var, selection, jet_type, data_name)
 	re_msdcat = re.compile("msd(?P<cat>\d+)") # Cat = 1 through 6, [450,500,600,700,800,1000]
 	for what in ["pass", "fail", "inclusive"]:
@@ -95,6 +95,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				else:
 					background_histograms[background].Add(this_histogram)
 			background_histograms[background].SetDirectory(0)
+			if background == "hbb" and what == "pass" and logy:
+				print "[debug] Set background color for hbb to {}".format(style.background_colors[background])
 			background_histograms[background].SetFillColor(style.background_colors[background])
 			background_histograms[background].SetLineWidth(2)
 			background_histograms[background].SetLineColor(1)
@@ -214,6 +216,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		elif legend_position == "left":
 			l = TLegend(0.15, 0.4, 0.35, 0.88)
 		l.SetFillColor(0)
+		l.SetFillStyle(0)
 		l.SetBorderSize(0)
 		l.AddEntry(data_histogram, "Data 2016", "p")
 		l.AddEntry(total_bkgd_histogram, "Total background", "l")
@@ -221,6 +224,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		bkgds_sorted.sort(key=lambda x: background_histograms[x].Integral())
 		bkgd_stack = THStack("bkgd_stack", "bkgd_stack")
 		for bkgd in bkgds_sorted:
+			background_histograms[bkgd].SetFillColor(style.background_colors[bkgd])
 			bkgd_stack.Add(background_histograms[bkgd])
 		for bkgd in reversed(bkgds_sorted):
 			legend_entry = bkgd
@@ -228,7 +232,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				legend_entry = legend_entries[bkgd]
 			l.AddEntry(background_histograms[bkgd], legend_entry, "f")
 		for signal_name in signal_names:
-			l.AddEntry(signal_histograms[signal_name], signal_name + ("" if signal_sf == 1 else "#times{}".format(signal_sf)), "l")
+			l.AddEntry(signal_histograms[signal_name], signal_name.replace("Sbb", "m_{#Phi}=") + ("" if signal_sf == 1 else "#times{}".format(signal_sf)), "l")
 
 		cname = "c_{}_{}_{}_{}".format(var, selection, jet_type, what)
 		if logy:
@@ -254,7 +258,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		ymax = max(data_histogram.GetMaximum(), total_bkgd_histogram.GetMaximum())
 		if logy:
 			ymin = 0.5
-			ymax = ymax * 10
+			ymax = ymax * 100
 		else:
 			ymin = 0.
 			ymax = ymax * 1.3
@@ -280,10 +284,14 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		for i, signal_name in enumerate(signal_names):
 			signal_histograms[signal_name].SetLineWidth(2)
 			signal_histograms[signal_name].SetLineStyle(2+i)
-			signal_histograms[signal_name].SetLineColor(seaborn.GetColorRoot("dark", i))
+			signal_histograms[signal_name].SetLineColor(seaborn.GetColorRoot("pastel", i))
 			signal_histograms[signal_name].Draw("hist same")
 		#frame_top.Draw("axis same")
 		l.Draw()
+
+		# Debugging: print data / MC ratio
+		if var == "msd" and what == "inclusive":
+			print "[debug] {} data / MC = {} / {} = {}".format(selection, data_histogram.Integral(), total_bkgd_histogram.Integral(), data_histogram.Integral() / total_bkgd_histogram.Integral())
 
 		c.cd()
 		bottom = TPad("bottom", "bottom", 0., 0., 1., 0.5)
