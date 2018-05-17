@@ -173,6 +173,8 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH2D("met_msd_pass", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
 			self._selection_histograms[selection].AddTH2D("met_msd_fail", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
 
+			self._selection_histograms[selection].AddTH1D("nAK4PuppijetsPt30dR08", "nAK4PuppijetsPt30dR08", 21, -0.5, 20.5)
+
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_rho", "dcsv_vs_rho", 
 				"Double-b", 110, -1.1, 1.1,
 				"#rho", 40, -8., 0.)
@@ -595,7 +597,7 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH2D("dcsv_vs_msd").Fill(fatjet_dcsv, fatjet_msd, event_weight)
 					self._selection_histograms[selection].GetTH3D("dcsv_vs_msd_vs_pt").Fill(fatjet_dcsv, fatjet_msd, fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH3D("n2ddt_vs_msd_vs_pt").Fill(fatjet_n2ddt, fatjet_msd, fatjet_pt, event_weight)
-
+					self._selection_histograms[selection].GetTH1D("nAK4PuppijetsPt30dR08").Fill(self._data.nAK4PuppijetsPt30dR08_0)
 					if self._jet_type == "CA15":
 						self._selection_histograms[selection].GetTH2D("dcsvalt_vs_rho").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_rho, event_weight)
 						self._selection_histograms[selection].GetTH2D("dcsvalt_vs_pt").Fill(self._data.CA15Puppijet0_doublecsv, fatjet_pt, event_weight)
