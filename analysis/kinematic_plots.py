@@ -239,9 +239,9 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 			cname += "_logy"
 		if old_N2DDT:
 			cname += "_oldN2DDT"
-		c = TCanvas(cname, var, 800, 1000)
-		top = TPad("top", "top", 0., 0.5, 1., 1.)
-		top.SetBottomMargin(0.02)
+		c = TCanvas(cname, var, 800, 800)
+		top = TPad("top", "top", 0., 0.25, 1., 1.)
+		top.SetBottomMargin(0.03)
 		top.Draw()
 		top.cd()
 		if logy:
@@ -294,31 +294,39 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 			print "[debug] {} data / MC = {} / {} = {}".format(selection, data_histogram.Integral(), total_bkgd_histogram.Integral(), data_histogram.Integral() / total_bkgd_histogram.Integral())
 
 		c.cd()
-		bottom = TPad("bottom", "bottom", 0., 0., 1., 0.5)
-		bottom.SetTopMargin(0.02)
-		bottom.SetBottomMargin(0.2)
+		bottom = TPad("bottom", "bottom", 0., 0., 1., 0.25)
+		bottom.SetTopMargin(0.04)
+		bottom.SetBottomMargin(0.3)
 		bottom.Draw()
 		bottom.cd()
 		ratio_histogram = data_histogram.Clone()
 		ratio_histogram.SetDirectory(0)
 		ratio_histogram.Divide(total_bkgd_histogram)
 		ratio_histogram.SetMinimum(0.)
-		ratio_histogram.SetMaximum(3.)
+		ratio_histogram.SetMaximum(2.5)
 		if var in style.axis_titles:
 			ratio_histogram.GetXaxis().SetTitle(style.axis_titles[var])
 		else:
 			ratio_histogram.GetXaxis().SetTitle(var)
-		ratio_histogram.GetXaxis().SetTitleSize(0.06)
-		ratio_histogram.GetXaxis().SetLabelSize(0.06)
-		ratio_histogram.GetYaxis().SetTitleSize(0.06)
-		ratio_histogram.GetYaxis().SetTitleOffset(0.9)
-		ratio_histogram.GetYaxis().SetLabelSize(0.06)
+		ratio_histogram.GetXaxis().SetTitleSize(0.12)
+		ratio_histogram.GetXaxis().SetLabelSize(0.12)
+		ratio_histogram.GetYaxis().SetTitleSize(0.12)
+		ratio_histogram.GetYaxis().SetTitleOffset(0.4)
+		ratio_histogram.GetYaxis().SetLabelSize(0.12)
 		ratio_histogram.GetYaxis().SetTitle("Data / Bkgd")
 		if x_range:
 			ratio_histogram.GetXaxis().SetRangeUser(x_range[0], x_range[1])
 		ratio_histogram.Draw("p")
 
 		c.cd()
+		# CMS stuff
+		Root.CMSLabel(0.22, 0.88, "Internal", 1, 0.6)
+		lumi_text = TLatex()
+		lumi_text.SetTextSize(0.08 * 0.5)
+		lumi_text.SetNDC()
+		lumi_text.SetTextColor(1)
+		lumi_text.DrawLatex(0.7, 0.96, "#font[42]{35.9 fb^{-1} (8 TeV)}")
+
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/{}.pdf".format(c.GetName()))
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/{}.eps".format(c.GetName()))
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/{}.C".format(c.GetName()))
@@ -331,13 +339,13 @@ if __name__ == "__main__":
 	vars = ["pfmet","dcsv","n2ddt","pt","eta","rho", "msd"]
 	rebin = {"pfmet":1,"dcsv":1, "n2ddt":1, "pt":10, "eta":1, "rho":4, "msd":1}
 	legend_positions = {
-		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"N2SR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"muCR":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"Preselection":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2SR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"muCR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"Preselection":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
 		"N2CR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"N2SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"right","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
 		"N2CR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
 	}
 
@@ -345,12 +353,13 @@ if __name__ == "__main__":
 		"pfmet":[0,500],
 		"dcsv":[-1,1],
 		"n2ddt":[-0.4, 0.2],
-		"pt":[0,2000],
+		"pt":[350.,2000.],
 		"eta":[-3.,3.],
 		"rho":[-9, 0.],
 		"msd":[0., 400.]
 	}
 	selections = ["SR", "Preselection", "muCR", "N2CR", "N2SR", "SR_ps10", "N2CR_ps10", "N2SR_ps10"]
+	#selections = ["Preselection"]
 	backgrounds = {
 		"SR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],
 		"N2SR":["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"],

@@ -154,6 +154,10 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("pass_n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH1D("fail_n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
 
+			self._selection_histograms[selection].AddTH1D("tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
+			self._selection_histograms[selection].AddTH1D("pass_tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
+			self._selection_histograms[selection].AddTH1D("fail_tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
+
 			self._selection_histograms[selection].AddTH1D("pt", "pt", "pt", 400, 0., 2000.)
 			self._selection_histograms[selection].AddTH1D("pass_pt", "pt", "pt", 400, 0., 2000.)
 			self._selection_histograms[selection].AddTH1D("fail_pt", "pt", "pt", 400, 0., 2000.)
@@ -173,7 +177,7 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH2D("met_msd_pass", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
 			self._selection_histograms[selection].AddTH2D("met_msd_fail", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
 
-			self._selection_histograms[selection].AddTH1D("nAK4PuppijetsPt30dR08", "nAK4PuppijetsPt30dR08", 21, -0.5, 20.5)
+			self._selection_histograms[selection].AddTH1D("nAK4PuppijetsPt30dR08", "nAK4PuppijetsPt30dR08", "n(AK4 jets, #Delta R>0.8, p_{T}>30 GeV)", 21, -0.5, 20.5)
 
 			self._selection_histograms[selection].AddTH2D("dcsv_vs_rho", "dcsv_vs_rho", 
 				"Double-b", 110, -1.1, 1.1,
@@ -534,23 +538,25 @@ class EventSelectionHistograms(AnalysisBase):
 
 				# Pick up AK8 or CA15 event variables here, to avoid mistakes later
 				if self._jet_type == "AK8":
-					fatjet_pt = self._data.AK8Puppijet0_pt
-					fatjet_eta = self._data.AK8Puppijet0_eta
-					fatjet_msd = self._data.AK8Puppijet0_msd_puppi
-					fatjet_dcsv = self._data.AK8Puppijet0_doublecsv
+					fatjet_pt       = self._data.AK8Puppijet0_pt
+					fatjet_eta      = self._data.AK8Puppijet0_eta
+					fatjet_msd      = self._data.AK8Puppijet0_msd_puppi
+					fatjet_dcsv     = self._data.AK8Puppijet0_doublecsv
 					fatjet_dcsv_alt = 0.
-					fatjet_n2ddt = self._data.AK8Puppijet0_N2DDT
-					fatjet_rho = self._data.AK8Puppijet0_rho
-					fatjet_phi = self._data.AK8Puppijet0_phi
+					fatjet_n2ddt    = self._data.AK8Puppijet0_N2DDT
+					fatjet_tau21ddt = self._data.AK8Puppijet0_tau21DDT
+					fatjet_rho      = self._data.AK8Puppijet0_rho
+					fatjet_phi      = self._data.AK8Puppijet0_phi
 				elif self._jet_type == "CA15":
-					fatjet_pt = self._data.CA15Puppijet0_pt
-					fatjet_eta = self._data.CA15Puppijet0_eta
-					fatjet_msd = self._data.CA15Puppijet0_msd_puppi
-					fatjet_dcsv = self._data.CA15Puppijet0_doublesub
+					fatjet_pt       = self._data.CA15Puppijet0_pt
+					fatjet_eta      = self._data.CA15Puppijet0_eta
+					fatjet_msd      = self._data.CA15Puppijet0_msd_puppi
+					fatjet_dcsv     = self._data.CA15Puppijet0_doublesub
 					fatjet_dcsv_alt = self._data.CA15Puppijet0_doublecsv
-					fatjet_n2ddt = self._data.CA15Puppijet0_N2DDT
-					fatjet_rho = self._data.CA15Puppijet0_rho
-					fatjet_phi = self._data.CA15Puppijet0_phi
+					fatjet_n2ddt    = self._data.CA15Puppijet0_N2DDT
+					fatjet_tau21ddt = self._data.CA15Puppijet0_tau21DDT
+					fatjet_rho      = self._data.CA15Puppijet0_rho
+					fatjet_phi      = self._data.CA15Puppijet0_phi
 
 				# Inclusive histograms
 				self._histograms.GetTH1D("inclusive_pt").Fill(fatjet_pt, event_weight)
@@ -586,6 +592,7 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH1D("pfmet").Fill(self._data.pfmet, event_weight)
 					self._selection_histograms[selection].GetTH1D("dcsv").Fill(fatjet_dcsv, event_weight)
 					self._selection_histograms[selection].GetTH1D("n2ddt").Fill(fatjet_n2ddt, event_weight)
+					self._selection_histograms[selection].GetTH1D("tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 					self._selection_histograms[selection].GetTH1D("pt").Fill(fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH1D("msd").Fill(fatjet_msd, event_weight)
 					self._selection_histograms[selection].GetTH1D("eta").Fill(fatjet_eta, event_weight)
@@ -623,6 +630,7 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH1D("pass_pfmet").Fill(self._data.pfmet, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_dcsv").Fill(fatjet_dcsv, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_n2ddt").Fill(fatjet_n2ddt, event_weight)
+						self._selection_histograms[selection].GetTH1D("pass_tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_pt").Fill(fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_msd").Fill(fatjet_msd, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_eta").Fill(fatjet_eta, event_weight)
@@ -651,6 +659,7 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH1D("fail_pfmet").Fill(self._data.pfmet, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_dcsv").Fill(fatjet_dcsv, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_n2ddt").Fill(fatjet_n2ddt, event_weight)
+						self._selection_histograms[selection].GetTH1D("fail_tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_pt").Fill(fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_msd").Fill(fatjet_msd, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_eta").Fill(fatjet_eta, event_weight)
