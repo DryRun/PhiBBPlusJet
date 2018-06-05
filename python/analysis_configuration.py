@@ -28,8 +28,9 @@ signal_models = ["Sbb", "PSbb"] # ZPrime
 signal_model_masses = {
 	"Sbb":[50,100,125,200,300,350,400,500], 
 	"PSbb":[50,100,125,200,300,350,400,500], 
-	"ZPrime":[50, 75, 100, 125, 200, 300],
+	"ZPrime":[75, 125, 150, 175, 200, 225, 250, 300, 400, 500],
 }
+
 signal_masses = {}
 #signal_masses = [25,50,75,100,125,150,200,250,300,350,400,500,600,800]
 #signal_masses = [50,75,100,125,150,200,250,300,350,400,500,600,800,1000]
@@ -46,19 +47,20 @@ supersamples.extend(background_names)
 supersamples.extend(signal_names)
 supersamples.extend(data_names)
 
-interpolated_signal_masses = [x for x in range(50, 525, 25) if not x in signal_model_masses]
+interpolated_signal_masses = {}
 interpolated_signal_names = []
-for model in ["Sbb", "PSbb"]:
-	for mass in interpolated_signal_masses:
+for model in ["Sbb", "PSbb", "ZPrime"]:
+	interpolated_signal_masses[model] = [x for x in range(50, 505, 5) if not x in signal_model_masses[model]]
+	for mass in interpolated_signal_masses[model]:
 		this_signal_name = "{}{}".format(model, mass)
 		signal_names.append(this_signal_name)
 		interpolated_signal_names.append(this_signal_name)
 		signal_masses[this_signal_name] = mass
-for mass in range(50, 325, 25):
-	this_signal_name = "{}{}".format("ZPrime", mass)
-	signal_names.append(this_signal_name)
-	interpolated_signal_names.append(this_signal_name)
-	signal_masses[this_signal_name] = mass
+#for mass in range(50, 325, 25):
+#	this_signal_name = "{}{}".format("ZPrime", mass)
+#	signal_names.append(this_signal_name)
+#	interpolated_signal_names.append(this_signal_name)
+#	signal_masses[this_signal_name] = mass
 
 
 # Sample names. Dictionary is [signal/background/data name]:[list of samples] 
@@ -122,8 +124,14 @@ samples = {
 	"ZPrime75":["ZPrime75"],
 	"ZPrime100":["ZPrime100"],
 	"ZPrime125":["ZPrime125"],
+	"ZPrime150":["ZPrime150"],
+	"ZPrime175":["ZPrime175"],
 	"ZPrime200":["ZPrime200"],
+	"ZPrime225":["ZPrime225"],
+	"ZPrime250":["ZPrime250"],
 	"ZPrime300":["ZPrime300"],
+	"ZPrime400":["ZPrime400"],
+	"ZPrime500":["ZPrime500"],
 }
 # 10% of the data aliases
 samples["data_obs_ps10"] = [x + "_ps10" for x in samples["data_obs"]]
@@ -292,6 +300,8 @@ for mass in signal_model_masses["Sbb"]:
 	sklims["Sbb{}".format(mass)] = [lpchbb_directory + "/zprimebits-v12.05/Spin0_ggPhibb1j_g1_{}_Scalar_1000pb_weighted.root".format(mass)]
 for mass in signal_model_masses["PSbb"]:
 	sklims["PSbb{}".format(mass)] = [lpchbb_directory + "/zprimebits-v12.05/Spin0_ggPhibb1j_g1_{}_PseudoScalar_1000pb_weighted.root".format(mass)]
+for mass in signal_model_masses["ZPrime"]:
+	sklims["Zprime{}".format(mass)] = ["root://cmseos.fnal.gov//eos/uscms/store/user/lpcbacon/dazsle/zprimebits-v12.07/norm/VectorDiJet1Jet_madgraph_Mphi{}Mchi3000_13TeV_noPF_8_1000pb_weighted.root".format(mass)]
 
 for mass in [50,75,100,125,150,200,250,300,400,500]:
 	sklims["DMSbb{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/cmslpc/DMSpin0_ggPhibb1j_{}.txt".format(mass)))]

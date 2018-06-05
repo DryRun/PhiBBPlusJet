@@ -15,6 +15,7 @@ import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 import DAZSLE.PhiBBPlusJet.style as style
 seaborn = Root.SeabornInterface()
 seaborn.Initialize()
+Root.SetCanvasStyle()
 
 signal_xsecs = {}
 signal_xsecs["Sbb50"] = 1.574e-02
@@ -212,9 +213,10 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 
 		# Sort backgrounds by integral, and make THStack (and legend)
 		if legend_position == "right":
-			l = TLegend(0.68, 0.4, 0.88, 0.88)
+			l = TLegend(0.48, 0.55, 0.88, 0.88)
 		elif legend_position == "left":
-			l = TLegend(0.15, 0.4, 0.35, 0.88)
+			l = TLegend(0.15, 0.55, 0.55, 0.88)
+		l.SetNColumns(2)
 		l.SetFillColor(0)
 		l.SetFillStyle(0)
 		l.SetBorderSize(0)
@@ -239,7 +241,9 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 			cname += "_logy"
 		if old_N2DDT:
 			cname += "_oldN2DDT"
-		c = TCanvas(cname, var, 800, 800)
+		c = TCanvas(cname, var, 1100, 800)
+		c.SetTopMargin(0.1)
+		c.SetLeftMargin(0.15)
 		top = TPad("top", "top", 0., 0.25, 1., 1.)
 		top.SetBottomMargin(0.03)
 		top.Draw()
@@ -251,9 +255,9 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		bkgd_stack.Draw("hist")
 		bkgd_stack.GetXaxis().SetLabelSize(0)
 		bkgd_stack.GetXaxis().SetTitleSize(0)
-		bkgd_stack.GetYaxis().SetTitleSize(0.06)
+		bkgd_stack.GetYaxis().SetTitleSize(0.07)
 		bkgd_stack.GetYaxis().SetTitleOffset(0.9)
-		bkgd_stack.GetYaxis().SetLabelSize(0.06)
+		bkgd_stack.GetYaxis().SetLabelSize(0.07)
 		bkgd_stack.GetYaxis().SetTitle("Events")
 		ymax = max(data_histogram.GetMaximum(), total_bkgd_histogram.GetMaximum())
 		if logy:
@@ -295,8 +299,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 
 		c.cd()
 		bottom = TPad("bottom", "bottom", 0., 0., 1., 0.25)
-		bottom.SetTopMargin(0.04)
-		bottom.SetBottomMargin(0.3)
+		bottom.SetTopMargin(0.055)
+		bottom.SetBottomMargin(0.34)
 		bottom.Draw()
 		bottom.cd()
 		ratio_histogram = data_histogram.Clone()
@@ -308,24 +312,33 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 			ratio_histogram.GetXaxis().SetTitle(style.axis_titles[var])
 		else:
 			ratio_histogram.GetXaxis().SetTitle(var)
-		ratio_histogram.GetXaxis().SetTitleSize(0.12)
-		ratio_histogram.GetXaxis().SetLabelSize(0.12)
-		ratio_histogram.GetYaxis().SetTitleSize(0.12)
-		ratio_histogram.GetYaxis().SetTitleOffset(0.4)
-		ratio_histogram.GetYaxis().SetLabelSize(0.12)
+		ratio_histogram.GetXaxis().SetTitleSize(0.18)
+		ratio_histogram.GetXaxis().SetLabelSize(0.18)
+		ratio_histogram.GetXaxis().SetTitleOffset(0.9)
+		ratio_histogram.GetYaxis().SetTitleSize(0.18)
+		ratio_histogram.GetYaxis().SetTitleOffset(0.3)
+		ratio_histogram.GetYaxis().SetLabelSize(0.18)
 		ratio_histogram.GetYaxis().SetTitle("Data / Bkgd")
 		if x_range:
 			ratio_histogram.GetXaxis().SetRangeUser(x_range[0], x_range[1])
 		ratio_histogram.Draw("p")
 
+		if x_range:
+			unity = TLine(x_range[0], 1., x_range[0], 1.)
+		else:
+			unity = TLine(ratio_histogram.GetXaxis().GetXmin(), 1., ratio_histogram.GetXaxis().GetXmax(), 1.)
+		unity.SetLineColor(kGray)
+		unity.SetLineStyle(3)
+		unity.Draw("same")
+
 		c.cd()
 		# CMS stuff
-		Root.CMSLabel(0.22, 0.88, "Internal", 1, 0.6)
+		Root.CMSLabel(0.12, 0.95, "Internal", 1, 0.6)
 		lumi_text = TLatex()
 		lumi_text.SetTextSize(0.08 * 0.5)
 		lumi_text.SetNDC()
 		lumi_text.SetTextColor(1)
-		lumi_text.DrawLatex(0.7, 0.96, "#font[42]{35.9 fb^{-1} (8 TeV)}")
+		lumi_text.DrawLatex(0.72, 0.95, "#font[42]{35.9 fb^{-1} (8 TeV)}")
 
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/{}.pdf".format(c.GetName()))
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/{}.eps".format(c.GetName()))
@@ -337,6 +350,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 
 if __name__ == "__main__":
 	vars = ["pfmet","dcsv","n2ddt","pt","eta","rho", "msd"]
+	#vars = ["msd"]
 	rebin = {"pfmet":1,"dcsv":1, "n2ddt":1, "pt":10, "eta":1, "rho":4, "msd":1}
 	legend_positions = {
 		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
