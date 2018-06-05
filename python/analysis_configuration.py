@@ -301,7 +301,7 @@ for mass in signal_model_masses["Sbb"]:
 for mass in signal_model_masses["PSbb"]:
 	sklims["PSbb{}".format(mass)] = [lpchbb_directory + "/zprimebits-v12.05/Spin0_ggPhibb1j_g1_{}_PseudoScalar_1000pb_weighted.root".format(mass)]
 for mass in signal_model_masses["ZPrime"]:
-	sklims["ZPrime{}".format(mass)] = ["root://cmseos.fnal.gov//eos/uscms/store/user/lpcbacon/dazsle/zprimebits-v12.07/norm/VectorDiJet1Jet_madgraph_Mphi{}Mchi3000_13TeV_noPF_8_1000pb_weighted.root".format(mass)]
+	sklims["ZPrime{}".format(mass)] = ["root://cmseos.fnal.gov//store/user/lpcbacon/dazsle/zprimebits-v12.07/norm/VectorDiJet1Jet_madgraph_Mphi{}Mchi3000_13TeV_noPF_8_1000pb_weighted.root".format(mass)]
 
 for mass in [50,75,100,125,150,200,250,300,400,500]:
 	sklims["DMSbb{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/cmslpc/DMSpin0_ggPhibb1j_{}.txt".format(mass)))]
