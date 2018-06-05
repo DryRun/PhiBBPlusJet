@@ -195,8 +195,8 @@ for mass in signal_model_masses["Sbb"]:
 	skims["Sbb{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/Spin0_ggPhibb1j_g1_{}_Scalar.txt".format(mass)))]
 for mass in signal_model_masses["PSbb"]:
 	skims["PSbb{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/Spin0_ggPhibb1j_g1_{}_PseudoScalar.txt".format(mass)))]
-for mass in signal_model_masses["ZPrime"]:
-	skims["ZPrime{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/VectorDiJet1Jet_{}_13TeV_madgraph.txt".format(mass)))]
+#for mass in signal_model_masses["ZPrime"]:
+#	skims["ZPrime{}".format(mass)] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/VectorDiJet1Jet_{}_13TeV_madgraph.txt".format(mass)))]
 
 # Function to infer the sample from a file path... removing for now, because this doesn't work well on the batch system. E.g. if you have subfiles with generic names (e.g. Output_subjob1.root), there is no way to get the sample.
 #def get_sample_from_skim(skim):
