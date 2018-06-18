@@ -124,7 +124,10 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 
 
 if __name__ == "__main__":
-	print branching_fraction("b", 300., 1., 1.e10, 0., "scalar")
+	for i in xrange(100):
+		tau = 2. / 100. * i
+		print "form_factor({}) = {}".format(tau, form_factor(tau, "scalar"))
+	#print branching_fraction("b", 300., 1., 1.e10, 0., "scalar")
 
 	plot(1., "scalar")
 	plot(1., "pseudoscalar")
