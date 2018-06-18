@@ -155,6 +155,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 
 		# Signal histograms
 		signal_histograms = {}
+		signal_histograms_copy = {}
 		for signal_name in signal_names:
 			if var == "msd":
 				if what == "pass":
@@ -226,6 +227,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		bkgds_sorted.sort(key=lambda x: background_histograms[x].Integral())
 		bkgd_stack = THStack("bkgd_stack", "bkgd_stack")
 		for bkgd in bkgds_sorted:
+			background_histograms[bkgd].SetFillStyle(1001)
 			background_histograms[bkgd].SetFillColor(style.background_colors[bkgd])
 			bkgd_stack.Add(background_histograms[bkgd])
 		for bkgd in reversed(bkgds_sorted):
@@ -262,7 +264,7 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		ymax = max(data_histogram.GetMaximum(), total_bkgd_histogram.GetMaximum())
 		if logy:
 			ymin = 0.5
-			ymax = ymax * 100
+			ymax = ymax * 200
 		else:
 			ymin = 0.
 			ymax = ymax * 1.3
@@ -286,9 +288,17 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		data_histogram.SetLineColor(1)
 		data_histogram.Draw("p same")
 		for i, signal_name in enumerate(signal_names):
+			# Copy of signal histogram to draw a white border around the actual line
+			if "msd" in var:
+				signal_histograms_copy[signal_name] = signal_histograms[signal_name].Clone()
+				signal_histograms_copy[signal_name].SetLineWidth(2)
+				signal_histograms_copy[signal_name].SetLineStyle(1)
+				signal_histograms_copy[signal_name].SetLineColor(kWhite)
+				signal_histograms_copy[signal_name].Draw("hist same")
+
 			signal_histograms[signal_name].SetLineWidth(2)
 			signal_histograms[signal_name].SetLineStyle(2+i)
-			signal_histograms[signal_name].SetLineColor(seaborn.GetColorRoot("pastel", i))
+			signal_histograms[signal_name].SetLineColor(seaborn.GetColorRoot("bright", i))
 			signal_histograms[signal_name].Draw("hist same")
 		#frame_top.Draw("axis same")
 		l.Draw()
