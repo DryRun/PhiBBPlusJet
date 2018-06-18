@@ -122,16 +122,16 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax2.plot(mphis, width_bb, color=pastels[0], linewidth=1.0, linestyle="--", label=r"$b\bar{b}$")
 	ax2.plot(mphis, width_cc, color=pastels[5], linewidth=1.0, linestyle="--", label=r"$c\bar{c}$")
 	ax2.plot(mphis, width_gg, color=pastels[1], linewidth=1.0, linestyle="--", label=r"$gg$")
-	ax2.legend(loc=0)
+	ax2.legend(loc="center left")
 
 	#plt.show()
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_{}.png".format(phi_type)))
 
 
 if __name__ == "__main__":
-	for i in xrange(1, 100):
-		tau = 2. / 100. * i
-		print "form_factor({}) = {}".format(tau, form_factor(tau, "scalar"))
+	#for i in xrange(1, 100):
+	#	tau = 2. / 100. * i
+	#	print "form_factor({}) = {}".format(tau, form_factor(tau, "scalar"))
 	#print branching_fraction("b", 300., 1., 1.e10, 0., "scalar")
 
 	plot(1., "scalar")
