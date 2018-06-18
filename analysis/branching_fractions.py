@@ -111,6 +111,7 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax1.plot(mphis, br_bb, color=darks[0], linewidth=1.0, linestyle="-")
 	ax1.plot(mphis, br_cc, color=darks[5], linewidth=1.0, linestyle="-")
 	ax1.plot(mphis, br_gg, color=darks[1], linewidth=1.0, linestyle="-")
+	ax1.legend(loc="center left")
 
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(r"$\Gamma$ [GeV]")
@@ -122,7 +123,6 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax2.plot(mphis, width_bb, color=pastels[0], linewidth=1.0, linestyle="--", label=r"$b\bar{b}$")
 	ax2.plot(mphis, width_cc, color=pastels[5], linewidth=1.0, linestyle="--", label=r"$c\bar{c}$")
 	ax2.plot(mphis, width_gg, color=pastels[1], linewidth=1.0, linestyle="--", label=r"$gg$")
-	ax2.legend(loc="center left")
 
 	#plt.show()
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_{}.png".format(phi_type)))
