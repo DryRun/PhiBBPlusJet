@@ -102,7 +102,7 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax1.set_yscale("linear")
 	ax1.set_ylim(0., 1.)
 	ax1.set_ylabel("Branching fraction")
-	ax1.plot(mphis, br_tt, color=darks[2]", linewidth=1.0, linestyle="-")
+	ax1.plot(mphis, br_tt, color=darks[2], linewidth=1.0, linestyle="-")
 	ax1.plot(mphis, br_bb, color=darks[0], linewidth=1.0, linestyle="-")
 	ax1.plot(mphis, br_cc, color=darks[5], linewidth=1.0, linestyle="-")
 	ax1.plot(mphis, br_gg, color=darks[1], linewidth=1.0, linestyle="-")
