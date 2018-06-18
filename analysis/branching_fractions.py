@@ -21,7 +21,7 @@ masses = {
 	"mu":0.1066e-3,
 	"tau":1.777
 }
-hvev = 246.
+hvev = 246. / math.sqrt(2)
 alpha_s = 0.118
 
 # - Yukawa couplings
