@@ -55,12 +55,17 @@ def chi_width(mphi, mchi, gchi, phi_type):
 		return gchi**2 * mphi / (8. * math.pi) * (1. - (2. * mchi / mphi)**2)
 
 def form_factor(tau, phi_type):
-	if tau < 1.:
-		return 0.
 	if phi_type == "scalar":
-		return tau * (1. + (1. - tau) * cmath.atan(1. / cmath.sqrt(tau - 1.))**2)
+		if tau == 1.:
+			# Return lim(tau --> 1.)
+			return 1.
+		else:
+			return tau * (1. + (1. - tau) * cmath.atan(1. / cmath.sqrt(tau - 1.))**2)
 	elif phi_type == "pseudoscalar":
-		return tau * cmath.atan(1. / cmath.sqrt(tau - 1.))**2
+		if tau == 1.:
+			return (math.pi/2.)**2
+		else:
+			return tau * cmath.atan(1. / cmath.sqrt(tau - 1.))**2
 
 def gg_width(mphi, gqphi, phi_type):
 	return alpha_s**2 * y["t"]**2 * gqphi**2 * mphi**3 / (32 * math.pi**3 * hvev**2) * abs(form_factor(4*masses["t"]**2/mphi**2, phi_type))**2
