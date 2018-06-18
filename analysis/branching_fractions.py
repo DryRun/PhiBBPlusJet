@@ -60,8 +60,6 @@ def form_factor(tau, phi_type):
 			# Return lim(tau --> 1.)
 			return 1.
 		else:
-			print "\t{}".format(cmath.sqrt(tau - 1.))
-			print "\t{}".format(cmath.atan(1. / cmath.sqrt(tau - 1.)))
 			return tau * (1. + (1. - tau) * cmath.atan(1. / cmath.sqrt(tau - 1.))**2)
 	elif phi_type == "pseudoscalar":
 		if tau == 1.:
