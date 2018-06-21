@@ -21,13 +21,13 @@ masses = {
 	"mu":0.1066e-3,
 	"tau":1.777
 }
-hvev = 246. / math.sqrt(2)
+hvev = 246.
 alpha_s = 0.118
 
 # - Yukawa couplings
 y = {}
 for f in masses.keys():
-	y[f] = masses[f] / hvev
+	y[f] = masses[f] * hvev / math.sqrt(2)
 
 fermions = ["u", "d", "s", "c", "b", "t", "e", "mu", "tau"]
 quarks = ["u", "d", "s", "c", "b", "t"]
