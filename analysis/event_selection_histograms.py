@@ -154,6 +154,10 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("pass_n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH1D("fail_n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
 
+			self._selection_histograms[selection].AddTH1D("n2", "n2", "n2", 20, -0.5, 0.5)
+			self._selection_histograms[selection].AddTH1D("pass_n2", "n2", "n2", 20, -0.5, 0.5)
+			self._selection_histograms[selection].AddTH1D("fail_n2", "n2", "n2", 20, -0.5, 0.5)
+
 			self._selection_histograms[selection].AddTH1D("tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH1D("pass_tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH1D("fail_tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
@@ -547,6 +551,7 @@ class EventSelectionHistograms(AnalysisBase):
 					fatjet_tau21ddt = self._data.AK8Puppijet0_tau21DDT
 					fatjet_rho      = self._data.AK8Puppijet0_rho
 					fatjet_phi      = self._data.AK8Puppijet0_phi
+					fatjet_n2       = self._data.AK8Puppijet0_N2sdb1
 				elif self._jet_type == "CA15":
 					fatjet_pt       = self._data.CA15Puppijet0_pt
 					fatjet_eta      = self._data.CA15Puppijet0_eta
@@ -557,6 +562,7 @@ class EventSelectionHistograms(AnalysisBase):
 					fatjet_tau21ddt = self._data.CA15Puppijet0_tau21DDT
 					fatjet_rho      = self._data.CA15Puppijet0_rho
 					fatjet_phi      = self._data.CA15Puppijet0_phi
+					fatjet_n2       = self._data.CA15Puppijet0_N2sdb1
 
 				# Inclusive histograms
 				self._histograms.GetTH1D("inclusive_pt").Fill(fatjet_pt, event_weight)
@@ -592,6 +598,7 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH1D("pfmet").Fill(self._data.pfmet, event_weight)
 					self._selection_histograms[selection].GetTH1D("dcsv").Fill(fatjet_dcsv, event_weight)
 					self._selection_histograms[selection].GetTH1D("n2ddt").Fill(fatjet_n2ddt, event_weight)
+					self._selection_histograms[selection].GetTH1D("n2").Fill(fatjet_n2, event_weight)
 					self._selection_histograms[selection].GetTH1D("tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 					self._selection_histograms[selection].GetTH1D("pt").Fill(fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH1D("msd").Fill(fatjet_msd, event_weight)
