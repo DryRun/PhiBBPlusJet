@@ -359,24 +359,25 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		histogram_file.Close()
 
 if __name__ == "__main__":
-	vars = ["pfmet","dcsv","n2ddt","pt","eta","rho", "msd"]
-	#vars = ["msd"]
-	rebin = {"pfmet":1,"dcsv":1, "n2ddt":1, "pt":10, "eta":1, "rho":4, "msd":1}
+	#vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "msd"]
+	vars = ["n2"]
+	rebin = {"pfmet":1,"dcsv":1, "n2ddt":1, "n2":1, "pt":10, "eta":1, "rho":4, "msd":1}
 	legend_positions = {
-		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"N2SR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"muCR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"Preselection":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"N2CR":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"N2SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
-		"N2CR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2SR":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"muCR":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"Preselection":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2CR":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2SR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
+		"N2CR_ps10":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
 	}
 
 	x_ranges = {
 		"pfmet":[0,500],
 		"dcsv":[-1,1],
 		"n2ddt":[-0.4, 0.2],
+		"n2":[-1.0, 1.0],		
 		"pt":[350.,2000.],
 		"eta":[-3.,3.],
 		"rho":[-9, 0.],

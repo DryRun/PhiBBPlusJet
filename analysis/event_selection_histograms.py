@@ -150,13 +150,15 @@ class EventSelectionHistograms(AnalysisBase):
 			self._selection_histograms[selection].AddTH1D("pass_dcsv", "dcsv", "dcsv", 200, -1., 1.)
 			self._selection_histograms[selection].AddTH1D("fail_dcsv", "dcsv", "dcsv", 200, -1., 1.)
 
-			self._selection_histograms[selection].AddTH1D("n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
-			self._selection_histograms[selection].AddTH1D("pass_n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
-			self._selection_histograms[selection].AddTH1D("fail_n2ddt", "n2ddt", "n2ddt", 20, -0.5, 0.5)
+			self._selection_histograms[selection].AddTH1D("n2ddt", "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
+			self._selection_histograms[selection].AddTH1D("pass_n2ddt", "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
+			self._selection_histograms[selection].AddTH1D("fail_n2ddt", "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
 
-			self._selection_histograms[selection].AddTH1D("n2", "n2", "n2", 20, -0.5, 0.5)
-			self._selection_histograms[selection].AddTH1D("pass_n2", "n2", "n2", 20, -0.5, 0.5)
-			self._selection_histograms[selection].AddTH1D("fail_n2", "n2", "n2", 20, -0.5, 0.5)
+			self._selection_histograms[selection].AddTH1D("n2", "n2", "N_{2}", 160, -1.0, 1.0)
+			self._selection_histograms[selection].AddTH1D("pass_n2", "n2", "N_{2}", 160, -1.0, 1.0)
+			self._selection_histograms[selection].AddTH1D("fail_n2", "n2", "N_{2}", 160, -1.0, 1.0)
+
+			self._selection_histograms[selection].AddTH2D("n2ddt_vs_n2", "n2ddt vs n2", "N_{2}", 40, -1.0, 1.0, "N_{2}^{DDT}", 40, -1.0, 1.0)
 
 			self._selection_histograms[selection].AddTH1D("tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH1D("pass_tau21ddt", "tau21ddt", "tau21ddt", 20, -0.5, 0.5)
@@ -599,6 +601,7 @@ class EventSelectionHistograms(AnalysisBase):
 					self._selection_histograms[selection].GetTH1D("dcsv").Fill(fatjet_dcsv, event_weight)
 					self._selection_histograms[selection].GetTH1D("n2ddt").Fill(fatjet_n2ddt, event_weight)
 					self._selection_histograms[selection].GetTH1D("n2").Fill(fatjet_n2, event_weight)
+					self._selection_histograms[selection].GetTH2D("n2ddt_vs_n2").Fill(fatjet_n2, fatjet_n2ddt, event_weight)
 					self._selection_histograms[selection].GetTH1D("tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 					self._selection_histograms[selection].GetTH1D("pt").Fill(fatjet_pt, event_weight)
 					self._selection_histograms[selection].GetTH1D("msd").Fill(fatjet_msd, event_weight)
@@ -637,6 +640,7 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH1D("pass_pfmet").Fill(self._data.pfmet, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_dcsv").Fill(fatjet_dcsv, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_n2ddt").Fill(fatjet_n2ddt, event_weight)
+						self._selection_histograms[selection].GetTH1D("pass_n2").Fill(fatjet_n2, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_pt").Fill(fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH1D("pass_msd").Fill(fatjet_msd, event_weight)
@@ -666,6 +670,7 @@ class EventSelectionHistograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH1D("fail_pfmet").Fill(self._data.pfmet, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_dcsv").Fill(fatjet_dcsv, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_n2ddt").Fill(fatjet_n2ddt, event_weight)
+						self._selection_histograms[selection].GetTH1D("fail_n2").Fill(fatjet_n2, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_tau21ddt").Fill(fatjet_tau21ddt, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_pt").Fill(fatjet_pt, event_weight)
 						self._selection_histograms[selection].GetTH1D("fail_msd").Fill(fatjet_msd, event_weight)
@@ -1097,7 +1102,7 @@ if __name__ == "__main__":
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
 		selections = ["SR", "muCR", "Preselection", "N2CR", "N2SR"] # N2CR
-		extra_vars = ["pfmet", "dcsv", "n2ddt", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt"]
+		extra_vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
 		if args.do_optimization:
