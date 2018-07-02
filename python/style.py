@@ -23,7 +23,7 @@ axis_titles = {
 	"msd":"m_{SD} [GeV]",
 	"pt":"p_{T} [GeV]",
 	"dcsv":"Double b-tag",
-	"n2ddt":"N_{2}^{DDT}",
+	"n2ddt":"N_{2}^{1,DDT}",
 	"rho":"#rho",
 	"pfmet":"PF E_{T}^{miss}",
 	"eta":"#eta"

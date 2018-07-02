@@ -65,7 +65,7 @@ for model in ["Sbb", "PSbb", "ZPrime"]:
 
 # Sample names. Dictionary is [signal/background/data name]:[list of samples] 
 samples = {
-	"qcd":["QCD_HT100to200","QCD_HT200to300","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000","QCD_HT1000to1500","QCD_HT1500to2000","QCD_HT2000toInf"],
+	"qcd":["QCD_HT200to300","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000","QCD_HT1000to1500","QCD_HT1500to2000","QCD_HT2000toInf"], # QCD_HT100to200
 	"stqq":["ST_t_antitop","ST_t_top","ST_tW_antitop","ST_tW_top"],
 	"tqq":["tqq"],
 	"wqq":["wqq"],
