@@ -4,6 +4,10 @@
 #include "DAZSLE/PhiBBPlusJet/interface/BaconData.h"
 
 BaconData::BaconData(TTree *tree) : BaconTree(tree) {
+	// Default configs
+	_jettype = kAK8;
+	_jetordering = kPt;
+
 	// Histogram for N2 DDT
 	TFile *f_n2ddt_AK8 = new TFile("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ZqqJet/h3_n2ddt_26eff_36binrho11pt_Spring16.root","read");
 	n2_ddt_transformation_AK8_ = (TH1D*)f_n2ddt_AK8->Get("h2ddt");
@@ -128,6 +132,545 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     pfmet_JESDown = TMath::Sqrt(TMath::Power(pfmet_x + MetXCorrjesDown, 2) + TMath::Power(pfmet_y + MetYCorrjesDown, 2));
     pfmet_JERUp = TMath::Sqrt(TMath::Power(pfmet_x + MetXCorrjerUp, 2) + TMath::Power(pfmet_y + MetYCorrjerUp, 2));
     pfmet_JERDown = TMath::Sqrt(TMath::Power(pfmet_x + MetXCorrjerDown, 2) + TMath::Power(pfmet_y + MetYCorrjerDown, 2));
+
+
+    // Selected jet stuff
+    WhichJet_t which_jet;
+    if (_jettype == kAK8) {
+    	if (_jetordering == kPt) {
+    		double max_pt = 0.;
+    		if (AK8Puppijet0_pt > max_pt) {
+    			max_pt = AK8Puppijet0_pt;
+    			which_jet = kAK8_0;
+    		}
+    		if (AK8Puppijet01_pt > max_pt) {
+    			max_pt = AK8Puppijet1_pt;
+    			which_jet = kAK8_1;
+    		}
+    		if (AK8Puppijet2_pt > max_pt) {
+    			max_pt = AK8Puppijet2_pt;
+    			which_jet = kAK8_2;
+    		}
+    	} else if (_jetordering == kDbtag) {
+    		double max_dbtag = 0.;
+    		if (AK8Puppijet0_doublecsv > max_dbtag) {
+    			max_dbtag = AK8Puppijet0_doublecsv;
+    			which_jet = kAK8_0;
+    		}
+    		if (AK8Puppijet01_doublecsv > max_dbtag) {
+    			max_dbtag = AK8Puppijet1_doublecsv;
+    			which_jet = kAK8_1;
+    		}
+    		if (AK8Puppijet2_doublecsv > max_dbtag) {
+    			max_dbtag = AK8Puppijet2_doublecsv;
+    			which_jet = kAK8_2;
+    		}
+    	} else if (_jetordering == kN2DDT) {
+    		double max_n2ddt = 0.;
+    		if (AK8Puppijet0_N2DDT > max_n2ddt) {
+    			max_n2ddt = AK8Puppijet0_N2DDT;
+    			which_jet = kAK8_0;
+    		}
+    		if (AK8Puppijet01_N2DDT > max_n2ddt) {
+    			max_n2ddt = AK8Puppijet1_N2DDT;
+    			which_jet = kAK8_1;
+    		}
+    		if (AK8Puppijet2_N2DDT > max_n2ddt) {
+    			max_n2ddt = AK8Puppijet2_N2DDT;
+    			which_jet = kAK8_2;
+    		}
+    	}
+    } else if (_jettype == kCA15) {
+    	if (_jetordering == kPt) {
+    		double max_pt = 0.;
+    		if (CA15Puppijet0_pt > max_pt) {
+    			max_pt = CA15Puppijet0_pt;
+    			which_jet = kCA15_0;
+    		}
+    		if (CA15Puppijet01_pt > max_pt) {
+    			max_pt = CA15Puppijet1_pt;
+    			which_jet = kCA15_1;
+    		}
+    		if (CA15Puppijet2_pt > max_pt) {
+    			max_pt = CA15Puppijet2_pt;
+    			which_jet = kCA15_2;
+    		}
+    	} else if (_jetordering == kDbtag) {
+    		double max_dbtag = 0.;
+    		if (CA15Puppijet0_doublesub > max_dbtag) {
+    			max_dbtag = CA15Puppijet0_doublesub;
+    			which_jet = kCA15_0;
+    		}
+    		if (CA15Puppijet01_doublesub > max_dbtag) {
+    			max_dbtag = CA15Puppijet1_doublesub;
+    			which_jet = kCA15_1;
+    		}
+    		if (CA15Puppijet2_doublesub > max_dbtag) {
+    			max_dbtag = CA15Puppijet2_doublesub;
+    			which_jet = kCA15_2;
+    		}
+    	} else if (_jetordering == kN2DDT) {
+    		double max_n2ddt = 0.;
+    		if (CA15Puppijet0_N2DDT > max_n2ddt) {
+    			max_n2ddt = CA15Puppijet0_N2DDT;
+    			which_jet = kCA15_0;
+    		}
+    		if (CA15Puppijet01_N2DDT > max_n2ddt) {
+    			max_n2ddt = CA15Puppijet1_N2DDT;
+    			which_jet = kCA15_1;
+    		}
+    		if (CA15Puppijet2_N2DDT > max_n2ddt) {
+    			max_n2ddt = CA15Puppijet2_N2DDT;
+    			which_jet = kCA15_2;
+    		}
+    	}
+    }
+    if (which_jet == kAK8_0) {
+		SelectedJet_pt           = AK8Puppijet0_pt;
+		SelectedJet_eta          = AK8Puppijet0_eta;
+		SelectedJet_phi          = AK8Puppijet0_phi;
+		SelectedJet_mass         = AK8Puppijet0_mass;
+		SelectedJet_csv          = AK8Puppijet0_csv;
+		SelectedJet_CHF          = AK8Puppijet0_CHF;
+		SelectedJet_NHF          = AK8Puppijet0_NHF;
+		SelectedJet_NEMF         = AK8Puppijet0_NEMF;
+		SelectedJet_tau21        = AK8Puppijet0_tau21;
+		SelectedJet_tau32        = AK8Puppijet0_tau32;
+		SelectedJet_msd          = AK8Puppijet0_msd;
+		SelectedJet_rho          = AK8Puppijet0_rho;
+		SelectedJet_minsubcsv    = AK8Puppijet0_minsubcsv;
+		SelectedJet_maxsubcsv    = AK8Puppijet0_maxsubcsv;
+		SelectedJet_doublecsv    = AK8Puppijet0_doublecsv;
+		SelectedJet_doublesub    = AK8Puppijet0_doublesub;
+		SelectedJet_ptraw        = AK8Puppijet0_ptraw;
+		SelectedJet_genpt        = AK8Puppijet0_genpt;
+		SelectedJet_e2_b1        = AK8Puppijet0_e2_b1;
+		SelectedJet_e3_b1        = AK8Puppijet0_e3_b1;
+		SelectedJet_e3_v1_b1     = AK8Puppijet0_e3_v1_b1;
+		SelectedJet_e3_v2_b1     = AK8Puppijet0_e3_v2_b1;
+		SelectedJet_e4_v1_b1     = AK8Puppijet0_e4_v1_b1;
+		SelectedJet_e4_v2_b1     = AK8Puppijet0_e4_v2_b1;
+		SelectedJet_e2_b2        = AK8Puppijet0_e2_b2;
+		SelectedJet_e3_b2        = AK8Puppijet0_e3_b2;
+		SelectedJet_e3_v1_b2     = AK8Puppijet0_e3_v1_b2;
+		SelectedJet_e3_v2_b2     = AK8Puppijet0_e3_v2_b2;
+		SelectedJet_e4_v1_b2     = AK8Puppijet0_e4_v1_b2;
+		SelectedJet_e4_v2_b2     = AK8Puppijet0_e4_v2_b2;
+		SelectedJet_e2_sdb1      = AK8Puppijet0_e2_sdb1;
+		SelectedJet_e3_sdb1      = AK8Puppijet0_e3_sdb1;
+		SelectedJet_e3_v1_sdb1   = AK8Puppijet0_e3_v1_sdb1;
+		SelectedJet_e3_v2_sdb1   = AK8Puppijet0_e3_v2_sdb1;
+		SelectedJet_e4_v1_sdb1   = AK8Puppijet0_e4_v1_sdb1;
+		SelectedJet_e4_v2_sdb1   = AK8Puppijet0_e4_v2_sdb1;
+		SelectedJet_e2_sdb2      = AK8Puppijet0_e2_sdb2;
+		SelectedJet_e3_sdb2      = AK8Puppijet0_e3_sdb2;
+		SelectedJet_e3_v1_sdb2   = AK8Puppijet0_e3_v1_sdb2;
+		SelectedJet_e3_v2_sdb2   = AK8Puppijet0_e3_v2_sdb2;
+		SelectedJet_e4_v1_sdb2   = AK8Puppijet0_e4_v1_sdb2;
+		SelectedJet_e4_v2_sdb2   = AK8Puppijet0_e4_v2_sdb2;
+		SelectedJet_N2sdb1       = AK8Puppijet0_N2sdb1;
+		SelectedJet_N2sdb2       = AK8Puppijet0_N2sdb2;
+		SelectedJet_M2sdb1       = AK8Puppijet0_M2sdb1;
+		SelectedJet_M2sdb2       = AK8Puppijet0_M2sdb2;
+		SelectedJet_D2sdb1       = AK8Puppijet0_D2sdb1;
+		SelectedJet_D2sdb2       = AK8Puppijet0_D2sdb2;
+		SelectedJet_N2b1         = AK8Puppijet0_N2b1;
+		SelectedJet_N2b2         = AK8Puppijet0_N2b2;
+		SelectedJet_M2b1         = AK8Puppijet0_M2b1;
+		SelectedJet_M2b2         = AK8Puppijet0_M2b2;
+		SelectedJet_D2b1         = AK8Puppijet0_D2b1;
+		SelectedJet_D2b2         = AK8Puppijet0_D2b2;
+		SelectedJet_pt_old       = AK8Puppijet0_pt_old;
+		SelectedJet_pt_JESUp     = AK8Puppijet0_pt_JESUp;
+		SelectedJet_pt_JESDown   = AK8Puppijet0_pt_JESDown;
+		SelectedJet_pt_JERUp     = AK8Puppijet0_pt_JERUp;
+		SelectedJet_pt_JERDown   = AK8Puppijet0_pt_JERDown;
+		SelectedJet_isTightVJet  = AK8Puppijet0_isTightVJet;
+		SelectedJet_isHadronicV  = AK8Puppijet0_isHadronicV;
+		SelectedJet_vMatching    = AK8Puppijet0_vMatching;
+		SelectedJet_vSize        = AK8Puppijet0_vSize;
+		SelectedJet_partonFlavor = AK8Puppijet0_partonFlavor
+		SelectedJet_hadronFlavor = AK8Puppijet0_hadronFlavor
+		SelectedJet_nCharged     = AK8Puppijet0_nCharged;
+		SelectedJet_nNeutrals    = AK8Puppijet0_nNeutrals;
+		SelectedJet_nParticles   = AK8Puppijet0_nParticles;
+		SelectedJet_ratioCA15_04 = AK8Puppijet0_ratioCA15_04
+		SelectedJet_tau21DDT     = AK8Puppijet0_tau21DDT;
+		SelectedJet_rho          = AK8Puppijet0_rho;
+		SelectedJet_N2DDT        = AK8Puppijet0_N2DDT;
+		SelectedJet_msd_puppi    = AK8Puppijet0_msd_puppi;
+	} else if (which_jet == kAK8_1) {
+		SelectedJet_pt           = AK8Puppijet1_pt;
+		SelectedJet_eta          = AK8Puppijet1_eta;
+		SelectedJet_phi          = AK8Puppijet1_phi;
+		SelectedJet_mass         = AK8Puppijet1_mass;
+		SelectedJet_csv          = AK8Puppijet1_csv;
+		SelectedJet_CHF          = AK8Puppijet1_CHF;
+		SelectedJet_NHF          = AK8Puppijet1_NHF;
+		SelectedJet_NEMF         = AK8Puppijet1_NEMF;
+		SelectedJet_tau21        = AK8Puppijet1_tau21;
+		SelectedJet_tau32        = AK8Puppijet1_tau32;
+		SelectedJet_msd          = AK8Puppijet1_msd;
+		SelectedJet_rho          = AK8Puppijet1_rho;
+		SelectedJet_minsubcsv    = AK8Puppijet1_minsubcsv;
+		SelectedJet_maxsubcsv    = AK8Puppijet1_maxsubcsv;
+		SelectedJet_doublecsv    = AK8Puppijet1_doublecsv;
+		SelectedJet_doublesub    = AK8Puppijet1_doublesub;
+		SelectedJet_ptraw        = AK8Puppijet1_ptraw;
+		SelectedJet_genpt        = AK8Puppijet1_genpt;
+		SelectedJet_e2_b1        = AK8Puppijet1_e2_b1;
+		SelectedJet_e3_b1        = AK8Puppijet1_e3_b1;
+		SelectedJet_e3_v1_b1     = AK8Puppijet1_e3_v1_b1;
+		SelectedJet_e3_v2_b1     = AK8Puppijet1_e3_v2_b1;
+		SelectedJet_e4_v1_b1     = AK8Puppijet1_e4_v1_b1;
+		SelectedJet_e4_v2_b1     = AK8Puppijet1_e4_v2_b1;
+		SelectedJet_e2_b2        = AK8Puppijet1_e2_b2;
+		SelectedJet_e3_b2        = AK8Puppijet1_e3_b2;
+		SelectedJet_e3_v1_b2     = AK8Puppijet1_e3_v1_b2;
+		SelectedJet_e3_v2_b2     = AK8Puppijet1_e3_v2_b2;
+		SelectedJet_e4_v1_b2     = AK8Puppijet1_e4_v1_b2;
+		SelectedJet_e4_v2_b2     = AK8Puppijet1_e4_v2_b2;
+		SelectedJet_e2_sdb1      = AK8Puppijet1_e2_sdb1;
+		SelectedJet_e3_sdb1      = AK8Puppijet1_e3_sdb1;
+		SelectedJet_e3_v1_sdb1   = AK8Puppijet1_e3_v1_sdb1;
+		SelectedJet_e3_v2_sdb1   = AK8Puppijet1_e3_v2_sdb1;
+		SelectedJet_e4_v1_sdb1   = AK8Puppijet1_e4_v1_sdb1;
+		SelectedJet_e4_v2_sdb1   = AK8Puppijet1_e4_v2_sdb1;
+		SelectedJet_e2_sdb2      = AK8Puppijet1_e2_sdb2;
+		SelectedJet_e3_sdb2      = AK8Puppijet1_e3_sdb2;
+		SelectedJet_e3_v1_sdb2   = AK8Puppijet1_e3_v1_sdb2;
+		SelectedJet_e3_v2_sdb2   = AK8Puppijet1_e3_v2_sdb2;
+		SelectedJet_e4_v1_sdb2   = AK8Puppijet1_e4_v1_sdb2;
+		SelectedJet_e4_v2_sdb2   = AK8Puppijet1_e4_v2_sdb2;
+		SelectedJet_N2sdb1       = AK8Puppijet1_N2sdb1;
+		SelectedJet_N2sdb2       = AK8Puppijet1_N2sdb2;
+		SelectedJet_M2sdb1       = AK8Puppijet1_M2sdb1;
+		SelectedJet_M2sdb2       = AK8Puppijet1_M2sdb2;
+		SelectedJet_D2sdb1       = AK8Puppijet1_D2sdb1;
+		SelectedJet_D2sdb2       = AK8Puppijet1_D2sdb2;
+		SelectedJet_N2b1         = AK8Puppijet1_N2b1;
+		SelectedJet_N2b2         = AK8Puppijet1_N2b2;
+		SelectedJet_M2b1         = AK8Puppijet1_M2b1;
+		SelectedJet_M2b2         = AK8Puppijet1_M2b2;
+		SelectedJet_D2b1         = AK8Puppijet1_D2b1;
+		SelectedJet_D2b2         = AK8Puppijet1_D2b2;
+		SelectedJet_pt_old       = AK8Puppijet1_pt_old;
+		SelectedJet_pt_JESUp     = AK8Puppijet1_pt_JESUp;
+		SelectedJet_pt_JESDown   = AK8Puppijet1_pt_JESDown;
+		SelectedJet_pt_JERUp     = AK8Puppijet1_pt_JERUp;
+		SelectedJet_pt_JERDown   = AK8Puppijet1_pt_JERDown;
+		SelectedJet_isTightVJet  = AK8Puppijet1_isTightVJet;
+		SelectedJet_isHadronicV  = AK8Puppijet1_isHadronicV;
+		SelectedJet_vMatching    = AK8Puppijet1_vMatching;
+		SelectedJet_vSize        = AK8Puppijet1_vSize;
+		SelectedJet_partonFlavor = AK8Puppijet1_partonFlavor
+		SelectedJet_hadronFlavor = AK8Puppijet1_hadronFlavor
+		SelectedJet_nCharged     = AK8Puppijet1_nCharged;
+		SelectedJet_nNeutrals    = AK8Puppijet1_nNeutrals;
+		SelectedJet_nParticles   = AK8Puppijet1_nParticles;
+		SelectedJet_ratioCA15_04 = AK8Puppijet1_ratioCA15_04
+		SelectedJet_tau21DDT     = AK8Puppijet1_tau21DDT;
+		SelectedJet_rho          = AK8Puppijet1_rho;
+		SelectedJet_N2DDT        = AK8Puppijet1_N2DDT;
+		SelectedJet_msd_puppi    = AK8Puppijet1_msd_puppi;
+	} else if (which_jet == kAK8_2) {
+		SelectedJet_pt           = AK8Puppijet2_pt;
+		SelectedJet_eta          = AK8Puppijet2_eta;
+		SelectedJet_phi          = AK8Puppijet2_phi;
+		SelectedJet_mass         = AK8Puppijet2_mass;
+		SelectedJet_csv          = AK8Puppijet2_csv;
+		SelectedJet_CHF          = AK8Puppijet2_CHF;
+		SelectedJet_NHF          = AK8Puppijet2_NHF;
+		SelectedJet_NEMF         = AK8Puppijet2_NEMF;
+		SelectedJet_tau21        = AK8Puppijet2_tau21;
+		SelectedJet_tau32        = AK8Puppijet2_tau32;
+		SelectedJet_msd          = AK8Puppijet2_msd;
+		SelectedJet_rho          = AK8Puppijet2_rho;
+		SelectedJet_minsubcsv    = AK8Puppijet2_minsubcsv;
+		SelectedJet_maxsubcsv    = AK8Puppijet2_maxsubcsv;
+		SelectedJet_doublecsv    = AK8Puppijet2_doublecsv;
+		SelectedJet_doublesub    = AK8Puppijet2_doublesub;
+		SelectedJet_ptraw        = AK8Puppijet2_ptraw;
+		SelectedJet_genpt        = AK8Puppijet2_genpt;
+		SelectedJet_e2_b1        = AK8Puppijet2_e2_b1;
+		SelectedJet_e3_b1        = AK8Puppijet2_e3_b1;
+		SelectedJet_e3_v1_b1     = AK8Puppijet2_e3_v1_b1;
+		SelectedJet_e3_v2_b1     = AK8Puppijet2_e3_v2_b1;
+		SelectedJet_e4_v1_b1     = AK8Puppijet2_e4_v1_b1;
+		SelectedJet_e4_v2_b1     = AK8Puppijet2_e4_v2_b1;
+		SelectedJet_e2_b2        = AK8Puppijet2_e2_b2;
+		SelectedJet_e3_b2        = AK8Puppijet2_e3_b2;
+		SelectedJet_e3_v1_b2     = AK8Puppijet2_e3_v1_b2;
+		SelectedJet_e3_v2_b2     = AK8Puppijet2_e3_v2_b2;
+		SelectedJet_e4_v1_b2     = AK8Puppijet2_e4_v1_b2;
+		SelectedJet_e4_v2_b2     = AK8Puppijet2_e4_v2_b2;
+		SelectedJet_e2_sdb1      = AK8Puppijet2_e2_sdb1;
+		SelectedJet_e3_sdb1      = AK8Puppijet2_e3_sdb1;
+		SelectedJet_e3_v1_sdb1   = AK8Puppijet2_e3_v1_sdb1;
+		SelectedJet_e3_v2_sdb1   = AK8Puppijet2_e3_v2_sdb1;
+		SelectedJet_e4_v1_sdb1   = AK8Puppijet2_e4_v1_sdb1;
+		SelectedJet_e4_v2_sdb1   = AK8Puppijet2_e4_v2_sdb1;
+		SelectedJet_e2_sdb2      = AK8Puppijet2_e2_sdb2;
+		SelectedJet_e3_sdb2      = AK8Puppijet2_e3_sdb2;
+		SelectedJet_e3_v1_sdb2   = AK8Puppijet2_e3_v1_sdb2;
+		SelectedJet_e3_v2_sdb2   = AK8Puppijet2_e3_v2_sdb2;
+		SelectedJet_e4_v1_sdb2   = AK8Puppijet2_e4_v1_sdb2;
+		SelectedJet_e4_v2_sdb2   = AK8Puppijet2_e4_v2_sdb2;
+		SelectedJet_N2sdb1       = AK8Puppijet2_N2sdb1;
+		SelectedJet_N2sdb2       = AK8Puppijet2_N2sdb2;
+		SelectedJet_M2sdb1       = AK8Puppijet2_M2sdb1;
+		SelectedJet_M2sdb2       = AK8Puppijet2_M2sdb2;
+		SelectedJet_D2sdb1       = AK8Puppijet2_D2sdb1;
+		SelectedJet_D2sdb2       = AK8Puppijet2_D2sdb2;
+		SelectedJet_N2b1         = AK8Puppijet2_N2b1;
+		SelectedJet_N2b2         = AK8Puppijet2_N2b2;
+		SelectedJet_M2b1         = AK8Puppijet2_M2b1;
+		SelectedJet_M2b2         = AK8Puppijet2_M2b2;
+		SelectedJet_D2b1         = AK8Puppijet2_D2b1;
+		SelectedJet_D2b2         = AK8Puppijet2_D2b2;
+		SelectedJet_pt_old       = AK8Puppijet2_pt_old;
+		SelectedJet_pt_JESUp     = AK8Puppijet2_pt_JESUp;
+		SelectedJet_pt_JESDown   = AK8Puppijet2_pt_JESDown;
+		SelectedJet_pt_JERUp     = AK8Puppijet2_pt_JERUp;
+		SelectedJet_pt_JERDown   = AK8Puppijet2_pt_JERDown;
+		SelectedJet_isTightVJet  = AK8Puppijet2_isTightVJet;
+		SelectedJet_isHadronicV  = AK8Puppijet2_isHadronicV;
+		SelectedJet_vMatching    = AK8Puppijet2_vMatching;
+		SelectedJet_vSize        = AK8Puppijet2_vSize;
+		SelectedJet_partonFlavor = AK8Puppijet2_partonFlavor
+		SelectedJet_hadronFlavor = AK8Puppijet2_hadronFlavor
+		SelectedJet_nCharged     = AK8Puppijet2_nCharged;
+		SelectedJet_nNeutrals    = AK8Puppijet2_nNeutrals;
+		SelectedJet_nParticles   = AK8Puppijet2_nParticles;
+		SelectedJet_ratioCA15_04 = AK8Puppijet2_ratioCA15_04
+		SelectedJet_tau21DDT     = AK8Puppijet2_tau21DDT;
+		SelectedJet_rho          = AK8Puppijet2_rho;
+		SelectedJet_N2DDT        = AK8Puppijet2_N2DDT;
+		SelectedJet_msd_puppi    = AK8Puppijet2_msd_puppi;
+	} else if (which_jet == kCA15_0) {
+		SelectedJet_pt           = CA15Puppijet0_pt;
+		SelectedJet_eta          = CA15Puppijet0_eta;
+		SelectedJet_phi          = CA15Puppijet0_phi;
+		SelectedJet_mass         = CA15Puppijet0_mass;
+		SelectedJet_csv          = CA15Puppijet0_csv;
+		SelectedJet_CHF          = CA15Puppijet0_CHF;
+		SelectedJet_NHF          = CA15Puppijet0_NHF;
+		SelectedJet_NEMF         = CA15Puppijet0_NEMF;
+		SelectedJet_tau21        = CA15Puppijet0_tau21;
+		SelectedJet_tau32        = CA15Puppijet0_tau32;
+		SelectedJet_msd          = CA15Puppijet0_msd;
+		SelectedJet_rho          = CA15Puppijet0_rho;
+		SelectedJet_minsubcsv    = CA15Puppijet0_minsubcsv;
+		SelectedJet_maxsubcsv    = CA15Puppijet0_maxsubcsv;
+		SelectedJet_doublecsv    = CA15Puppijet0_doublecsv;
+		SelectedJet_doublesub    = CA15Puppijet0_doublesub;
+		SelectedJet_ptraw        = CA15Puppijet0_ptraw;
+		SelectedJet_genpt        = CA15Puppijet0_genpt;
+		SelectedJet_e2_b1        = CA15Puppijet0_e2_b1;
+		SelectedJet_e3_b1        = CA15Puppijet0_e3_b1;
+		SelectedJet_e3_v1_b1     = CA15Puppijet0_e3_v1_b1;
+		SelectedJet_e3_v2_b1     = CA15Puppijet0_e3_v2_b1;
+		SelectedJet_e4_v1_b1     = CA15Puppijet0_e4_v1_b1;
+		SelectedJet_e4_v2_b1     = CA15Puppijet0_e4_v2_b1;
+		SelectedJet_e2_b2        = CA15Puppijet0_e2_b2;
+		SelectedJet_e3_b2        = CA15Puppijet0_e3_b2;
+		SelectedJet_e3_v1_b2     = CA15Puppijet0_e3_v1_b2;
+		SelectedJet_e3_v2_b2     = CA15Puppijet0_e3_v2_b2;
+		SelectedJet_e4_v1_b2     = CA15Puppijet0_e4_v1_b2;
+		SelectedJet_e4_v2_b2     = CA15Puppijet0_e4_v2_b2;
+		SelectedJet_e2_sdb1      = CA15Puppijet0_e2_sdb1;
+		SelectedJet_e3_sdb1      = CA15Puppijet0_e3_sdb1;
+		SelectedJet_e3_v1_sdb1   = CA15Puppijet0_e3_v1_sdb1;
+		SelectedJet_e3_v2_sdb1   = CA15Puppijet0_e3_v2_sdb1;
+		SelectedJet_e4_v1_sdb1   = CA15Puppijet0_e4_v1_sdb1;
+		SelectedJet_e4_v2_sdb1   = CA15Puppijet0_e4_v2_sdb1;
+		SelectedJet_e2_sdb2      = CA15Puppijet0_e2_sdb2;
+		SelectedJet_e3_sdb2      = CA15Puppijet0_e3_sdb2;
+		SelectedJet_e3_v1_sdb2   = CA15Puppijet0_e3_v1_sdb2;
+		SelectedJet_e3_v2_sdb2   = CA15Puppijet0_e3_v2_sdb2;
+		SelectedJet_e4_v1_sdb2   = CA15Puppijet0_e4_v1_sdb2;
+		SelectedJet_e4_v2_sdb2   = CA15Puppijet0_e4_v2_sdb2;
+		SelectedJet_N2sdb1       = CA15Puppijet0_N2sdb1;
+		SelectedJet_N2sdb2       = CA15Puppijet0_N2sdb2;
+		SelectedJet_M2sdb1       = CA15Puppijet0_M2sdb1;
+		SelectedJet_M2sdb2       = CA15Puppijet0_M2sdb2;
+		SelectedJet_D2sdb1       = CA15Puppijet0_D2sdb1;
+		SelectedJet_D2sdb2       = CA15Puppijet0_D2sdb2;
+		SelectedJet_N2b1         = CA15Puppijet0_N2b1;
+		SelectedJet_N2b2         = CA15Puppijet0_N2b2;
+		SelectedJet_M2b1         = CA15Puppijet0_M2b1;
+		SelectedJet_M2b2         = CA15Puppijet0_M2b2;
+		SelectedJet_D2b1         = CA15Puppijet0_D2b1;
+		SelectedJet_D2b2         = CA15Puppijet0_D2b2;
+		SelectedJet_pt_old       = CA15Puppijet0_pt_old;
+		SelectedJet_pt_JESUp     = CA15Puppijet0_pt_JESUp;
+		SelectedJet_pt_JESDown   = CA15Puppijet0_pt_JESDown;
+		SelectedJet_pt_JERUp     = CA15Puppijet0_pt_JERUp;
+		SelectedJet_pt_JERDown   = CA15Puppijet0_pt_JERDown;
+		SelectedJet_isTightVJet  = CA15Puppijet0_isTightVJet;
+		SelectedJet_isHadronicV  = CA15Puppijet0_isHadronicV;
+		SelectedJet_vMatching    = CA15Puppijet0_vMatching;
+		SelectedJet_vSize        = CA15Puppijet0_vSize;
+		SelectedJet_partonFlavor = CA15Puppijet0_partonFlavor
+		SelectedJet_hadronFlavor = CA15Puppijet0_hadronFlavor
+		SelectedJet_nCharged     = CA15Puppijet0_nCharged;
+		SelectedJet_nNeutrals    = CA15Puppijet0_nNeutrals;
+		SelectedJet_nParticles   = CA15Puppijet0_nParticles;
+		SelectedJet_ratioCA15_04 = CA15Puppijet0_ratioCA15_04
+		SelectedJet_tau21DDT     = CA15Puppijet0_tau21DDT;
+		SelectedJet_rho          = CA15Puppijet0_rho;
+		SelectedJet_N2DDT        = CA15Puppijet0_N2DDT;
+		SelectedJet_msd_puppi    = CA15Puppijet0_msd_puppi;
+	} else if (which_jet == kCA15_1) {
+		SelectedJet_pt           = CA15Puppijet1_pt;
+		SelectedJet_eta          = CA15Puppijet1_eta;
+		SelectedJet_phi          = CA15Puppijet1_phi;
+		SelectedJet_mass         = CA15Puppijet1_mass;
+		SelectedJet_csv          = CA15Puppijet1_csv;
+		SelectedJet_CHF          = CA15Puppijet1_CHF;
+		SelectedJet_NHF          = CA15Puppijet1_NHF;
+		SelectedJet_NEMF         = CA15Puppijet1_NEMF;
+		SelectedJet_tau21        = CA15Puppijet1_tau21;
+		SelectedJet_tau32        = CA15Puppijet1_tau32;
+		SelectedJet_msd          = CA15Puppijet1_msd;
+		SelectedJet_rho          = CA15Puppijet1_rho;
+		SelectedJet_minsubcsv    = CA15Puppijet1_minsubcsv;
+		SelectedJet_maxsubcsv    = CA15Puppijet1_maxsubcsv;
+		SelectedJet_doublecsv    = CA15Puppijet1_doublecsv;
+		SelectedJet_doublesub    = CA15Puppijet1_doublesub;
+		SelectedJet_ptraw        = CA15Puppijet1_ptraw;
+		SelectedJet_genpt        = CA15Puppijet1_genpt;
+		SelectedJet_e2_b1        = CA15Puppijet1_e2_b1;
+		SelectedJet_e3_b1        = CA15Puppijet1_e3_b1;
+		SelectedJet_e3_v1_b1     = CA15Puppijet1_e3_v1_b1;
+		SelectedJet_e3_v2_b1     = CA15Puppijet1_e3_v2_b1;
+		SelectedJet_e4_v1_b1     = CA15Puppijet1_e4_v1_b1;
+		SelectedJet_e4_v2_b1     = CA15Puppijet1_e4_v2_b1;
+		SelectedJet_e2_b2        = CA15Puppijet1_e2_b2;
+		SelectedJet_e3_b2        = CA15Puppijet1_e3_b2;
+		SelectedJet_e3_v1_b2     = CA15Puppijet1_e3_v1_b2;
+		SelectedJet_e3_v2_b2     = CA15Puppijet1_e3_v2_b2;
+		SelectedJet_e4_v1_b2     = CA15Puppijet1_e4_v1_b2;
+		SelectedJet_e4_v2_b2     = CA15Puppijet1_e4_v2_b2;
+		SelectedJet_e2_sdb1      = CA15Puppijet1_e2_sdb1;
+		SelectedJet_e3_sdb1      = CA15Puppijet1_e3_sdb1;
+		SelectedJet_e3_v1_sdb1   = CA15Puppijet1_e3_v1_sdb1;
+		SelectedJet_e3_v2_sdb1   = CA15Puppijet1_e3_v2_sdb1;
+		SelectedJet_e4_v1_sdb1   = CA15Puppijet1_e4_v1_sdb1;
+		SelectedJet_e4_v2_sdb1   = CA15Puppijet1_e4_v2_sdb1;
+		SelectedJet_e2_sdb2      = CA15Puppijet1_e2_sdb2;
+		SelectedJet_e3_sdb2      = CA15Puppijet1_e3_sdb2;
+		SelectedJet_e3_v1_sdb2   = CA15Puppijet1_e3_v1_sdb2;
+		SelectedJet_e3_v2_sdb2   = CA15Puppijet1_e3_v2_sdb2;
+		SelectedJet_e4_v1_sdb2   = CA15Puppijet1_e4_v1_sdb2;
+		SelectedJet_e4_v2_sdb2   = CA15Puppijet1_e4_v2_sdb2;
+		SelectedJet_N2sdb1       = CA15Puppijet1_N2sdb1;
+		SelectedJet_N2sdb2       = CA15Puppijet1_N2sdb2;
+		SelectedJet_M2sdb1       = CA15Puppijet1_M2sdb1;
+		SelectedJet_M2sdb2       = CA15Puppijet1_M2sdb2;
+		SelectedJet_D2sdb1       = CA15Puppijet1_D2sdb1;
+		SelectedJet_D2sdb2       = CA15Puppijet1_D2sdb2;
+		SelectedJet_N2b1         = CA15Puppijet1_N2b1;
+		SelectedJet_N2b2         = CA15Puppijet1_N2b2;
+		SelectedJet_M2b1         = CA15Puppijet1_M2b1;
+		SelectedJet_M2b2         = CA15Puppijet1_M2b2;
+		SelectedJet_D2b1         = CA15Puppijet1_D2b1;
+		SelectedJet_D2b2         = CA15Puppijet1_D2b2;
+		SelectedJet_pt_old       = CA15Puppijet1_pt_old;
+		SelectedJet_pt_JESUp     = CA15Puppijet1_pt_JESUp;
+		SelectedJet_pt_JESDown   = CA15Puppijet1_pt_JESDown;
+		SelectedJet_pt_JERUp     = CA15Puppijet1_pt_JERUp;
+		SelectedJet_pt_JERDown   = CA15Puppijet1_pt_JERDown;
+		SelectedJet_isTightVJet  = CA15Puppijet1_isTightVJet;
+		SelectedJet_isHadronicV  = CA15Puppijet1_isHadronicV;
+		SelectedJet_vMatching    = CA15Puppijet1_vMatching;
+		SelectedJet_vSize        = CA15Puppijet1_vSize;
+		SelectedJet_partonFlavor = CA15Puppijet1_partonFlavor
+		SelectedJet_hadronFlavor = CA15Puppijet1_hadronFlavor
+		SelectedJet_nCharged     = CA15Puppijet1_nCharged;
+		SelectedJet_nNeutrals    = CA15Puppijet1_nNeutrals;
+		SelectedJet_nParticles   = CA15Puppijet1_nParticles;
+		SelectedJet_ratioCA15_04 = CA15Puppijet1_ratioCA15_04
+		SelectedJet_tau21DDT     = CA15Puppijet1_tau21DDT;
+		SelectedJet_rho          = CA15Puppijet1_rho;
+		SelectedJet_N2DDT        = CA15Puppijet1_N2DDT;
+		SelectedJet_msd_puppi    = CA15Puppijet1_msd_puppi;
+	} else if (which_jet == kCA15_2) {
+		SelectedJet_pt           = CA15Puppijet2_pt;
+		SelectedJet_eta          = CA15Puppijet2_eta;
+		SelectedJet_phi          = CA15Puppijet2_phi;
+		SelectedJet_mass         = CA15Puppijet2_mass;
+		SelectedJet_csv          = CA15Puppijet2_csv;
+		SelectedJet_CHF          = CA15Puppijet2_CHF;
+		SelectedJet_NHF          = CA15Puppijet2_NHF;
+		SelectedJet_NEMF         = CA15Puppijet2_NEMF;
+		SelectedJet_tau21        = CA15Puppijet2_tau21;
+		SelectedJet_tau32        = CA15Puppijet2_tau32;
+		SelectedJet_msd          = CA15Puppijet2_msd;
+		SelectedJet_rho          = CA15Puppijet2_rho;
+		SelectedJet_minsubcsv    = CA15Puppijet2_minsubcsv;
+		SelectedJet_maxsubcsv    = CA15Puppijet2_maxsubcsv;
+		SelectedJet_doublecsv    = CA15Puppijet2_doublecsv;
+		SelectedJet_doublesub    = CA15Puppijet2_doublesub;
+		SelectedJet_ptraw        = CA15Puppijet2_ptraw;
+		SelectedJet_genpt        = CA15Puppijet2_genpt;
+		SelectedJet_e2_b1        = CA15Puppijet2_e2_b1;
+		SelectedJet_e3_b1        = CA15Puppijet2_e3_b1;
+		SelectedJet_e3_v1_b1     = CA15Puppijet2_e3_v1_b1;
+		SelectedJet_e3_v2_b1     = CA15Puppijet2_e3_v2_b1;
+		SelectedJet_e4_v1_b1     = CA15Puppijet2_e4_v1_b1;
+		SelectedJet_e4_v2_b1     = CA15Puppijet2_e4_v2_b1;
+		SelectedJet_e2_b2        = CA15Puppijet2_e2_b2;
+		SelectedJet_e3_b2        = CA15Puppijet2_e3_b2;
+		SelectedJet_e3_v1_b2     = CA15Puppijet2_e3_v1_b2;
+		SelectedJet_e3_v2_b2     = CA15Puppijet2_e3_v2_b2;
+		SelectedJet_e4_v1_b2     = CA15Puppijet2_e4_v1_b2;
+		SelectedJet_e4_v2_b2     = CA15Puppijet2_e4_v2_b2;
+		SelectedJet_e2_sdb1      = CA15Puppijet2_e2_sdb1;
+		SelectedJet_e3_sdb1      = CA15Puppijet2_e3_sdb1;
+		SelectedJet_e3_v1_sdb1   = CA15Puppijet2_e3_v1_sdb1;
+		SelectedJet_e3_v2_sdb1   = CA15Puppijet2_e3_v2_sdb1;
+		SelectedJet_e4_v1_sdb1   = CA15Puppijet2_e4_v1_sdb1;
+		SelectedJet_e4_v2_sdb1   = CA15Puppijet2_e4_v2_sdb1;
+		SelectedJet_e2_sdb2      = CA15Puppijet2_e2_sdb2;
+		SelectedJet_e3_sdb2      = CA15Puppijet2_e3_sdb2;
+		SelectedJet_e3_v1_sdb2   = CA15Puppijet2_e3_v1_sdb2;
+		SelectedJet_e3_v2_sdb2   = CA15Puppijet2_e3_v2_sdb2;
+		SelectedJet_e4_v1_sdb2   = CA15Puppijet2_e4_v1_sdb2;
+		SelectedJet_e4_v2_sdb2   = CA15Puppijet2_e4_v2_sdb2;
+		SelectedJet_N2sdb1       = CA15Puppijet2_N2sdb1;
+		SelectedJet_N2sdb2       = CA15Puppijet2_N2sdb2;
+		SelectedJet_M2sdb1       = CA15Puppijet2_M2sdb1;
+		SelectedJet_M2sdb2       = CA15Puppijet2_M2sdb2;
+		SelectedJet_D2sdb1       = CA15Puppijet2_D2sdb1;
+		SelectedJet_D2sdb2       = CA15Puppijet2_D2sdb2;
+		SelectedJet_N2b1         = CA15Puppijet2_N2b1;
+		SelectedJet_N2b2         = CA15Puppijet2_N2b2;
+		SelectedJet_M2b1         = CA15Puppijet2_M2b1;
+		SelectedJet_M2b2         = CA15Puppijet2_M2b2;
+		SelectedJet_D2b1         = CA15Puppijet2_D2b1;
+		SelectedJet_D2b2         = CA15Puppijet2_D2b2;
+		SelectedJet_pt_old       = CA15Puppijet2_pt_old;
+		SelectedJet_pt_JESUp     = CA15Puppijet2_pt_JESUp;
+		SelectedJet_pt_JESDown   = CA15Puppijet2_pt_JESDown;
+		SelectedJet_pt_JERUp     = CA15Puppijet2_pt_JERUp;
+		SelectedJet_pt_JERDown   = CA15Puppijet2_pt_JERDown;
+		SelectedJet_isTightVJet  = CA15Puppijet2_isTightVJet;
+		SelectedJet_isHadronicV  = CA15Puppijet2_isHadronicV;
+		SelectedJet_vMatching    = CA15Puppijet2_vMatching;
+		SelectedJet_vSize        = CA15Puppijet2_vSize;
+		SelectedJet_partonFlavor = CA15Puppijet2_partonFlavor
+		SelectedJet_hadronFlavor = CA15Puppijet2_hadronFlavor
+		SelectedJet_nCharged     = CA15Puppijet2_nCharged;
+		SelectedJet_nNeutrals    = CA15Puppijet2_nNeutrals;
+		SelectedJet_nParticles   = CA15Puppijet2_nParticles;
+		SelectedJet_ratioCA15_04 = CA15Puppijet2_ratioCA15_04
+		SelectedJet_tau21DDT     = CA15Puppijet2_tau21DDT;
+		SelectedJet_rho          = CA15Puppijet2_rho;
+		SelectedJet_N2DDT        = CA15Puppijet2_N2DDT;
+		SelectedJet_msd_puppi    = CA15Puppijet2_msd_puppi;
+	}
+
 
 	return ret;
 }

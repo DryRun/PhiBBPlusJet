@@ -1106,7 +1106,7 @@ if __name__ == "__main__":
 			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
 		selections = ["SR", "muCR", "Preselection", "N2CR", "N2SR"] # N2CR
-		extra_vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt"]
+		extra_vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt", "n2ddt_vs_n2"]
 		selection_tau21s = {}
 		selection_dcsvs = {}
 		if args.do_optimization:

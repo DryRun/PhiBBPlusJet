@@ -27,7 +27,7 @@ signal_xsecs["Sbb350"] = 1.275e-02
 signal_xsecs["Sbb400"] = 1.144e-02
 signal_xsecs["Sbb500"] = 7.274e-03
 
-def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb50", "Sbb125", "Sbb200", "Sbb300"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False, old_N2DDT=False):
+def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sbb50", "Sbb125", "Sbb200", "Sbb300"], backgrounds=["qcd","tqq","wqq","zqq","hbb","stqq","vvqq"], logy=False, rebin=None, legend_position="right", x_range=None, legend_entries=None, subbackgrounds=None, blind=False, signal_sf=10, decidata=False, old_N2DDT=False, normalize_mc=False):
 	print "Welcome to DataMCPlot({}, {}, {}, {})".format(var, selection, jet_type, data_name)
 	re_msdcat = re.compile("msd(?P<cat>\d+)") # Cat = 1 through 6, [450,500,600,700,800,1000]
 	for what in ["pass", "fail", "inclusive"]:
@@ -39,6 +39,28 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		background_histograms = {}
 		total_bkgd_histogram = None
 		first = True
+
+		# Normalize QCD to match data?
+		k_qcd = 1
+		if normalize_mc:
+			data_normalization = histogram_file.Get("data_obs_pass").Integral() + histogram_file.Get("data_obs_fail").Integral()
+			mc_normalizations = {}
+			for background in backgrounds:
+				mc_normalizations[background] = 0
+				if background in subbackgrounds:
+					this_subbackgrounds = subbackgrounds[background]
+				else:
+					this_subbackgrounds = [background]
+				for subbackground in this_subbackgrounds:
+					mc_normalizations[background] += histogram_file.Get("{}_pass".format(subbackground)).Integral() + histogram_file.Get("{}_fail".format(subbackground)).Integral()
+			# Non-QCD normalization
+			nonqcd_normalization = 0
+			for background in backgrounds:
+				if background != "qcd":
+					nonqcd_normalization += mc_normalizations[background]
+			k_qcd = (data_normalization - nonqcd_normalization) / mc_normalizations["qcd"]
+
+
 		for background in backgrounds:
 			if background in subbackgrounds:
 				this_subbackgrounds = subbackgrounds[background]
@@ -96,6 +118,8 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 				else:
 					background_histograms[background].Add(this_histogram)
 			background_histograms[background].SetDirectory(0)
+			if background == "qcd" and normalize_mc:
+				background_histograms[background].Scale(k_qcd)
 			if background == "hbb" and what == "pass" and logy:
 				print "[debug] Set background color for hbb to {}".format(style.background_colors[background])
 			background_histograms[background].SetFillColor(style.background_colors[background])
@@ -384,6 +408,9 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		unity.SetLineStyle(3)
 		unity.Draw("same")
 
+		# Redraw ratio and frame on top
+		ratio_histogram.Draw("same")
+
 		c.cd()
 		# CMS stuff
 		if legend_position == "right":
@@ -395,6 +422,12 @@ def DataMCPlot(var, selection, jet_type, data_name="data_obs", signal_names=["Sb
 		lumi_text.SetNDC()
 		lumi_text.SetTextColor(1)
 		lumi_text.DrawLatex(0.67, 0.96, "#font[42]{35.9 fb^{-1} (13 TeV)}")
+
+		if normalize_mc:
+			if legend_position == "right":
+				Root.myText(0.17, 0.85, 1, "K_{{QCD}}={:.2f}".format(k_qcd), 0.4)
+			else:
+				Root.myText(0.65, 0.85, 1, "K_{{QCD}}={:.2f}".format(k_qcd), 0.4)
 
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/public/{}.pdf".format(c.GetName()))
 		c.SaveAs("/uscms/home/dryu/DAZSLE/data/EventSelection/figures/public/{}.eps".format(c.GetName()))
@@ -408,7 +441,7 @@ if __name__ == "__main__":
 	vars = ["pt", "msd", "rho", "eta", "n2ddt", "dcsv", "n2"]
 	#vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "msd"]
 	#vars = ["n2"]
-	rebin = {"pfmet":1,"dcsv":10, "n2ddt":1, "n2":1, "pt":10, "eta":1, "rho":4, "msd":1}
+	rebin = {"pfmet":1,"dcsv":10, "n2ddt":4, "n2":1, "pt":10, "eta":1, "rho":4, "msd":1}
 	legend_positions = {
 		"SR":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
 		"N2SR":{"pfmet":"right","dcsv":"right","n2ddt":"left", "n2":"left","pt":"right","eta":"right","rho":"left", "msd":"right"},
@@ -425,7 +458,7 @@ if __name__ == "__main__":
 			"pfmet":[0,500],
 			"dcsv":[-1,1],
 			"n2ddt":[-0.4, 0.2],
-			"n2":[-1.0, 1.0],		
+			"n2":[-0.2, 0.5],		
 			"pt":[400.,2000.],
 			"eta":[-3.,3.],
 			"rho":[-8, 0.],
@@ -435,7 +468,7 @@ if __name__ == "__main__":
 			"pfmet":[0,500],
 			"dcsv":[-1,1],
 			"n2ddt":[-0.4, 0.2],
-			"n2":[-1.0, 1.0],		
+			"n2":[-0.2, 0.5],		
 			"pt":[450.,2000.],
 			"eta":[-3.,3.],
 			"rho":[-8, 0.],
@@ -485,8 +518,8 @@ if __name__ == "__main__":
 					blind = False
 				else:
 					blind = False
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[jet_type][var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
-				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[jet_type][var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[jet_type][var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, normalize_mc=True)
+				DataMCPlot(var, selection, jet_type, data_name=data_names[selection], backgrounds=backgrounds[selection], logy=True, rebin=rebin[var], legend_position=legend_positions[selection][var], x_range=x_ranges[jet_type][var], subbackgrounds=subbackgrounds, legend_entries=legend_entries, blind=blind, normalize_mc=True)
 				pass
 	# mSD in pT categories, for SR and N2CR
 	for var in ["msd{}".format(x) for x in xrange(1,7)]:

@@ -23,6 +23,34 @@ public:
 	Double_t PUPPIweight(double pt, double eta) const;
 
 public:
+	// Enums for specifying the jet type and jet selection
+	enum JetType_t {
+		kAK8,
+		kCA15
+	};
+	JetType_t _jettype;
+
+	enum JetOrdering_t {
+		kPt,
+		kDbtag,
+		kN2DDT,
+	}
+	JetOrdering_t _jetordering;
+
+	inline void SetJetSelection(JetType_t jettype, JetOrdering_t jetordering) {
+		_jettype = jettype;
+		_jetordering = jetordering;
+	}
+
+	enum WhichJet_t {
+		kAK8_0,
+		kAK8_1, 
+		kAK8_2, 
+		kCA15_0, 
+		kCA15_1, 
+		kCA15_2
+	}
+
 	// Computed variables
 	Double_t AK8Puppijet0_tau21DDT;
 	Double_t CA15Puppijet0_tau21DDT;
@@ -41,6 +69,81 @@ public:
 	Double_t pfmet_JESDown;
 	Double_t pfmet_JERUp;
 	Double_t pfmet_JERDown;
+
+	// Containers for selected jet variables
+	Double_t        SelectedJet_pt;
+	Double_t        SelectedJet_eta;
+	Double_t        SelectedJet_phi;
+	Double_t        SelectedJet_mass;
+	Double_t        SelectedJet_csv;
+	Double_t        SelectedJet_CHF;
+	Double_t        SelectedJet_NHF;
+	Double_t        SelectedJet_NEMF;
+	Double_t        SelectedJet_tau21;
+	Double_t        SelectedJet_tau32;
+	Double_t        SelectedJet_msd;
+	Double_t        SelectedJet_rho;
+	Double_t        SelectedJet_minsubcsv;
+	Double_t        SelectedJet_maxsubcsv;
+	Double_t        SelectedJet_doublecsv;
+	Double_t        SelectedJet_doublesub;
+	Double_t        SelectedJet_ptraw;
+	Double_t        SelectedJet_genpt;
+	Double_t        SelectedJet_e2_b1;
+	Double_t        SelectedJet_e3_b1;
+	Double_t        SelectedJet_e3_v1_b1;
+	Double_t        SelectedJet_e3_v2_b1;
+	Double_t        SelectedJet_e4_v1_b1;
+	Double_t        SelectedJet_e4_v2_b1;
+	Double_t        SelectedJet_e2_b2;
+	Double_t        SelectedJet_e3_b2;
+	Double_t        SelectedJet_e3_v1_b2;
+	Double_t        SelectedJet_e3_v2_b2;
+	Double_t        SelectedJet_e4_v1_b2;
+	Double_t        SelectedJet_e4_v2_b2;
+	Double_t        SelectedJet_e2_sdb1;
+	Double_t        SelectedJet_e3_sdb1;
+	Double_t        SelectedJet_e3_v1_sdb1;
+	Double_t        SelectedJet_e3_v2_sdb1;
+	Double_t        SelectedJet_e4_v1_sdb1;
+	Double_t        SelectedJet_e4_v2_sdb1;
+	Double_t        SelectedJet_e2_sdb2;
+	Double_t        SelectedJet_e3_sdb2;
+	Double_t        SelectedJet_e3_v1_sdb2;
+	Double_t        SelectedJet_e3_v2_sdb2;
+	Double_t        SelectedJet_e4_v1_sdb2;
+	Double_t        SelectedJet_e4_v2_sdb2;
+	Double_t        SelectedJet_N2sdb1;
+	Double_t        SelectedJet_N2sdb2;
+	Double_t        SelectedJet_M2sdb1;
+	Double_t        SelectedJet_M2sdb2;
+	Double_t        SelectedJet_D2sdb1;
+	Double_t        SelectedJet_D2sdb2;
+	Double_t        SelectedJet_N2b1;
+	Double_t        SelectedJet_N2b2;
+	Double_t        SelectedJet_M2b1;
+	Double_t        SelectedJet_M2b2;
+	Double_t        SelectedJet_D2b1;
+	Double_t        SelectedJet_D2b2;
+	Double_t        SelectedJet_pt_old;
+	Double_t        SelectedJet_pt_JESUp;
+	Double_t        SelectedJet_pt_JESDown;
+	Double_t        SelectedJet_pt_JERUp;
+	Double_t        SelectedJet_pt_JERDown;
+	Int_t           SelectedJet_isTightVJet;
+	Int_t           SelectedJet_isHadronicV;
+	Double_t        SelectedJet_vMatching;
+	Double_t        SelectedJet_vSize;
+	Int_t           SelectedJet_partonFlavor;
+	Int_t           SelectedJet_hadronFlavor;
+	Int_t           SelectedJet_nCharged;
+	Int_t           SelectedJet_nNeutrals;
+	Int_t           SelectedJet_nParticles;
+	Double_t        SelectedJet_ratioCA15_04;
+	Double_t 		SelectedJet_tau21DDT;
+	Double_t 		SelectedJet_rho;
+	Double_t 		SelectedJet_N2DDT;
+	Double_t 		SelectedJet_msd_puppi;
 private:
 	TH1D* n2_ddt_transformation_AK8_;
 	TH1D* n2_ddt_transformation_CA15_;

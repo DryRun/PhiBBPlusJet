@@ -5,9 +5,9 @@ from cutflow import Cutflow
 
 # Specialization of Cutflow to event selection. 
 class EventSelector(Cutflow):
-	def __init__(self, name="UnnamedEventSelector"):
+	def __init__(self, name="UnnamedEventSelector", event=None):
 		super(EventSelector, self).__init__(name)
-		self._event = None
+		self._event = event
 		self._object_selectors = {}
 		self._event_pass = False
 		self._event_pass_nminusone = {}
@@ -23,14 +23,17 @@ class EventSelector(Cutflow):
 	def event(self):
 		return self._event
 
-	def process_event(self, event, weight=1):
-		self.reset()
+	# Set pointer to the event data. If the event instance is constant, better to set this in the constructor; this method enables changing the pointer, if it happens to be reallocated.
+	def set_event(self, event):
 		self._event = event
+
+	def process_event(self, weight=1):
+		self.reset()
 		self._pass_calls += 1
 		self._pass_calls_weighted += weight
 
 		for object_selector in self._object_selectors:
-			object_selector.process_event(event, weight)
+			object_selector.process_event(weight)
 
 		# Run cuts
 		this_pass = True
@@ -80,3 +83,14 @@ class EventSelector(Cutflow):
 		self._event_pass = False
 		self._event_pass_nminusone.clear()
 
+	def add_cut(self, cut_name, cut_logic, return_data=None):
+		self._cut_list.append(cut_name)
+
+		# Create the cut function
+		exec("""
+def {}_{}(obj, event):
+	{}
+""".format(self._name, cut_name, cut_logic))
+
+		# Attach cut function to this instance
+		exec("self.{} = MethodType({}, self, EventSelector".format(cut_name, ))
