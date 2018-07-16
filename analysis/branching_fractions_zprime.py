@@ -65,7 +65,7 @@ def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	quark_widths = {}
 	for qflavor in quarks:
 		quark_widths[qflavor] = np.array([partial_width(qflavor, mzp, gq, v_type) for mzp in mzps])
-	quark_widths["udsc"] = quark_widths["u"] + quark_width["d"] + quark_widths["s"] + quark_widths["c"]
+	quark_widths["udsc"] = quark_widths["u"] + quark_widths["d"] + quark_widths["s"] + quark_widths["c"]
 	width_total = np.array([total_width(mzp, gq, mchi, gchi, v_type) for mzp in mzps])
 
 	branching_fractions = {}
