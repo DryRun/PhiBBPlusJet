@@ -87,6 +87,7 @@ def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax1.plot(mzps, branching_fractions["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
 	ax1.plot(mzps, branching_fractions["udsc"], color=darks[5], linewidth=1.0, linestyle="-", label=r"$u/d/s/c$")
 	ax1.legend(loc="center left")
+	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_zp_{}.png".format(v_type)))
 
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(r"$\Gamma$ [GeV]")
@@ -100,7 +101,7 @@ def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax2.legend(loc="center right")
 
 	#plt.show()
-	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_zp_{}.png".format(v_type)))
+	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brsandwidths_zp_{}.png".format(v_type)))
 
 
 if __name__ == "__main__":
