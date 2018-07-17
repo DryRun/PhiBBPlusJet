@@ -1,9 +1,13 @@
+print "Imports"
 import os
 import sys
 import math
 import cmath
+print "Importing numpy"
 import numpy as np
+print "...done. Importing matplotlib"
 import matplotlib.pyplot as plt
+print "...done"
 import seaborn as sns
 darks = sns.color_palette("dark")
 pastels = sns.color_palette("pastel")
@@ -60,7 +64,8 @@ def branching_fraction(qflavor, mzp, gq, mchi, gchi, v_type):
 def branching_fraction_gg(mzp, gq, mchi, gchi, v_type):
 	return gg_width(mzp, gq, v_type) / total_width(mzp, gq, mchi, gchi, v_type)
 
-def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
+def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
+	print "plot()"
 	mzps = np.arange(mass_range[0], mass_range[1], 1.)
 	quark_widths = {}
 	for qflavor in quarks:
@@ -81,6 +86,7 @@ def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 
 
 	ax1.set_yscale("linear")
+	ax1.set_xlim(0., mass_range[1])
 	ax1.set_ylim(0., 1.)
 	ax1.set_ylabel("Branching fraction")
 	ax1.plot(mzps, branching_fractions["t"], color=darks[2], linewidth=1.0, linestyle="-", label=r"$t$")
@@ -92,7 +98,7 @@ def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(r"$\Gamma$ [GeV]")
 	ax2.set_yscale("log")
-	ax2.set_xlim(0., 500.)
+	ax2.set_xlim(0., mass_range[1])
 	ax2.set_ylim(0.001, 100.)
 	ax2.plot(mzps, width_total, color="black", linewidth=2.0, linestyle="--", label="Total")
 	ax2.plot(mzps, quark_widths["t"], color=pastels[2], linewidth=1.0, linestyle="--", label=r"$t$")
@@ -102,13 +108,13 @@ def plot(gq, v_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 
 	#plt.show()
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brsandwidths_zp_{}.png".format(v_type)))
-
+	print "Done with plot()"
 
 if __name__ == "__main__":
 	#for i in xrange(1, 100):
 	#	tau = 2. / 100. * i
 	#	print "form_factor({}) = {}".format(tau, form_factor(tau, "vector"))
 	#print branching_fraction("b", 300., 1., 1.e10, 0., "vector")
-
+	print "Welcome to branching_fractions_zprime"
 	plot(1., "vector")
 	plot(1., "axialvector")
