@@ -22,6 +22,8 @@ public:
 
 	Double_t PUPPIweight(double pt, double eta) const;
 
+	Bool_t IsVMatched(double matching_dR) const;
+
 public:
 	// Enums for specifying the jet type and jet selection
 	enum JetType_t {
@@ -34,7 +36,7 @@ public:
 		kPt,
 		kDbtag,
 		kN2DDT,
-	}
+	};
 	JetOrdering_t _jetordering;
 
 	inline void SetJetSelection(JetType_t jettype, JetOrdering_t jetordering) {
@@ -49,7 +51,7 @@ public:
 		kCA15_0, 
 		kCA15_1, 
 		kCA15_2
-	}
+	};
 
 	// Computed variables
 	Double_t AK8Puppijet0_tau21DDT;
@@ -61,6 +63,27 @@ public:
 	Double_t CA15CHSjet0_N2DDT;
 	Double_t AK8Puppijet0_msd_puppi;
 	Double_t CA15Puppijet0_msd_puppi;
+
+	Double_t AK8Puppijet1_tau21DDT;
+	Double_t CA15Puppijet1_tau21DDT;
+	Double_t AK8Puppijet1_rho;
+	Double_t CA15Puppijet1_rho;
+	Double_t AK8Puppijet1_N2DDT;
+	Double_t CA15Puppijet1_N2DDT;
+	Double_t CA15CHSjet1_N2DDT;
+	Double_t AK8Puppijet1_msd_puppi;
+	Double_t CA15Puppijet1_msd_puppi;
+
+	Double_t AK8Puppijet2_tau21DDT;
+	Double_t CA15Puppijet2_tau21DDT;
+	Double_t AK8Puppijet2_rho;
+	Double_t CA15Puppijet2_rho;
+	Double_t AK8Puppijet2_N2DDT;
+	Double_t CA15Puppijet2_N2DDT;
+	Double_t CA15CHSjet2_N2DDT;
+	Double_t AK8Puppijet2_msd_puppi;
+	Double_t CA15Puppijet2_msd_puppi;
+
 	Double_t puppet_JESUp;
 	Double_t puppet_JESDown;
 	Double_t puppet_JERUp;
@@ -74,7 +97,6 @@ public:
 	Double_t        SelectedJet_pt;
 	Double_t        SelectedJet_eta;
 	Double_t        SelectedJet_phi;
-	Double_t        SelectedJet_mass;
 	Double_t        SelectedJet_csv;
 	Double_t        SelectedJet_CHF;
 	Double_t        SelectedJet_NHF;
@@ -131,17 +153,7 @@ public:
 	Double_t        SelectedJet_pt_JERUp;
 	Double_t        SelectedJet_pt_JERDown;
 	Int_t           SelectedJet_isTightVJet;
-	Int_t           SelectedJet_isHadronicV;
-	Double_t        SelectedJet_vMatching;
-	Double_t        SelectedJet_vSize;
-	Int_t           SelectedJet_partonFlavor;
-	Int_t           SelectedJet_hadronFlavor;
-	Int_t           SelectedJet_nCharged;
-	Int_t           SelectedJet_nNeutrals;
-	Int_t           SelectedJet_nParticles;
-	Double_t        SelectedJet_ratioCA15_04;
 	Double_t 		SelectedJet_tau21DDT;
-	Double_t 		SelectedJet_rho;
 	Double_t 		SelectedJet_N2DDT;
 	Double_t 		SelectedJet_msd_puppi;
 private:

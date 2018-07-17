@@ -76,16 +76,28 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 
 	/*** Computed variables ***/
 	AK8Puppijet0_msd_puppi = AK8Puppijet0_msd * PUPPIweight(AK8Puppijet0_pt, AK8Puppijet0_eta);
+	AK8Puppijet1_msd_puppi = AK8Puppijet1_msd * PUPPIweight(AK8Puppijet1_pt, AK8Puppijet1_eta);
+	AK8Puppijet2_msd_puppi = AK8Puppijet2_msd * PUPPIweight(AK8Puppijet2_pt, AK8Puppijet2_eta);
 
 	CA15Puppijet0_msd_puppi = CA15Puppijet0_msd * PUPPIweight(CA15Puppijet0_pt, CA15Puppijet0_eta);
+	CA15Puppijet1_msd_puppi = CA15Puppijet1_msd * PUPPIweight(CA15Puppijet1_pt, CA15Puppijet1_eta);
+	CA15Puppijet2_msd_puppi = CA15Puppijet2_msd * PUPPIweight(CA15Puppijet2_pt, CA15Puppijet2_eta);
 
 	AK8Puppijet0_tau21DDT = AK8Puppijet0_tau21 + 0.063*TMath::Log(AK8Puppijet0_msd_puppi*AK8Puppijet0_msd_puppi/AK8Puppijet0_pt);
+	AK8Puppijet1_tau21DDT = AK8Puppijet1_tau21 + 0.063*TMath::Log(AK8Puppijet1_msd_puppi*AK8Puppijet1_msd_puppi/AK8Puppijet1_pt);
+	AK8Puppijet2_tau21DDT = AK8Puppijet2_tau21 + 0.063*TMath::Log(AK8Puppijet2_msd_puppi*AK8Puppijet2_msd_puppi/AK8Puppijet2_pt);
 
 	CA15Puppijet0_tau21DDT = CA15Puppijet0_tau21 + 0.063*TMath::Log(CA15Puppijet0_msd*CA15Puppijet0_msd/CA15Puppijet0_pt);
+	CA15Puppijet1_tau21DDT = CA15Puppijet1_tau21 + 0.063*TMath::Log(CA15Puppijet1_msd*CA15Puppijet1_msd/CA15Puppijet1_pt);
+	CA15Puppijet2_tau21DDT = CA15Puppijet2_tau21 + 0.063*TMath::Log(CA15Puppijet2_msd*CA15Puppijet2_msd/CA15Puppijet2_pt);
 
 	AK8Puppijet0_rho = 2 * TMath::Log(AK8Puppijet0_msd_puppi/ AK8Puppijet0_pt);
+	AK8Puppijet1_rho = 2 * TMath::Log(AK8Puppijet1_msd_puppi/ AK8Puppijet1_pt);
+	AK8Puppijet2_rho = 2 * TMath::Log(AK8Puppijet2_msd_puppi/ AK8Puppijet2_pt);
 
 	CA15Puppijet0_rho = 2 * TMath::Log(CA15Puppijet0_msd_puppi/ CA15Puppijet0_pt);
+	CA15Puppijet1_rho = 2 * TMath::Log(CA15Puppijet1_msd_puppi/ CA15Puppijet1_pt);
+	CA15Puppijet2_rho = 2 * TMath::Log(CA15Puppijet2_msd_puppi/ CA15Puppijet2_pt);
 
 	// AK8Puppijet0_N2DDT
 	int rho_index = n2_ddt_transformation_AK8_->GetXaxis()->FindBin(AK8Puppijet0_rho);
@@ -102,6 +114,34 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 	}
 	AK8Puppijet0_N2DDT = AK8Puppijet0_N2sdb1 - n2_ddt_transformation_AK8_->GetBinContent(rho_index, pt_index);
 
+	rho_index = n2_ddt_transformation_AK8_->GetXaxis()->FindBin(AK8Puppijet1_rho);
+	if (rho_index > n2_ddt_transformation_AK8_->GetXaxis()->GetNbins()) {
+		rho_index = n2_ddt_transformation_AK8_->GetXaxis()->GetNbins();
+	} else if (rho_index <= 0) {
+		rho_index = 1;
+	}
+	pt_index = n2_ddt_transformation_AK8_->GetYaxis()->FindBin(AK8Puppijet1_pt);
+	if (pt_index > n2_ddt_transformation_AK8_->GetYaxis()->GetNbins()) {
+		pt_index = n2_ddt_transformation_AK8_->GetYaxis()->GetNbins();
+	} else if (pt_index <= 0) {
+		pt_index = 1;
+	}
+	AK8Puppijet1_N2DDT = AK8Puppijet1_N2sdb1 - n2_ddt_transformation_AK8_->GetBinContent(rho_index, pt_index);
+
+	rho_index = n2_ddt_transformation_AK8_->GetXaxis()->FindBin(AK8Puppijet2_rho);
+	if (rho_index > n2_ddt_transformation_AK8_->GetXaxis()->GetNbins()) {
+		rho_index = n2_ddt_transformation_AK8_->GetXaxis()->GetNbins();
+	} else if (rho_index <= 0) {
+		rho_index = 1;
+	}
+	pt_index = n2_ddt_transformation_AK8_->GetYaxis()->FindBin(AK8Puppijet2_pt);
+	if (pt_index > n2_ddt_transformation_AK8_->GetYaxis()->GetNbins()) {
+		pt_index = n2_ddt_transformation_AK8_->GetYaxis()->GetNbins();
+	} else if (pt_index <= 0) {
+		pt_index = 1;
+	}
+	AK8Puppijet2_N2DDT = AK8Puppijet2_N2sdb1 - n2_ddt_transformation_AK8_->GetBinContent(rho_index, pt_index);
+
 	// CA15Puppijet0_N2DDT
 	rho_index = n2_ddt_transformation_CA15_->GetXaxis()->FindBin(CA15Puppijet0_rho);
 	if (rho_index > n2_ddt_transformation_CA15_->GetXaxis()->GetNbins()) {
@@ -116,6 +156,34 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		pt_index = 1;
 	}
 	CA15Puppijet0_N2DDT = CA15Puppijet0_N2sdb1 - n2_ddt_transformation_CA15_->GetBinContent(rho_index, pt_index);
+
+	rho_index = n2_ddt_transformation_CA15_->GetXaxis()->FindBin(CA15Puppijet1_rho);
+	if (rho_index > n2_ddt_transformation_CA15_->GetXaxis()->GetNbins()) {
+		rho_index = n2_ddt_transformation_CA15_->GetXaxis()->GetNbins();
+	} else if (rho_index <= 0) {
+		rho_index = 1;
+	}
+	pt_index = n2_ddt_transformation_CA15_->GetYaxis()->FindBin(CA15Puppijet1_pt);
+	if (pt_index > n2_ddt_transformation_CA15_->GetYaxis()->GetNbins()) {
+		pt_index = n2_ddt_transformation_CA15_->GetYaxis()->GetNbins();
+	} else if (pt_index <= 0) {
+		pt_index = 1;
+	}
+	CA15Puppijet1_N2DDT = CA15Puppijet1_N2sdb1 - n2_ddt_transformation_CA15_->GetBinContent(rho_index, pt_index);
+
+	rho_index = n2_ddt_transformation_CA15_->GetXaxis()->FindBin(CA15Puppijet2_rho);
+	if (rho_index > n2_ddt_transformation_CA15_->GetXaxis()->GetNbins()) {
+		rho_index = n2_ddt_transformation_CA15_->GetXaxis()->GetNbins();
+	} else if (rho_index <= 0) {
+		rho_index = 1;
+	}
+	pt_index = n2_ddt_transformation_CA15_->GetYaxis()->FindBin(CA15Puppijet2_pt);
+	if (pt_index > n2_ddt_transformation_CA15_->GetYaxis()->GetNbins()) {
+		pt_index = n2_ddt_transformation_CA15_->GetYaxis()->GetNbins();
+	} else if (pt_index <= 0) {
+		pt_index = 1;
+	}
+	CA15Puppijet2_N2DDT = CA15Puppijet2_N2sdb1 - n2_ddt_transformation_CA15_->GetBinContent(rho_index, pt_index);
 
 
 	// MET JES/JER
@@ -143,7 +211,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     			max_pt = AK8Puppijet0_pt;
     			which_jet = kAK8_0;
     		}
-    		if (AK8Puppijet01_pt > max_pt) {
+    		if (AK8Puppijet1_pt > max_pt) {
     			max_pt = AK8Puppijet1_pt;
     			which_jet = kAK8_1;
     		}
@@ -157,7 +225,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     			max_dbtag = AK8Puppijet0_doublecsv;
     			which_jet = kAK8_0;
     		}
-    		if (AK8Puppijet01_doublecsv > max_dbtag) {
+    		if (AK8Puppijet1_doublecsv > max_dbtag) {
     			max_dbtag = AK8Puppijet1_doublecsv;
     			which_jet = kAK8_1;
     		}
@@ -171,7 +239,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     			max_n2ddt = AK8Puppijet0_N2DDT;
     			which_jet = kAK8_0;
     		}
-    		if (AK8Puppijet01_N2DDT > max_n2ddt) {
+    		if (AK8Puppijet1_N2DDT > max_n2ddt) {
     			max_n2ddt = AK8Puppijet1_N2DDT;
     			which_jet = kAK8_1;
     		}
@@ -187,7 +255,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     			max_pt = CA15Puppijet0_pt;
     			which_jet = kCA15_0;
     		}
-    		if (CA15Puppijet01_pt > max_pt) {
+    		if (CA15Puppijet1_pt > max_pt) {
     			max_pt = CA15Puppijet1_pt;
     			which_jet = kCA15_1;
     		}
@@ -201,7 +269,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     			max_dbtag = CA15Puppijet0_doublesub;
     			which_jet = kCA15_0;
     		}
-    		if (CA15Puppijet01_doublesub > max_dbtag) {
+    		if (CA15Puppijet1_doublesub > max_dbtag) {
     			max_dbtag = CA15Puppijet1_doublesub;
     			which_jet = kCA15_1;
     		}
@@ -215,7 +283,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     			max_n2ddt = CA15Puppijet0_N2DDT;
     			which_jet = kCA15_0;
     		}
-    		if (CA15Puppijet01_N2DDT > max_n2ddt) {
+    		if (CA15Puppijet1_N2DDT > max_n2ddt) {
     			max_n2ddt = CA15Puppijet1_N2DDT;
     			which_jet = kCA15_1;
     		}
@@ -229,7 +297,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt           = AK8Puppijet0_pt;
 		SelectedJet_eta          = AK8Puppijet0_eta;
 		SelectedJet_phi          = AK8Puppijet0_phi;
-		SelectedJet_mass         = AK8Puppijet0_mass;
 		SelectedJet_csv          = AK8Puppijet0_csv;
 		SelectedJet_CHF          = AK8Puppijet0_CHF;
 		SelectedJet_NHF          = AK8Puppijet0_NHF;
@@ -286,15 +353,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt_JERUp     = AK8Puppijet0_pt_JERUp;
 		SelectedJet_pt_JERDown   = AK8Puppijet0_pt_JERDown;
 		SelectedJet_isTightVJet  = AK8Puppijet0_isTightVJet;
-		SelectedJet_isHadronicV  = AK8Puppijet0_isHadronicV;
-		SelectedJet_vMatching    = AK8Puppijet0_vMatching;
-		SelectedJet_vSize        = AK8Puppijet0_vSize;
-		SelectedJet_partonFlavor = AK8Puppijet0_partonFlavor
-		SelectedJet_hadronFlavor = AK8Puppijet0_hadronFlavor
-		SelectedJet_nCharged     = AK8Puppijet0_nCharged;
-		SelectedJet_nNeutrals    = AK8Puppijet0_nNeutrals;
-		SelectedJet_nParticles   = AK8Puppijet0_nParticles;
-		SelectedJet_ratioCA15_04 = AK8Puppijet0_ratioCA15_04
 		SelectedJet_tau21DDT     = AK8Puppijet0_tau21DDT;
 		SelectedJet_rho          = AK8Puppijet0_rho;
 		SelectedJet_N2DDT        = AK8Puppijet0_N2DDT;
@@ -303,7 +361,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt           = AK8Puppijet1_pt;
 		SelectedJet_eta          = AK8Puppijet1_eta;
 		SelectedJet_phi          = AK8Puppijet1_phi;
-		SelectedJet_mass         = AK8Puppijet1_mass;
 		SelectedJet_csv          = AK8Puppijet1_csv;
 		SelectedJet_CHF          = AK8Puppijet1_CHF;
 		SelectedJet_NHF          = AK8Puppijet1_NHF;
@@ -360,15 +417,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt_JERUp     = AK8Puppijet1_pt_JERUp;
 		SelectedJet_pt_JERDown   = AK8Puppijet1_pt_JERDown;
 		SelectedJet_isTightVJet  = AK8Puppijet1_isTightVJet;
-		SelectedJet_isHadronicV  = AK8Puppijet1_isHadronicV;
-		SelectedJet_vMatching    = AK8Puppijet1_vMatching;
-		SelectedJet_vSize        = AK8Puppijet1_vSize;
-		SelectedJet_partonFlavor = AK8Puppijet1_partonFlavor
-		SelectedJet_hadronFlavor = AK8Puppijet1_hadronFlavor
-		SelectedJet_nCharged     = AK8Puppijet1_nCharged;
-		SelectedJet_nNeutrals    = AK8Puppijet1_nNeutrals;
-		SelectedJet_nParticles   = AK8Puppijet1_nParticles;
-		SelectedJet_ratioCA15_04 = AK8Puppijet1_ratioCA15_04
 		SelectedJet_tau21DDT     = AK8Puppijet1_tau21DDT;
 		SelectedJet_rho          = AK8Puppijet1_rho;
 		SelectedJet_N2DDT        = AK8Puppijet1_N2DDT;
@@ -377,7 +425,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt           = AK8Puppijet2_pt;
 		SelectedJet_eta          = AK8Puppijet2_eta;
 		SelectedJet_phi          = AK8Puppijet2_phi;
-		SelectedJet_mass         = AK8Puppijet2_mass;
 		SelectedJet_csv          = AK8Puppijet2_csv;
 		SelectedJet_CHF          = AK8Puppijet2_CHF;
 		SelectedJet_NHF          = AK8Puppijet2_NHF;
@@ -434,15 +481,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt_JERUp     = AK8Puppijet2_pt_JERUp;
 		SelectedJet_pt_JERDown   = AK8Puppijet2_pt_JERDown;
 		SelectedJet_isTightVJet  = AK8Puppijet2_isTightVJet;
-		SelectedJet_isHadronicV  = AK8Puppijet2_isHadronicV;
-		SelectedJet_vMatching    = AK8Puppijet2_vMatching;
-		SelectedJet_vSize        = AK8Puppijet2_vSize;
-		SelectedJet_partonFlavor = AK8Puppijet2_partonFlavor
-		SelectedJet_hadronFlavor = AK8Puppijet2_hadronFlavor
-		SelectedJet_nCharged     = AK8Puppijet2_nCharged;
-		SelectedJet_nNeutrals    = AK8Puppijet2_nNeutrals;
-		SelectedJet_nParticles   = AK8Puppijet2_nParticles;
-		SelectedJet_ratioCA15_04 = AK8Puppijet2_ratioCA15_04
 		SelectedJet_tau21DDT     = AK8Puppijet2_tau21DDT;
 		SelectedJet_rho          = AK8Puppijet2_rho;
 		SelectedJet_N2DDT        = AK8Puppijet2_N2DDT;
@@ -451,7 +489,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt           = CA15Puppijet0_pt;
 		SelectedJet_eta          = CA15Puppijet0_eta;
 		SelectedJet_phi          = CA15Puppijet0_phi;
-		SelectedJet_mass         = CA15Puppijet0_mass;
 		SelectedJet_csv          = CA15Puppijet0_csv;
 		SelectedJet_CHF          = CA15Puppijet0_CHF;
 		SelectedJet_NHF          = CA15Puppijet0_NHF;
@@ -508,15 +545,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt_JERUp     = CA15Puppijet0_pt_JERUp;
 		SelectedJet_pt_JERDown   = CA15Puppijet0_pt_JERDown;
 		SelectedJet_isTightVJet  = CA15Puppijet0_isTightVJet;
-		SelectedJet_isHadronicV  = CA15Puppijet0_isHadronicV;
-		SelectedJet_vMatching    = CA15Puppijet0_vMatching;
-		SelectedJet_vSize        = CA15Puppijet0_vSize;
-		SelectedJet_partonFlavor = CA15Puppijet0_partonFlavor
-		SelectedJet_hadronFlavor = CA15Puppijet0_hadronFlavor
-		SelectedJet_nCharged     = CA15Puppijet0_nCharged;
-		SelectedJet_nNeutrals    = CA15Puppijet0_nNeutrals;
-		SelectedJet_nParticles   = CA15Puppijet0_nParticles;
-		SelectedJet_ratioCA15_04 = CA15Puppijet0_ratioCA15_04
 		SelectedJet_tau21DDT     = CA15Puppijet0_tau21DDT;
 		SelectedJet_rho          = CA15Puppijet0_rho;
 		SelectedJet_N2DDT        = CA15Puppijet0_N2DDT;
@@ -525,7 +553,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt           = CA15Puppijet1_pt;
 		SelectedJet_eta          = CA15Puppijet1_eta;
 		SelectedJet_phi          = CA15Puppijet1_phi;
-		SelectedJet_mass         = CA15Puppijet1_mass;
 		SelectedJet_csv          = CA15Puppijet1_csv;
 		SelectedJet_CHF          = CA15Puppijet1_CHF;
 		SelectedJet_NHF          = CA15Puppijet1_NHF;
@@ -582,15 +609,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt_JERUp     = CA15Puppijet1_pt_JERUp;
 		SelectedJet_pt_JERDown   = CA15Puppijet1_pt_JERDown;
 		SelectedJet_isTightVJet  = CA15Puppijet1_isTightVJet;
-		SelectedJet_isHadronicV  = CA15Puppijet1_isHadronicV;
-		SelectedJet_vMatching    = CA15Puppijet1_vMatching;
-		SelectedJet_vSize        = CA15Puppijet1_vSize;
-		SelectedJet_partonFlavor = CA15Puppijet1_partonFlavor
-		SelectedJet_hadronFlavor = CA15Puppijet1_hadronFlavor
-		SelectedJet_nCharged     = CA15Puppijet1_nCharged;
-		SelectedJet_nNeutrals    = CA15Puppijet1_nNeutrals;
-		SelectedJet_nParticles   = CA15Puppijet1_nParticles;
-		SelectedJet_ratioCA15_04 = CA15Puppijet1_ratioCA15_04
 		SelectedJet_tau21DDT     = CA15Puppijet1_tau21DDT;
 		SelectedJet_rho          = CA15Puppijet1_rho;
 		SelectedJet_N2DDT        = CA15Puppijet1_N2DDT;
@@ -599,7 +617,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt           = CA15Puppijet2_pt;
 		SelectedJet_eta          = CA15Puppijet2_eta;
 		SelectedJet_phi          = CA15Puppijet2_phi;
-		SelectedJet_mass         = CA15Puppijet2_mass;
 		SelectedJet_csv          = CA15Puppijet2_csv;
 		SelectedJet_CHF          = CA15Puppijet2_CHF;
 		SelectedJet_NHF          = CA15Puppijet2_NHF;
@@ -656,15 +673,6 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_pt_JERUp     = CA15Puppijet2_pt_JERUp;
 		SelectedJet_pt_JERDown   = CA15Puppijet2_pt_JERDown;
 		SelectedJet_isTightVJet  = CA15Puppijet2_isTightVJet;
-		SelectedJet_isHadronicV  = CA15Puppijet2_isHadronicV;
-		SelectedJet_vMatching    = CA15Puppijet2_vMatching;
-		SelectedJet_vSize        = CA15Puppijet2_vSize;
-		SelectedJet_partonFlavor = CA15Puppijet2_partonFlavor
-		SelectedJet_hadronFlavor = CA15Puppijet2_hadronFlavor
-		SelectedJet_nCharged     = CA15Puppijet2_nCharged;
-		SelectedJet_nNeutrals    = CA15Puppijet2_nNeutrals;
-		SelectedJet_nParticles   = CA15Puppijet2_nParticles;
-		SelectedJet_ratioCA15_04 = CA15Puppijet2_ratioCA15_04
 		SelectedJet_tau21DDT     = CA15Puppijet2_tau21DDT;
 		SelectedJet_rho          = CA15Puppijet2_rho;
 		SelectedJet_N2DDT        = CA15Puppijet2_N2DDT;
@@ -679,6 +687,11 @@ Double_t BaconData::PUPPIweight(double pt, double eta) const {
 	return (TMath::Abs(eta) < 1.3 ? 
 		puppi_corr_gen_->Eval(pt) * puppi_corr_reco_cen_->Eval(pt) : 
 		puppi_corr_gen_->Eval(pt) * puppi_corr_reco_for_->Eval(pt));
+}
+
+Bool_t BaconData::IsVMatched(double matching_dR) const {
+	double dR = TMath::Sqrt(TMath::Power(SelectedJet_eta - genVEta, 2) + TMath::Power(SelectedJet_phi - genVPhi, 2));
+	return dR <= matching_dR;
 }
 
 

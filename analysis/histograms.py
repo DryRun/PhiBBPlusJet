@@ -1,4 +1,4 @@
-import os
+ import os
 import sys
 import ROOT
 from DAZSLE.PhiBBPlusJet.analysis_base import AnalysisBase
@@ -56,7 +56,6 @@ class Histograms(AnalysisBase):
 		self._dcsv_cut = params[jet_type]["DCSV"]
 		self._dcsv_cut_loose = params[jet_type]["DCSV_LOOSE"]
 		self._dcsv_min = -999.
-		self._do_optimization = False
 		self._data_source = "data"
 		self._prescale = -1
 
@@ -302,14 +301,14 @@ class Histograms(AnalysisBase):
 				for systematic in self._weight_systematics:
 					self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_{}".format(box, systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
 
-			self._selection_histograms[selection].AddTH3D("dcsv_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt", 
-				"Double-b", 110, -1.1, 1.1,
+			self._selection_histograms[selection].AddTH3D("dbtag_vs_pt_vs_msd", "dbtag_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 80, 40, 600,
-				"p_{T} [GeV]", 12, 400, 1000)
-			self._selection_histograms[selection].AddTH3D("n2ddt_vs_msd_vs_pt", "n2ddt_vs_msd_vs_pt", 
-				"N_{2}^{DDT}", 40, -0.5, 0.5,
+				"p_{T} [GeV]", 12, 400, 1000
+				"Double-b", 110, -1.1, 1.1)
+			self._selection_histograms[selection].AddTH3D("n2ddt_vs_pt_vs_msd", "n2ddt_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 40, 40, 600,
-				"p_{T} [GeV]", 12, 400, 1000)
+				"p_{T} [GeV]", 12, 400, 1000,
+				"N_{2}^{DDT}", 40, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH2D("nparticles_vs_n2", "N_{particles} vs N_{2}^{1}", "N_{2}^{1}", 40, -1., 1., "N_{particles}", 41, -0.5, 40.5)
 	initialize_weight_tools()
 
@@ -493,7 +492,7 @@ class Histograms(AnalysisBase):
 				self._histograms.GetTH1D("inclusive_eta").Fill(fatjet_eta, event_weight)
 				self._histograms.GetTH1D("inclusive_msd").Fill(fatjet_msd, event_weight)
 				self._histograms.GetTH1D("inclusive_n2ddt").Fill(fatjet_n2ddt, event_weight)
-				self._histograms.GetTH1D("inclusive_dcsv").Fill(fatjet_dcsv, event_weight)
+				self._histograms.GetTH1D("inclusive_dcsv").Fill(fatjet_dbtag, event_weight)
 
 				# Run selection and fill histograms
 				self._event_selectors[selection].process_event(self._data, event_weight)
@@ -516,39 +515,132 @@ class Histograms(AnalysisBase):
 					event_boxes.append("fail1")
 				if fatjet_n2ddt > 0. and fatjet_dbtag < self._dbtagcut:
 					event_boxes.append("fail2")
-				for box in event_boxes:
-					self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd".format(box)).Fill()
-					self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_unweighted".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_nevents".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_nevents_weighted".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_pfmet".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_dcsv".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_n2ddt".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_n2".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_tau21ddt".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_pt".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_msd".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_eta".format(box)).Fill()
-					self._selection_histograms[selection].GetTH1D("{}_rho".format(box)).Fill()
-					self._selection_histograms[selection].GetTH2D("{}_met_vs_msd".format(box)).Fill()
-					for systematic in self._weight_systematics:
-						self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_{}".format(box,).Fill()
+				if self._event_selectors[selection].event_pass():
+					for box in event_boxes:
+						self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd".format(box)).Fill(fatjet_msd, fatjet_pt, event_weight)
+						self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_unweighted".format(box)).Fill(fatjet_msd, fatjet_pt)
+						self._selection_histograms[selection].GetTH1D("{}_nevents".format(box)).Fill(0)
+						self._selection_histograms[selection].GetTH1D("{}_nevents_weighted".format(box)).Fill(0, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_pfmet".format(box)).Fill(self._data.pfmet, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_dcsv".format(box)).Fill(fatjet_dbtag, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_n2ddt".format(box)).Fill(fatjet_n2ddt, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_n2".format(box)).Fill(fatjet_n2, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_tau21ddt".format(box)).Fill(fatjet_tau21ddt, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_pt".format(box)).Fill(fatjet_pt, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_msd".format(box)).Fill(fatjet_msd, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_eta".format(box)).Fill(fatjet_eta, event_weight)
+						self._selection_histograms[selection].GetTH1D("{}_rho".format(box)).Fill(fatjet_rho, event_weight)
+						self._selection_histograms[selection].GetTH2D("{}_met_vs_msd".format(box)).Fill(fatjet_msd, self._data.pfmet, event_weight)
+						for systematic in self._weight_systematics:
+							self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_{}".format(box, systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+
+					self._selection_histograms[selection].GetTH3D("dbtag_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_dbtag)
+					self._selection_histograms[selection].GetTH3D("n2ddt_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_n2ddt)
+					self._selection_histograms[selection].GetTH2D("nparticles_vs_n2").Fill(fatjet_n2, fatjet_nParticles)
+
+	def finish(self):
+		if self._output_path == "":
+			self._output_path = "/uscms/home/dryu/DAZSLE/data/LimitSetting/InputHistograms_{}.root".format(time.time)
+			print "[SignalCutflow::finish] WARNING : Output path was not provided! Saving to {}".format(self._output_path)
+		print "[SignalCutflow::finish] INFO : Saving histograms to {}".format(self._output_path)
+		f_out = ROOT.TFile(self._output_path, "RECREATE")
+		self._histograms.SaveAll(f_out)
+		for selection, histogrammer in self._selection_histograms.iteritems():
+			histogrammer.SaveAll(f_out)
+		for selection, selector in self._event_selectors.iteritems():
+			selector.print_cutflow()
+			selector.make_cutflow_histograms(f_out)
+			selector.save_nminusone_histograms(f_out)
+		f_out.Close()
 
 
+if __name__ == "__main__":
+	import argparse
+	parser = argparse.ArgumentParser(description='Produce and plot ieta-iphi histograms to look for buggy events')
+	input_group = parser.add_mutually_exclusive_group() 
+	input_group.add_argument('--supersamples', type=str, help="List of supersamples to fun, comma separated")
+	input_group.add_argument('--files', type=str, help="Input file name(s), comma separated")
+	input_group.add_argument('--files_txt', type=str, help="Text files with lists of inputs, comma separated")
+	parser.add_argument('--output_folder', type=str, help="Output folder")
+	parser.add_argument('--label', type=str, help="Output file label")
+	parser.add_argument('--jet_type', type=str, default="AK8", help="AK8 or CA15")
+	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
+	args = parser.parse_args()
 
+	# Make list of input files
+	samples = []
+	sample_files = {}
+	if args.supersamples:
+		supersamples = args.supersamples.split(",")
+		samples = [] 
+		for supersample in supersamples:
+			samples.extend(config.samples[supersample])
+			for sample in config.samples[supersample]:
+				if args.skim_inputs:
+					sample_files[sample] = config.skims[sample]
+				else:
+					sample_files[sample] = config.sklims[sample]
+	elif args.files:
+		sample_files[args.label] = args.files.split(",")
+		samples.append(args.label)
+	elif args.files_txt:
+		samples.append(args.label)
+		sample_files[args.label] = []
+		with open(args.files_txt, 'r') as f:
+			for line in f:
+				sample_files[args.label].append(line.strip())
 
-			self._selection_histograms[selection].AddTH1D("pass_msd", "msd", "msd", 85, 5, 600)
-			self._selection_histograms[selection].AddTH1D("pass_eta", "eta", "eta", 60, -3., 3.)
+	for sample in samples:
+		print "\n *** Running sample {}".format(sample)
+		if "Sbb" in sample or args.skim_inputs or "ZPrime" in sample:
+			tree_name = "Events"
+		else:
+			tree_name = "otree"
 
-			self._selection_histograms[selection].AddTH1D("pass_rho", "rho", "rho", 80, -8., 0.)
-			self._selection_histograms[selection].AddTH2D("met_msd_pass", "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
+		# Sanity check: make sure tree exists in file
+		for filename in sample_files[sample]:
+			print "[event_selection_histograms] INFO : Checking contents of file {}".format(filename)
+			f = ROOT.TFile.Open(filename, "READ")
+			t = f.Get(tree_name)
+			if not t:
+				if tree_name == "otree":
+					backup_tree_name = "Events"
+				else:
+					backup_tree_name = "otree"
+				t_backup = f.Get(backup_tree_name)
+				if t_backup:
+					print "[setup_limits] WARNING : Didn't find tree {} in input file, but did find {}. Changing the tree name, but try to fix this.".format(tree_name, backup_tree_name)
+					tree_name = backup_tree_name
+				else:
+					print "[setup_limits] ERROR : Didn't find tree {} in input file, nor {}. Quitting!".format(tree_name, backup_tree_name)
+					sys.exit(1)
+			# Check that the "NEvents" histogram is present
+			h_NEvents = f.Get("NEvents")
+			if not h_NEvents:
+				if "data" in sample:
+					print "[setup_limits] ERROR : NEvents histogram in not in this file! It is probably corrupt. This is data, so this problem is fatal."
+					sys.exit(1)
+				else:
+					print "[setup_limits] WARNING : NEvents histogram in not in this file! It is probably corrupt. This is MC, so I am skipping the file. But, you probably want to remove from the input list."
+					sample_files[sample].remove(filename)
+			
+		limit_histogrammer = Histograms(sample, tree_name=tree_name, jet_type=args.jet_type)
+		output_file_basename ="InputHistograms_{}_{}.root".format(sample, args.jet_type) 
+		if args.output_folder:
+			limit_histogrammer.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
+		else:
+			limit_histogrammer.set_output_path("/uscms/home/dryu/DAZSLE/data/LimitSetting/{}".format(output_file_basename))
+		for filename in sample_files[sample]:
+			print "Input file {}".format(filename)
+			limit_histogrammer.add_file(filename)
+		#limit_histogrammer.set_jet_type(args.jet_type)
+		if "JetHTRun2016" in sample or "SingleMuRun2016" in sample:
+			limit_histogrammer.set_data_source("data")
+		else:
+			limit_histogrammer.set_data_source("simulation")
+		if "ps10" in sample:
+			limit_histogrammer.set_prescale(10)
+		limit_histogrammer.start()
+		limit_histogrammer.run()
+		limit_histogrammer.finish()
 
-			self._selection_histograms[selection].AddTH3D("dcsv_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt", 
-				"Double-b", 110, -1.1, 1.1,
-				"m_{SD} [GeV]", 80, 40, 600,
-				"p_{T} [GeV]", 12, 400, 1000)
-			self._selection_histograms[selection].AddTH3D("n2ddt_vs_msd_vs_pt", "n2ddt_vs_msd_vs_pt", 
-				"N_{2}^{DDT}", 40, -0.5, 0.5,
-				"m_{SD} [GeV]", 40, 40, 600,
-				"p_{T} [GeV]", 12, 400, 1000)
-			self._selection_histograms[selection].AddTH2D("nparticles_vs_n2", "N_{particles} vs N_{2}^{1}", "N_{2}^{1}", 40, -1., 1., "N_{particles}", 41, -0.5, 40.5)
