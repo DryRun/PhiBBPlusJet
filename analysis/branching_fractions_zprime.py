@@ -80,7 +80,7 @@ def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 
 	branching_fractions = {}
 	for qflavor in quarks:
-	print "debug 6 {}".format(qflavor)
+		print "debug 6 {}".format(qflavor)
 		branching_fractions[qflavor] = np.array([branching_fraction(qflavor, mzp, gq, mchi, gchi, v_type) for mzp in mzps])
 	print "debug 7"
 	branching_fractions["udsc"] = branching_fractions["u"] + branching_fractions["d"] + branching_fractions["s"] + branching_fractions["c"]
