@@ -112,11 +112,11 @@ def plot_all_types(gqphi, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	br_pseudoscalar_cc = np.array([branching_fraction("c", mphi, gqphi, mchi, gchi, "pseudoscalar") for mphi in mphis])
 
 	fig, ax1 = plt.subplots()
-	ax1.set_xlabel(r"$m_{\Phi/A}$ [GeV]")
+	ax1.set_xlabel(r"$m_{\Phi/A}$ [GeV]", fontsize=18)
 
 	ax1.set_yscale("linear")
 	ax1.set_ylim(0., 1.)
-	ax1.set_ylabel("Branching fraction")
+	ax1.set_ylabel("Branching fraction", fontsize=18)
 
 	# Plot scalar
 	plotobj_br_scalar_tt, = ax1.plot(mphis, br_scalar_tt, color=darks[2], linewidth=1.0, linestyle="-", label=r"$t\bar{t}$")
