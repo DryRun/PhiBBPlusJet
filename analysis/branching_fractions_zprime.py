@@ -89,7 +89,7 @@ def plot_all_types(gq, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	plotobj_vector_t, = ax1.plot(mzps, branching_fractions_vector["t"], color=darks[2], linewidth=1.0, linestyle="-", label=r"$t$")
 	plotobj_vector_b, = ax1.plot(mzps, branching_fractions_vector["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
 	plotobj_vector_udsc, = ax1.plot(mzps, branching_fractions_vector["udsc"], color=darks[5], linewidth=1.0, linestyle="-", label=r"$u/d/s/c$")
-	vector_legend = plt.legend(handles=[plotobj_vector_t, plotobj_vector_b, plotobj_vector_udsc], loc=(0.07, 0.33), title="Vector")
+	vector_legend = plt.legend(handles=[plotobj_vector_t, plotobj_vector_b, plotobj_vector_udsc], loc=(0.05, 0.33), title="Vector")
 	ax1.add_artist(vector_legend)
 
 	plotobj_axialvector_t, = ax1.plot(mzps, branching_fractions_axialvector["t"], color=darks[2], linewidth=1.0, linestyle="--", label=r"$t$")
