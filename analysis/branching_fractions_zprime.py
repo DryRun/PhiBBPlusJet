@@ -1,13 +1,10 @@
-print "Imports"
 import os
 import sys
 import math
 import cmath
-print "Importing numpy"
 import numpy as np
-print "...done. Importing matplotlib"
 import matplotlib.pyplot as plt
-print "...done"
+plt.ioff()
 import seaborn as sns
 darks = sns.color_palette("dark")
 pastels = sns.color_palette("pastel")
@@ -67,25 +64,17 @@ def branching_fraction_gg(mzp, gq, mchi, gchi, v_type):
 def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	print "plot()"
 	mzps = np.arange(mass_range[0], mass_range[1], 1.)
-	print "debug 1"
 	quark_widths = {}
 	for qflavor in quarks:
-		print "debug 2 {}".format(qflavor)
 		quark_widths[qflavor] = np.array([partial_width(qflavor, mzp, gq, v_type) for mzp in mzps])
-	print "debug 3"
 	quark_widths["udsc"] = quark_widths["u"] + quark_widths["d"] + quark_widths["s"] + quark_widths["c"]
-	print "debug 4"
 	width_total = np.array([total_width(mzp, gq, mchi, gchi, v_type) for mzp in mzps])
-	print "debug 5"
 
 	branching_fractions = {}
 	for qflavor in quarks:
-		print "debug 6 {}".format(qflavor)
 		branching_fractions[qflavor] = np.array([branching_fraction(qflavor, mzp, gq, mchi, gchi, v_type) for mzp in mzps])
-	print "debug 7"
 	branching_fractions["udsc"] = branching_fractions["u"] + branching_fractions["d"] + branching_fractions["s"] + branching_fractions["c"]
 
-	print "debug 8"
 
 	fig, ax1 = plt.subplots()
 	if v_type == "vector":
@@ -93,7 +82,6 @@ def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	elif v_type == "axialvector":
 		ax1.set_xlabel(r"$m_{Z'_{av}}$ [GeV]")
 
-	print "debug 9"
 
 	ax1.set_yscale("linear")
 	ax1.set_xlim(0., mass_range[1])
@@ -103,9 +91,7 @@ def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	ax1.plot(mzps, branching_fractions["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
 	ax1.plot(mzps, branching_fractions["udsc"], color=darks[5], linewidth=1.0, linestyle="-", label=r"$u/d/s/c$")
 	ax1.legend(loc="center left")
-	print "debug 10"
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_zp_{}.png".format(v_type)))
-	print "debug 11"
 
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(r"$\Gamma$ [GeV]")
@@ -116,13 +102,10 @@ def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	ax2.plot(mzps, quark_widths["t"], color=pastels[2], linewidth=1.0, linestyle="--", label=r"$t$")
 	ax2.plot(mzps, quark_widths["b"], color=pastels[0], linewidth=1.0, linestyle="--", label=r"$b$")
 	ax2.plot(mzps, quark_widths["udsc"], color=pastels[5], linewidth=1.0, linestyle="--", label=r"$u/d/s/c$")
-	print "debug 12"
 	ax2.legend(loc="center right")
-	print "debug 13"
 
 	#plt.show()
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brsandwidths_zp_{}.png".format(v_type)))
-	print "debug 14"
 	print "Done with plot()"
 
 if __name__ == "__main__":

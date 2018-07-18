@@ -4,6 +4,7 @@ import math
 import cmath
 import numpy as np
 import matplotlib.pyplot as plt
+plt.ioff()
 import seaborn as sns
 darks = sns.color_palette("dark")
 pastels = sns.color_palette("pastel")
@@ -112,6 +113,7 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax1.plot(mphis, br_cc, color=darks[5], linewidth=1.0, linestyle="-", label=r"$c\bar{c}$")
 	ax1.plot(mphis, br_gg, color=darks[1], linewidth=1.0, linestyle="-", label=r"$gg$")
 	ax1.legend(loc="center left")
+	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_spin0_{}.png".format(phi_type)))
 
 	ax2 = ax1.twinx()
 	ax2.set_ylabel(r"$\Gamma$ [GeV]")
@@ -126,7 +128,7 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax2.legend(loc="center right")
 
 	#plt.show()
-	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_{}.png".format(phi_type)))
+	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brsandwidths_{}.png".format(phi_type)))
 
 
 if __name__ == "__main__":
