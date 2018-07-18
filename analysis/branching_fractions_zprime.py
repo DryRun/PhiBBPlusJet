@@ -61,6 +61,43 @@ def branching_fraction(qflavor, mzp, gq, mchi, gchi, v_type):
 def branching_fraction_gg(mzp, gq, mchi, gchi, v_type):
 	return gg_width(mzp, gq, v_type) / total_width(mzp, gq, mchi, gchi, v_type)
 
+def plot_all_types(gq, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
+	print "plot()"
+	mzps = np.arange(mass_range[0], mass_range[1], 1.)
+
+	branching_fractions_vector = {}
+	for qflavor in quarks:
+		branching_fractions_vector[qflavor] = np.array([branching_fraction(qflavor, mzp, gq, mchi, gchi, "vector") for mzp in mzps])
+	branching_fractions_vector["udsc"] = branching_fractions_vector["u"] + branching_fractions_vector["d"] + branching_fractions_vector["s"] + branching_fractions_vector["c"]
+
+	branching_fractions_axialvector = {}
+	for qflavor in quarks:
+		branching_fractions_axialvector[qflavor] = np.array([branching_fraction(qflavor, mzp, gq, mchi, gchi, "axialvector") for mzp in mzps])
+	branching_fractions_axialvector["udsc"] = branching_fractions_axialvector["u"] + branching_fractions_axialvector["d"] + branching_fractions_axialvector["s"] + branching_fractions_axialvector["c"]
+
+
+	fig, ax1 = plt.subplots()
+	ax1.set_xlabel(r"$m_{Z'$ [GeV]")
+
+	ax1.set_yscale("linear")
+	ax1.set_xlim(0., mass_range[1])
+	ax1.set_ylim(0., 1.)
+	ax1.set_ylabel("Branching fraction")
+
+	ax1.plot(mzps, branching_fractions_vector["t"], color=darks[2], linewidth=1.0, linestyle="-", label=r"$t$")
+	ax1.plot(mzps, branching_fractions_vector["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
+	ax1.plot(mzps, branching_fractions_vector["udsc"], color=darks[5], linewidth=1.0, linestyle="-", label=r"$u/d/s/c$")
+	vector_legend = plt.legend(handles=[branching_fractions_vector["t"], branching_fractions_vector["b"], branching_fractions_vector["udsc"]], loc="center left", title="Vector")
+	ax1.add_artist(vector_legend)
+
+	ax1.plot(mzps, branching_fractions_axialvector["t"], color=darks[2], linewidth=1.0, linestyle="-", label=r"$t$")
+	ax1.plot(mzps, branching_fractions_axialvector["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
+	ax1.plot(mzps, branching_fractions_axialvector["udsc"], color=darks[5], linewidth=1.0, linestyle="-", label=r"$u/d/s/c$")
+	axialvector_legend = plt.legend(handles=[branching_fractions_axialvector["t"], branching_fractions_axialvector["b"], branching_fractions_axialvector["udsc"]], loc="center left", title="Axial vector")
+	ax1.add_artist(axialvector_legend)
+
+	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_zp_both.png"))
+
 def plot(gq, v_type, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	print "plot()"
 	mzps = np.arange(mass_range[0], mass_range[1], 1.)
@@ -114,5 +151,6 @@ if __name__ == "__main__":
 	#	print "form_factor({}) = {}".format(tau, form_factor(tau, "vector"))
 	#print branching_fraction("b", 300., 1., 1.e10, 0., "vector")
 	print "Welcome to branching_fractions_zprime"
-	plot(1., "vector")
-	plot(1., "axialvector")
+	plot_all_types(1.)
+	#plot(1., "vector")
+	#plot(1., "axialvector")

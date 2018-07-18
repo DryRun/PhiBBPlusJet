@@ -117,19 +117,19 @@ def plot_all_types(gqphi, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax1.set_ylabel("Branching fraction")
 
 	# Plot scalar
-	plotobj_br_scalar_tt, = ax1.plot(mphis, br_scalar_tt, color=darks[2], linewidth=1.0, linestyle="-", label=r"$Scalar t\bar{t}$")
-	plotobj_br_scalar_bb, = ax1.plot(mphis, br_scalar_bb, color=darks[0], linewidth=1.0, linestyle="-", label=r"$Scalar b\bar{b}$")
-	plotobj_br_scalar_cc, = ax1.plot(mphis, br_scalar_cc, color=darks[5], linewidth=1.0, linestyle="-", label=r"$Scalar c\bar{c}$")
-	plotobj_br_scalar_gg, = ax1.plot(mphis, br_scalar_gg, color=darks[1], linewidth=1.0, linestyle="-", label=r"$Scalar gg$")
-	scalar_legend = plt.legend(handles=[plotobj_br_scalar_tt, plotobj_br_scalar_bb, plotobj_br_scalar_cc, plotobj_br_scalar_gg, ], loc="center left")
+	plotobj_br_scalar_tt, = ax1.plot(mphis, br_scalar_tt, color=darks[2], linewidth=1.0, linestyle="-", label=r"$t\bar{t}$")
+	plotobj_br_scalar_bb, = ax1.plot(mphis, br_scalar_bb, color=darks[0], linewidth=1.0, linestyle="-", label=r"$b\bar{b}$")
+	plotobj_br_scalar_cc, = ax1.plot(mphis, br_scalar_cc, color=darks[5], linewidth=1.0, linestyle="-", label=r"$c\bar{c}$")
+	plotobj_br_scalar_gg, = ax1.plot(mphis, br_scalar_gg, color=darks[1], linewidth=1.0, linestyle="-", label=r"$gg$")
+	scalar_legend = plt.legend(handles=[plotobj_br_scalar_tt, plotobj_br_scalar_bb, plotobj_br_scalar_cc, plotobj_br_scalar_gg, ], loc="center left", title="Scalar")
 	ax1.add_artist(scalar_legend)
 
 	# Plot pseudoscalar
-	plotobj_br_pseudoscalar_tt, = ax1.plot(mphis, br_pseudoscalar_tt, color=darks[2], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar t\bar{t}$")
-	plotobj_br_pseudoscalar_bb, = ax1.plot(mphis, br_pseudoscalar_bb, color=darks[0], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar b\bar{b}$")
-	plotobj_br_pseudoscalar_cc, = ax1.plot(mphis, br_pseudoscalar_cc, color=darks[5], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar c\bar{c}$")
-	plotobj_br_pseudoscalar_gg, = ax1.plot(mphis, br_pseudoscalar_gg, color=darks[1], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar gg$")
-	pseudoscalar_legend = plt.legend(handles=[plotobj_br_pseudoscalar_tt, plotobj_br_pseudoscalar_bb, plotobj_br_pseudoscalar_cc, plotobj_br_pseudoscalar_gg, ], loc="center right")
+	plotobj_br_pseudoscalar_tt, = ax1.plot(mphis, br_pseudoscalar_tt, color=darks[2], linewidth=1.0, linestyle="--", label=r"$t\bar{t}$")
+	plotobj_br_pseudoscalar_bb, = ax1.plot(mphis, br_pseudoscalar_bb, color=darks[0], linewidth=1.0, linestyle="--", label=r"$b\bar{b}$")
+	plotobj_br_pseudoscalar_cc, = ax1.plot(mphis, br_pseudoscalar_cc, color=darks[5], linewidth=1.0, linestyle="--", label=r"$c\bar{c}$")
+	plotobj_br_pseudoscalar_gg, = ax1.plot(mphis, br_pseudoscalar_gg, color=darks[1], linewidth=1.0, linestyle="--", label=r"$gg$")
+	pseudoscalar_legend = plt.legend(handles=[plotobj_br_pseudoscalar_tt, plotobj_br_pseudoscalar_bb, plotobj_br_pseudoscalar_cc, plotobj_br_pseudoscalar_gg, ], loc="center right", title="Pseudoscalar")
 	ax1.add_artist(pseudoscalar_legend)
 
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_spin0_both.png"))
