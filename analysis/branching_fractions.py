@@ -85,6 +85,56 @@ def branching_fraction(f, mphi, gqphi, mchi, gchi, phi_type):
 def branching_fraction_gg(mphi, gqphi, mchi, gchi, phi_type):
 	return gg_width(mphi, gqphi, phi_type) / total_width(mphi, gqphi, mchi, gchi, phi_type)
 
+def plot_all_types(gqphi, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
+	mphis = np.arange(mass_range[0], mass_range[1], 1.)
+	width_scalar_gg = np.array([gg_width(mphi, gqphi, "scalar") for mphi in mphis])
+	width_scalar_tt = np.array([partial_width("t", mphi, gqphi, "scalar") for mphi in mphis])
+	width_scalar_bb = np.array([partial_width("b", mphi, gqphi, "scalar") for mphi in mphis])
+	width_scalar_cc = np.array([partial_width("c", mphi, gqphi, "scalar") for mphi in mphis])
+	width_scalar_total = np.array([total_width(mphi, gqphi, mchi, gchi, "scalar") for mphi in mphis])
+
+	width_pseudoscalar_gg = np.array([gg_width(mphi, gqphi, "pseudoscalar") for mphi in mphis])
+	width_pseudoscalar_tt = np.array([partial_width("t", mphi, gqphi, "pseudoscalar") for mphi in mphis])
+	width_pseudoscalar_bb = np.array([partial_width("b", mphi, gqphi, "pseudoscalar") for mphi in mphis])
+	width_pseudoscalar_cc = np.array([partial_width("c", mphi, gqphi, "pseudoscalar") for mphi in mphis])
+	width_pseudoscalar_total = np.array([total_width(mphi, gqphi, mchi, gchi, "pseudoscalar") for mphi in mphis])
+
+	br_scalar_gg = np.array([branching_fraction_gg(mphi, gqphi, mchi, gchi, "scalar") for mphi in mphis])
+	br_scalar_tt = np.array([branching_fraction("t", mphi, gqphi, mchi, gchi, "scalar") for mphi in mphis])
+	br_scalar_bb = np.array([branching_fraction("b", mphi, gqphi, mchi, gchi, "scalar") for mphi in mphis])
+	br_scalar_cc = np.array([branching_fraction("c", mphi, gqphi, mchi, gchi, "scalar") for mphi in mphis])
+
+	br_pseudoscalar_gg = np.array([branching_fraction_gg(mphi, gqphi, mchi, gchi, "pseudoscalar") for mphi in mphis])
+	br_pseudoscalar_tt = np.array([branching_fraction("t", mphi, gqphi, mchi, gchi, "pseudoscalar") for mphi in mphis])
+	br_pseudoscalar_bb = np.array([branching_fraction("b", mphi, gqphi, mchi, gchi, "pseudoscalar") for mphi in mphis])
+	br_pseudoscalar_cc = np.array([branching_fraction("c", mphi, gqphi, mchi, gchi, "pseudoscalar") for mphi in mphis])
+
+	fig, ax1 = plt.subplots()
+	ax1.set_xlabel(r"$m_{\Phi/A}$ [GeV]")
+
+	ax1.set_yscale("linear")
+	ax1.set_ylim(0., 1.)
+	ax1.set_ylabel("Branching fraction")
+
+	# Plot scalar
+	plotobj_br_scalar_tt, = ax1.plot(mphis, br_scalar_tt, color=darks[2], linewidth=1.0, linestyle="-", label=r"$Scalar t\bar{t}$")
+	plotobj_br_scalar_bb, = ax1.plot(mphis, br_scalar_bb, color=darks[0], linewidth=1.0, linestyle="-", label=r"$Scalar b\bar{b}$")
+	plotobj_br_scalar_cc, = ax1.plot(mphis, br_scalar_cc, color=darks[5], linewidth=1.0, linestyle="-", label=r"$Scalar c\bar{c}$")
+	plotobj_br_scalar_gg, = ax1.plot(mphis, br_scalar_gg, color=darks[1], linewidth=1.0, linestyle="-", label=r"$Scalar gg$")
+	scalar_legend = plt.legend(handles=[plotobj_br_scalar_tt, plotobj_br_scalar_bb, plotobj_br_scalar_cc, plotobj_br_scalar_gg, ], loc="center left")
+	ax1.add_artist(scalar_legend)
+
+	# Plot pseudoscalar
+	plotobj_br_pseudoscalar_tt, = ax1.plot(mphis, br_pseudoscalar_tt, color=darks[2], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar t\bar{t}$")
+	plotobj_br_pseudoscalar_bb, = ax1.plot(mphis, br_pseudoscalar_bb, color=darks[0], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar b\bar{b}$")
+	plotobj_br_pseudoscalar_cc, = ax1.plot(mphis, br_pseudoscalar_cc, color=darks[5], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar c\bar{c}$")
+	plotobj_br_pseudoscalar_gg, = ax1.plot(mphis, br_pseudoscalar_gg, color=darks[1], linewidth=1.0, linestyle="--", label=r"$Pseudoscalar gg$")
+	pseudoscalar_legend = plt.legend(handles=[plotobj_br_pseudoscalar_tt, plotobj_br_pseudoscalar_bb, plotobj_br_pseudoscalar_cc, plotobj_br_pseudoscalar_gg, ], loc="center right")
+	ax1.add_artist(pseudoscalar_legend)
+
+	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_spin0_both.png"))
+
+
 def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	mphis = np.arange(mass_range[0], mass_range[1], 1.)
 	width_gg = np.array([gg_width(mphi, gqphi, phi_type) for mphi in mphis])
@@ -112,7 +162,7 @@ def plot(gqphi, phi_type, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	ax1.plot(mphis, br_bb, color=darks[0], linewidth=1.0, linestyle="-", label=r"$b\bar{b}$")
 	ax1.plot(mphis, br_cc, color=darks[5], linewidth=1.0, linestyle="-", label=r"$c\bar{c}$")
 	ax1.plot(mphis, br_gg, color=darks[1], linewidth=1.0, linestyle="-", label=r"$gg$")
-	ax1.legend(loc="center left")
+	ax1.legend(loc="center right")
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_spin0_{}.png".format(phi_type)))
 
 	ax2 = ax1.twinx()
@@ -137,5 +187,6 @@ if __name__ == "__main__":
 	#	print "form_factor({}) = {}".format(tau, form_factor(tau, "scalar"))
 	#print branching_fraction("b", 300., 1., 1.e10, 0., "scalar")
 
-	plot(1., "scalar")
-	plot(1., "pseudoscalar")
+	plot_all_types(1.)
+	#plot(1., "scalar")
+	#plot(1., "pseudoscalar")
