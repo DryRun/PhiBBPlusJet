@@ -122,7 +122,7 @@ def plot_all_types(gqphi, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	plotobj_br_scalar_tt, = ax1.plot(mphis, br_scalar_tt, color=darks[2], linewidth=1.0, linestyle="-", label=r"$t\bar{t}$")
 	plotobj_br_scalar_bb, = ax1.plot(mphis, br_scalar_bb, color=darks[0], linewidth=1.0, linestyle="-", label=r"$b\bar{b}$")
 	plotobj_br_scalar_cc, = ax1.plot(mphis, br_scalar_cc, color=darks[5], linewidth=1.0, linestyle="-", label=r"$c\bar{c}$")
-	plotobj_br_scalar_gg, = ax1.plot(mphis, br_scalar_gg, color=darks[1], linewidth=1.0, linestyle="-", label=r"$gg$")
+	plotobj_br_scalar_gg, = ax1.plot(mphis, br_scalar_gg, color=darks[3], linewidth=1.0, linestyle="-", label=r"$gg$")
 	scalar_legend = plt.legend(handles=[plotobj_br_scalar_tt, plotobj_br_scalar_bb, plotobj_br_scalar_cc, plotobj_br_scalar_gg, ], loc=(0.75, 0.55), title="   Scalar   ")
 	ax1.add_artist(scalar_legend)
 
@@ -130,7 +130,7 @@ def plot_all_types(gqphi, mass_range=[1., 500.], mchi=1.e10, gchi=0.):
 	plotobj_br_pseudoscalar_tt, = ax1.plot(mphis, br_pseudoscalar_tt, color=darks[2], linewidth=1.0, linestyle="--", label=r"$t\bar{t}$")
 	plotobj_br_pseudoscalar_bb, = ax1.plot(mphis, br_pseudoscalar_bb, color=darks[0], linewidth=1.0, linestyle="--", label=r"$b\bar{b}$")
 	plotobj_br_pseudoscalar_cc, = ax1.plot(mphis, br_pseudoscalar_cc, color=darks[5], linewidth=1.0, linestyle="--", label=r"$c\bar{c}$")
-	plotobj_br_pseudoscalar_gg, = ax1.plot(mphis, br_pseudoscalar_gg, color=darks[1], linewidth=1.0, linestyle="--", label=r"$gg$")
+	plotobj_br_pseudoscalar_gg, = ax1.plot(mphis, br_pseudoscalar_gg, color=darks[3], linewidth=1.0, linestyle="--", label=r"$gg$")
 	pseudoscalar_legend = plt.legend(handles=[plotobj_br_pseudoscalar_tt, plotobj_br_pseudoscalar_bb, plotobj_br_pseudoscalar_cc, plotobj_br_pseudoscalar_gg, ], loc=(0.75, 0.2), title="Pseudoscalar")
 	ax1.add_artist(pseudoscalar_legend)
 
