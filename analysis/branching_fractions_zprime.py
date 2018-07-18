@@ -92,10 +92,10 @@ def plot_all_types(gq, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 	vector_legend = plt.legend(handles=[plotobj_vector_t, plotobj_vector_b, plotobj_vector_udsc], loc="center left", title="Vector")
 	ax1.add_artist(vector_legend)
 
-	plotobj_axialvector_t, = ax1.plot(mzps, branching_fractions_axialvector["t"], color=darks[2], linewidth=1.0, linestyle="-", label=r"$t$")
-	plotobj_axialvector_b, = ax1.plot(mzps, branching_fractions_axialvector["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
-	plotobj_axialvector_udsc, = ax1.plot(mzps, branching_fractions_axialvector["udsc"], color=darks[5], linewidth=1.0, linestyle="-", label=r"$u/d/s/c$")
-	axialvector_legend = plt.legend(handles=[plotobj_axialvector_t, plotobj_axialvector_b, plotobj_axialvector_udsc], loc="center left", title="Axial vector")
+	plotobj_axialvector_t, = ax1.plot(mzps, branching_fractions_axialvector["t"], color=darks[2], linewidth=1.0, linestyle="--", label=r"$t$")
+	plotobj_axialvector_b, = ax1.plot(mzps, branching_fractions_axialvector["b"], color=darks[0], linewidth=1.0, linestyle="--", label=r"$b$")
+	plotobj_axialvector_udsc, = ax1.plot(mzps, branching_fractions_axialvector["udsc"], color=darks[5], linewidth=1.0, linestyle="--", label=r"$u/d/s/c$")
+	axialvector_legend = plt.legend(handles=[plotobj_axialvector_t, plotobj_axialvector_b, plotobj_axialvector_udsc], loc="center right", title="Axial vector")
 	ax1.add_artist(axialvector_legend)
 
 	plt.savefig(os.path.expandvars("$HOME/DAZSLE/data/Signal/figures/brs_zp_both.png"))
