@@ -77,7 +77,7 @@ def plot_all_types(gq, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 
 
 	fig, ax1 = plt.subplots()
-	ax1.set_xlabel(r"$m_{Z'$ [GeV]")
+	ax1.set_xlabel(r"$m_{Z'}$ [GeV]")
 
 	ax1.set_yscale("linear")
 	ax1.set_xlim(0., mass_range[1])
