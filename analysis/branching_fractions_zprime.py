@@ -79,12 +79,12 @@ def plot_all_types(gq, mass_range=[1., 800.], mchi=1.e10, gchi=0.):
 
 
 	fig, ax1 = plt.subplots()
-	ax1.set_xlabel(r"$m_{Z'}$ [GeV]")
+	ax1.set_xlabel(r"$m_{Z'}$ [GeV]", fontsize=18)
 
 	ax1.set_yscale("linear")
 	ax1.set_xlim(0., mass_range[1])
 	ax1.set_ylim(0., 1.)
-	ax1.set_ylabel("Branching fraction")
+	ax1.set_ylabel("Branching fraction", fontsize=18)
 
 	plotobj_vector_t, = ax1.plot(mzps, branching_fractions_vector["t"], color=darks[2], linewidth=1.0, linestyle="-", label=r"$t$")
 	plotobj_vector_b, = ax1.plot(mzps, branching_fractions_vector["b"], color=darks[0], linewidth=1.0, linestyle="-", label=r"$b$")
