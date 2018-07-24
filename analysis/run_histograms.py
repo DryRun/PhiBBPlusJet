@@ -5,6 +5,8 @@ import os
 import sys
 import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 from DAZSLE.ZPrimePlusJet.xbb_config import analysis_parameters as params
+import math
+from math import floor, ceil
 
 if __name__ == "__main__":
 	import argparse
@@ -23,8 +25,8 @@ if __name__ == "__main__":
 	parser.add_argument('--label', type=str, help="If running with --files, need to specify a label manually, in lieu of the sample names, for the output file naming.")
 	parser.add_argument('--luminosity', type=float, default=35900, help="Luminosity in pb^-1")
 	parser.add_argument('--jet_type', type=str, default="AK8", help="AK8 or CA15")
-	parser.add_argument('--data_source', type=str, default="data", help="data or simulation")
 	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
+	args = parser.parse_args()
 
 	if args.crun:
 		# Make a list of input samples and files
@@ -114,7 +116,7 @@ if __name__ == "__main__":
 					files_per_job = 10
 				elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 					files_per_job = 3
-			n_jobs = int(math.ceil(1. * len(sample_files[sample]) / files_per_job))
+			n_jobs = int(ceil(1. * len(sample_files[sample]) / files_per_job))
 
 			job_script_path = "{}/run_csubjob.sh".format(submission_directory)
 			job_script = open(job_script_path, 'w')
