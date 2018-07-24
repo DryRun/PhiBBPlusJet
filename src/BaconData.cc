@@ -203,7 +203,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 
 
     // Selected jet stuff
-    WhichJet_t which_jet;
+    WhichJet_t which_jet = kAK8_0;
     if (_jettype == kAK8) {
     	if (_jetordering == kPt) {
     		double max_pt = 0.;
