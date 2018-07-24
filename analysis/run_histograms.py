@@ -90,7 +90,7 @@ if __name__ == "__main__":
 		for sample in samples:
 			start_directory = os.getcwd()
 			job_tag = "job_{}_{}_{}".format(sample, args.jet_type, int(floor(time.time())))
-			submission_directory = os.path.expandvars("$HOME/DAZSLE/data/Histograms/condor/{}".format(job_tag))
+			submission_directory = os.path.expandvars("$HOME/PhiBB2017/data/Histograms/condor/{}".format(job_tag))
 			os.system("mkdir -pv {}".format(submission_directory))
 			os.chdir(submission_directory)
 
@@ -178,11 +178,11 @@ if __name__ == "__main__":
 			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
 			hadd_script.write("\tfi\n")
 			hadd_script.write("done\n")
-			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/LimitSetting/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
+			hadd_script.write(os.path.expandvars("hadd $HOME/PhiBB2017/data/Histograms/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
 			hadd_script.close()
 			os.chdir(start_directory)
 		# One hadd script to rule them all
-		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/LimitSetting/condor/master_hadd_{}".format(args.jet_type))
+		master_hadd_script_path = os.path.expandvars("$HOME/PhiBB2017/data/Histograms/condor/master_hadd_{}".format(args.jet_type))
 		if not args.all:
 			master_hadd_script_path += "_" + str(int(floor(time.time())))
 		master_hadd_script_path += ".sh"
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 				selection_prefix = "muCR"
 			elif "Preselection" in selection:
 				selection_prefix = "Preselection"
-			output_file = ROOT.TFile("/uscms/home/dryu/DAZSLE/data/LimitSetting/histograms_{}_{}.root".format(selection, args.jet_type), "RECREATE")
+			output_file = ROOT.TFile("$HOME/PhiBBPlusJet/data/Histograms/histograms_{}_{}.root".format(selection, args.jet_type), "RECREATE")
 			pass_histograms = {}
 			pass_histograms_syst = {}
 			fail_histograms = {}
@@ -240,7 +240,7 @@ if __name__ == "__main__":
 					pass_histograms_syst[supersample + "_normalization"] = {}
 
 				for sample in config.samples[supersample]:
-					input_histogram_filename = "/uscms/home/dryu/DAZSLE/data/LimitSetting/InputHistograms_{}_{}.root".format(sample, args.jet_type)
+					input_histogram_filename = "$HOME/DAZSLE/data/Histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
 					print "Opening {}".format(input_histogram_filename)
 					input_file = ROOT.TFile(input_histogram_filename, "READ")
 					if selection in selection_tau21s:
@@ -431,7 +431,7 @@ if __name__ == "__main__":
 					for var in extra_vars:
 						first = True
 						for sample in config.samples[supersample]:
-							input_histogram_filename = "/uscms/home/dryu/DAZSLE/data/LimitSetting/InputHistograms_{}_{}.root".format(sample, args.jet_type)
+							input_histogram_filename = "$HOME/DAZSLE/data/Histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
 							print "Opening {}".format(input_histogram_filename)
 							input_file = TFile(input_histogram_filename, "READ")
 							this_histogram = input_file.Get("h_{}_{}_{}".format(selection, args.jet_type, var))
