@@ -1,0 +1,2 @@
+#!/bin/bash
+python histograms.py --files root://cmsxrootd-site.fnal.gov//store/user/lpchbb/zprimebits-v12.05/Spin0_ggPhibb1j_g1_125_Scalar_1000pb_weighted.root --output_folder $HOME/PhiBB2017/data/Histograms --label test_Sbb125 --jet_type CA15
