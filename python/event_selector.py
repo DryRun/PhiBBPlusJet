@@ -2,6 +2,8 @@ import os
 import sys
 from ROOT import *
 from cutflow import Cutflow
+from types import MethodType
+import math
 
 # Specialization of Cutflow to event selection. 
 class EventSelector(Cutflow):
@@ -27,7 +29,7 @@ class EventSelector(Cutflow):
 	def set_event(self, event):
 		self._event = event
 
-	def process_event(self, weight=1):
+	def process_event(self, event, weight=1):
 		self.reset()
 		self._pass_calls += 1
 		self._pass_calls_weighted += weight
@@ -38,7 +40,7 @@ class EventSelector(Cutflow):
 		# Run cuts
 		this_pass = True
 		for cut in self._cut_list:
-			self._cut_results[cut] = getattr(self, cut)() # Or self._cut_functions[cut](self._event)?
+			self._cut_results[cut] = getattr(self, cut)(event) # Or self._cut_functions[cut](self._event)?
 			if not self._cut_results[cut]:
 				if this_pass:
 					this_pass = False
@@ -83,14 +85,25 @@ class EventSelector(Cutflow):
 		self._event_pass = False
 		self._event_pass_nminusone.clear()
 
+	# Add a cut to the selector.
+	# - cut_name = name of cut. The function is named <selector_name>_<cut_name>.
+	# - cut_logic = logic of cut (python string). It must define a variable cut_result=True/False
 	def add_cut(self, cut_name, cut_logic, return_data=None):
 		self._cut_list.append(cut_name)
+		self._pass_counter[cut_name] = 0
+		self._pass_counter_weighted[cut_name] = 0
+		self._cutflow_counter[cut_name] = 0
+		self._cutflow_counter_weighted[cut_name] = 0
+		self._cut_counter[cut_name] = 0
+		self._cut_counter_weighted[cut_name] = 0
 
 		# Create the cut function
+		function_name = "{}_{}".format(self._name, cut_name)
 		exec("""
-def {}_{}(obj, event):
+def {}(self, event):
 	{}
-""".format(self._name, cut_name, cut_logic))
+	return cut_result
+""".format(function_name, cut_logic))
 
 		# Attach cut function to this instance
-		exec("self.{} = MethodType({}, self, EventSelector".format(cut_name, ))
+		exec("self.{} = MethodType({}, self, EventSelector)".format(cut_name, function_name))

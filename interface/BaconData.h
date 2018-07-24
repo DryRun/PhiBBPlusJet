@@ -156,6 +156,7 @@ public:
 	Double_t 		SelectedJet_tau21DDT;
 	Double_t 		SelectedJet_N2DDT;
 	Double_t 		SelectedJet_msd_puppi;
+	Int_t           SelectedJet_nParticles;
 private:
 	TH1D* n2_ddt_transformation_AK8_;
 	TH1D* n2_ddt_transformation_CA15_;

@@ -293,6 +293,8 @@ Int_t BaconData::GetEntry(Long64_t entry) {
     		}
     	}
     }
+
+    // Set selected jet vars
     if (which_jet == kAK8_0) {
 		SelectedJet_pt           = AK8Puppijet0_pt;
 		SelectedJet_eta          = AK8Puppijet0_eta;
@@ -357,6 +359,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_rho          = AK8Puppijet0_rho;
 		SelectedJet_N2DDT        = AK8Puppijet0_N2DDT;
 		SelectedJet_msd_puppi    = AK8Puppijet0_msd_puppi;
+		SelectedJet_nParticles = AK8Puppijet0_nParticles;
 	} else if (which_jet == kAK8_1) {
 		SelectedJet_pt           = AK8Puppijet1_pt;
 		SelectedJet_eta          = AK8Puppijet1_eta;
@@ -421,6 +424,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_rho          = AK8Puppijet1_rho;
 		SelectedJet_N2DDT        = AK8Puppijet1_N2DDT;
 		SelectedJet_msd_puppi    = AK8Puppijet1_msd_puppi;
+		SelectedJet_nParticles = AK8Puppijet0_nParticles;
 	} else if (which_jet == kAK8_2) {
 		SelectedJet_pt           = AK8Puppijet2_pt;
 		SelectedJet_eta          = AK8Puppijet2_eta;
@@ -485,6 +489,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_rho          = AK8Puppijet2_rho;
 		SelectedJet_N2DDT        = AK8Puppijet2_N2DDT;
 		SelectedJet_msd_puppi    = AK8Puppijet2_msd_puppi;
+		SelectedJet_nParticles = AK8Puppijet0_nParticles;
 	} else if (which_jet == kCA15_0) {
 		SelectedJet_pt           = CA15Puppijet0_pt;
 		SelectedJet_eta          = CA15Puppijet0_eta;
@@ -549,6 +554,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_rho          = CA15Puppijet0_rho;
 		SelectedJet_N2DDT        = CA15Puppijet0_N2DDT;
 		SelectedJet_msd_puppi    = CA15Puppijet0_msd_puppi;
+		SelectedJet_nParticles = CA15Puppijet0_nParticles;
 	} else if (which_jet == kCA15_1) {
 		SelectedJet_pt           = CA15Puppijet1_pt;
 		SelectedJet_eta          = CA15Puppijet1_eta;
@@ -613,6 +619,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_rho          = CA15Puppijet1_rho;
 		SelectedJet_N2DDT        = CA15Puppijet1_N2DDT;
 		SelectedJet_msd_puppi    = CA15Puppijet1_msd_puppi;
+		SelectedJet_nParticles = CA15Puppijet0_nParticles;
 	} else if (which_jet == kCA15_2) {
 		SelectedJet_pt           = CA15Puppijet2_pt;
 		SelectedJet_eta          = CA15Puppijet2_eta;
@@ -677,6 +684,7 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_rho          = CA15Puppijet2_rho;
 		SelectedJet_N2DDT        = CA15Puppijet2_N2DDT;
 		SelectedJet_msd_puppi    = CA15Puppijet2_msd_puppi;
+		SelectedJet_nParticles = CA15Puppijet0_nParticles;
 	}
 
 

@@ -1,4 +1,4 @@
- import os
+import os
 import sys
 import ROOT
 from DAZSLE.PhiBBPlusJet.analysis_base import AnalysisBase
@@ -27,7 +27,7 @@ seaborn = Root.SeabornInterface()
 seaborn.Initialize()
 
 # Enums
-from BaconData import kAK8, kCA15, kPt, kDbtag, kN2DDT
+#from BaconData import kAK8, kCA15, kPt, kDbtag, kN2DDT
 
 class Histograms(AnalysisBase):
 	def __init__(self, sample_name, tree_name="otree", jet_type="AK8", jet_ordering="pt"):
@@ -49,12 +49,11 @@ class Histograms(AnalysisBase):
 			jet_type_enum = BaconData.kAK8
 		elif self._jet_type == "CA15":
 			jet_type_enum = BaconData.kCA15
-		self._data.SetJetOrdering(jet_type_enum, self._jet_ordering)
+		self._data.SetJetSelection(jet_type_enum, self._jet_ordering)
 
 		# Cuts
-		self._n2_ddt_cut = 0.
-		self._dcsv_cut = params[jet_type]["DCSV"]
-		self._dcsv_cut_loose = params[jet_type]["DCSV_LOOSE"]
+		self._dbtagcut = params[jet_type]["DCSV"]
+		self._dbtagcut_loose = params[jet_type]["DCSV_LOOSE"]
 		self._dcsv_min = -999.
 		self._data_source = "data"
 		self._prescale = -1
@@ -68,6 +67,7 @@ class Histograms(AnalysisBase):
 			"Preselection":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
+		self._weight_systematics["SR_matched"] = self._weight_systematics["SR"]
 		# Jet systematics: these affect the jet pT, so modify the event selection
 		self._jet_systematics = ["JESUp", "JESDown", "JERUp", "JERDown"]
 
@@ -188,80 +188,64 @@ class Histograms(AnalysisBase):
 
 	def start(self):
 		# Event selections
+		self._selections = []
 		self._event_selectors = {}
 		self._selections.append("Preselection")
 		self._event_selectors["Preselection"] = EventSelector("Preselection")
-		self._event_selectors["Preselection"].add_cut("min_pt", 	"return event.SelectedJet_pt > 400.", return_data=["event.SelectedJet_pt"])
-		self._event_selectors["Preselection"].add_cut("min_msd", 	"return event.SelectedJet_msd_puppi > 40.", return_data="event.SelectedJet_msd_puppi")
+		self._event_selectors["Preselection"].add_cut("min_pt", 	"cut_result = event.SelectedJet_pt > 400.", return_data=["event.SelectedJet_pt"])
+		self._event_selectors["Preselection"].add_cut("min_msd", 	"cut_result = event.SelectedJet_msd_puppi > 40.", return_data="event.SelectedJet_msd_puppi")
 
 		self._selections.append("SR")
 		self._event_selectors["SR"] = EventSelector("SR")
-		self._event_selectors["SR"].add_cut("jetID", 		"return event.SelectedJet_isTightVJet == 1")
-		self._event_selectors["SR"].add_cut("min_pt", 		"return event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
-		self._event_selectors["SR"].add_cut("min_msd", 		"return event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
-		self._event_selectors["SR"].add_cut("electronveto", "return event.neleLoose==0", return_data=["event.neleLoose"])
-		self._event_selectors["SR"].add_cut("muonveto", 	"return event.nmuLoose==0", return_data=["event.nmuLoose"])
-		self._event_selectors["SR"].add_cut("tauveto", 		"return event.ntau==0", return_data=["event.ntau"])
-		self._event_selectors["SR"].add_cut("max_pfmet", 	"return event.pfmet<140.", return_data=["event.pfmet"])
+		self._event_selectors["SR"].add_cut("jetID", 		"cut_result = event.SelectedJet_isTightVJet == 1")
+		self._event_selectors["SR"].add_cut("min_pt", 		"cut_result = event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
+		self._event_selectors["SR"].add_cut("min_msd", 		"cut_result = event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
+		self._event_selectors["SR"].add_cut("electronveto", "cut_result = event.neleLoose==0", return_data=["event.neleLoose"])
+		self._event_selectors["SR"].add_cut("muonveto", 	"cut_result = event.nmuLoose==0", return_data=["event.nmuLoose"])
+		self._event_selectors["SR"].add_cut("tauveto", 		"cut_result = event.ntau==0", return_data=["event.ntau"])
+		self._event_selectors["SR"].add_cut("max_pfmet", 	"cut_result = event.pfmet<140.", return_data=["event.pfmet"])
 
 		if self._data_source == "simulation":
 			self._selections.append("SR_matched")
 			self._event_selectors["SR_matched"] = EventSelector("SR_matched")
-						if self._data.genVPt > 0 and self._data.genVMass > 0:
-							matching_dphi = abs(math.acos(math.cos(self._data.genVPhi - fatjet_phi)))
-							matching_dpt = abs(self._data.genVPt - fatjet_pt) / self._data.genVPt
-							matching_dmass = abs(self._data.genVMass - fatjet_msd) / self._data.genVMass
-							vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3
-
 			self._event_selectors["SR_matched"].add_cut("Vmatch", 
 				"""
-	matching_dphi = abs(math.acos(math.cos(self._data.genVPhi - fatjet_phi)));
-	matching_dpt = abs(self._data.genVPt - fatjet_pt) / self._data.genVPt;
-	matching_dmass = abs(self._data.genVMass - fatjet_msd) / self._data.genVMass;
+	matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi)));
+	matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt;
+	matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass;
 	vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;
-	return event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;""")
-			self._event_selectors["SR_matched"].add_cut("jetID", 		"return event.SelectedJet_isTightVJet == 1")
-			self._event_selectors["SR_matched"].add_cut("min_pt", 		"return event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
-			self._event_selectors["SR_matched"].add_cut("min_msd", 		"return event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
-			self._event_selectors["SR_matched"].add_cut("electronveto", "return event.neleLoose==0", return_data=["event.neleLoose"])
-			self._event_selectors["SR_matched"].add_cut("muonveto", 	"return event.nmuLoose==0", return_data=["event.nmuLoose"])
-			self._event_selectors["SR_matched"].add_cut("tauveto", 		"return event.ntau==0", return_data=["event.ntau"])
-			self._event_selectors["SR_matched"].add_cut("max_pfmet", 	"return event.pfmet<140.", return_data=["event.pfmet"])
+	cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);""")
+			self._event_selectors["SR_matched"].add_cut("jetID", 		"cut_result = event.SelectedJet_isTightVJet == 1")
+			self._event_selectors["SR_matched"].add_cut("min_pt", 		"cut_result = event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
+			self._event_selectors["SR_matched"].add_cut("min_msd", 		"cut_result = event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
+			self._event_selectors["SR_matched"].add_cut("electronveto", "cut_result = event.neleLoose==0", return_data=["event.neleLoose"])
+			self._event_selectors["SR_matched"].add_cut("muonveto", 	"cut_result = event.nmuLoose==0", return_data=["event.nmuLoose"])
+			self._event_selectors["SR_matched"].add_cut("tauveto", 		"cut_result = event.ntau==0", return_data=["event.ntau"])
+			self._event_selectors["SR_matched"].add_cut("max_pfmet", 	"cut_result = event.pfmet<140.", return_data=["event.pfmet"])
 
 		for systematic in self._jet_systematics:
 			self._selections.append("SR_{}".format(systematic))
 			self._event_selectors["SR_{}".format(systematic)] = EventSelector("SR_{}".format(systematic))
-			self._event_selectors["SR_{}".format(systematic)].add_cut("jetID", 		"return event.SelectedJet_isTightVJet == 1")
-			self._event_selectors["SR_{}".format(systematic)].add_cut("min_pt", 		"return event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("min_msd", 		"return event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("electronveto", "return event.neleLoose==0", return_data=["event.neleLoose"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("muonveto", 	"return event.nmuLoose==0", return_data=["event.nmuLoose"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("tauveto", 		"return event.ntau==0", return_data=["event.ntau"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("max_pfmet", 	"return event.pfmet<140.", return_data=["event.pfmet"])
+			self._event_selectors["SR_{}".format(systematic)].add_cut("jetID", 		"cut_result = (event.SelectedJet_isTightVJet == 1)")
+			self._event_selectors["SR_{}".format(systematic)].add_cut("min_pt", 		"cut_result = (event.SelectedJet_pt > 450.)", return_data=["event.SelectedJet_pt"])
+			self._event_selectors["SR_{}".format(systematic)].add_cut("min_msd", 		"cut_result = (event.SelectedJet_msd_puppi > 40.)", return_data=["event.SelectedJet_msd_puppi"])
+			self._event_selectors["SR_{}".format(systematic)].add_cut("electronveto", "cut_result = (event.neleLoose==0)", return_data=["event.neleLoose"])
+			self._event_selectors["SR_{}".format(systematic)].add_cut("muonveto", 	"cut_result = (event.nmuLoose==0)", return_data=["event.nmuLoose"])
+			self._event_selectors["SR_{}".format(systematic)].add_cut("tauveto", 		"cut_result = (event.ntau==0)", return_data=["event.ntau"])
+			self._event_selectors["SR_{}".format(systematic)].add_cut("max_pfmet", 	"cut_result = (event.pfmet<140.)", return_data=["event.pfmet"])
 
 			if self._data_source == "simulation":
 				self._selections.append("SR_matched_{}".format(systematic))
 				self._event_selectors["SR_matched_{}".format(systematic)] = EventSelector("SR_matched_{}".format(systematic))
-							if self._data.genVPt > 0 and self._data.genVMass > 0:
-								matching_dphi = abs(math.acos(math.cos(self._data.genVPhi - fatjet_phi)))
-								matching_dpt = abs(self._data.genVPt - fatjet_pt) / self._data.genVPt
-								matching_dmass = abs(self._data.genVMass - fatjet_msd) / self._data.genVMass
-								vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3
-
 				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("Vmatch", 
-					"""
-		matching_dphi = abs(math.acos(math.cos(self._data.genVPhi - fatjet_phi)));
-		matching_dpt = abs(self._data.genVPt - fatjet_pt) / self._data.genVPt;
-		matching_dmass = abs(self._data.genVMass - fatjet_msd) / self._data.genVMass;
-		vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;
-		return event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;""")
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("jetID", 		"return event.SelectedJet_isTightVJet == 1")
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_pt", 		"return event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_msd", 		"return event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("electronveto", "return event.neleLoose==0", return_data=["event.neleLoose"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("muonveto", 	"return event.nmuLoose==0", return_data=["event.nmuLoose"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("tauveto", 		"return event.ntau==0", return_data=["event.ntau"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("max_pfmet", 	"return event.pfmet<140.", return_data=["event.pfmet"])
+					"""matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi))); matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt; matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass; vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3; cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);""")
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("jetID", 		"cut_result = (event.SelectedJet_isTightVJet == 1)")
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_pt", 		"cut_result = (event.SelectedJet_pt > 450.)", return_data=["event.SelectedJet_pt"])
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_msd", 		"cut_result = (event.SelectedJet_msd_puppi > 40.)", return_data=["event.SelectedJet_msd_puppi"])
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("electronveto", "cut_result = (event.neleLoose==0)", return_data=["event.neleLoose"])
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("muonveto", 	"cut_result = (event.nmuLoose==0)", return_data=["event.nmuLoose"])
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("tauveto", 		"cut_result = (event.ntau==0)", return_data=["event.ntau"])
+				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("max_pfmet", 	"cut_result = (event.pfmet<140.)", return_data=["event.pfmet"])
 
 
 		# Histograms
@@ -288,7 +272,7 @@ class Histograms(AnalysisBase):
 				self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_unweighted".format(box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
 				self._selection_histograms[selection].AddTH1D("{}_nevents".format(box), "{}_nevents".format(box), "", 1, -0.5, 0.5)
 				self._selection_histograms[selection].AddTH1D("{}_nevents_weighted".format(box), "{}_nevents_weighted".format(box), "", 1, -0.5, 0.5)
-				self._selection_histograms[selection].AddTH1D("{}_pfmet".format(box)., "PF MET", "PF MET [GeV]", 200, 0., 1000.)
+				self._selection_histograms[selection].AddTH1D("{}_pfmet".format(box), "PF MET", "PF MET [GeV]", 200, 0., 1000.)
 				self._selection_histograms[selection].AddTH1D("{}_dcsv".format(box), "dcsv", "dcsv", 200, -1., 1.)
 				self._selection_histograms[selection].AddTH1D("{}_n2ddt".format(box), "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
 				self._selection_histograms[selection].AddTH1D("{}_n2".format(box), "n2", "N_{2}", 160, -1.0, 1.0)
@@ -298,19 +282,20 @@ class Histograms(AnalysisBase):
 				self._selection_histograms[selection].AddTH1D("{}_eta".format(box), "eta", "eta", 60, -3., 3.)
 				self._selection_histograms[selection].AddTH1D("{}_rho".format(box), "rho", "rho", 80, -8., 0.)
 				self._selection_histograms[selection].AddTH2D("{}_met_vs_msd".format(box), "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
-				for systematic in self._weight_systematics:
-					self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_{}".format(box, systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+				if selection in self._weight_systematics:
+					for systematic in self._weight_systematics[selection]:
+						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_{}".format(box, systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
 
 			self._selection_histograms[selection].AddTH3D("dbtag_vs_pt_vs_msd", "dbtag_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 80, 40, 600,
-				"p_{T} [GeV]", 12, 400, 1000
+				"p_{T} [GeV]", 12, 400, 1000,
 				"Double-b", 110, -1.1, 1.1)
 			self._selection_histograms[selection].AddTH3D("n2ddt_vs_pt_vs_msd", "n2ddt_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 40, 40, 600,
 				"p_{T} [GeV]", 12, 400, 1000,
 				"N_{2}^{DDT}", 40, -0.5, 0.5)
 			self._selection_histograms[selection].AddTH2D("nparticles_vs_n2", "N_{particles} vs N_{2}^{1}", "N_{2}^{1}", 40, -1., 1., "N_{particles}", 41, -0.5, 40.5)
-	initialize_weight_tools()
+		self.initialize_weight_tools()
 
 
 	def run(self, max_nevents=-1, first_event=0):
@@ -531,8 +516,11 @@ class Histograms(AnalysisBase):
 						self._selection_histograms[selection].GetTH1D("{}_eta".format(box)).Fill(fatjet_eta, event_weight)
 						self._selection_histograms[selection].GetTH1D("{}_rho".format(box)).Fill(fatjet_rho, event_weight)
 						self._selection_histograms[selection].GetTH2D("{}_met_vs_msd".format(box)).Fill(fatjet_msd, self._data.pfmet, event_weight)
-						for systematic in self._weight_systematics:
-							self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_{}".format(box, systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+
+						# Weight systematics: run only if this selection is defined in self._weight_systematics
+						if selection in self._weight_systematics:
+							for systematic in self._weight_systematics[selection]:
+								self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_{}".format(box, systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 
 					self._selection_histograms[selection].GetTH3D("dbtag_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_dbtag)
 					self._selection_histograms[selection].GetTH3D("n2ddt_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_n2ddt)
