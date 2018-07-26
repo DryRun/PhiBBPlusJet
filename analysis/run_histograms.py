@@ -107,13 +107,13 @@ if __name__ == "__main__":
 					else:
 						files_per_job = 10
 				elif "QCD_HT500to700" in sample:
-					files_per_job = 5
+					files_per_job = 3
 				elif "QCD_HT700to1000" in sample:
-					files_per_job = 5
+					files_per_job = 3
 				elif "QCD_HT1000to1500" in sample:
 					files_per_job = 1
 				elif "QCD" in sample:
-					files_per_job = 10
+					files_per_job = 5
 				elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 					files_per_job = 3
 			n_jobs = int(ceil(1. * len(sample_files[sample]) / files_per_job))
