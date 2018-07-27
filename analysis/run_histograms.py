@@ -65,7 +65,7 @@ if __name__ == "__main__":
 				supersamples = config.supersamples
 			elif args.all_lxplus:
 				# lxplus: JetHT, SingleMuon, QCD, signal
-				supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "data_singlemu_ps10", "qcd"]
+				supersamples = ["data_obs", "data_singlemu", "qcd"] #"data_obs_ps10", "data_singlemu_ps10"
 				args.skim_inputs = True
 			elif args.all_cmslpc:
 				supersamples = ["stqq", "tqq", "wqq", "zqq", "zll", "wlnu", "vvqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]
