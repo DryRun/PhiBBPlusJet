@@ -8,6 +8,34 @@ from DAZSLE.ZPrimePlusJet.xbb_config import analysis_parameters as params
 import math
 from math import floor, ceil
 
+# Slice up the pt vs msd histogram
+def SliceSignalHistogram(hist2d, pt_bins):
+	# Make sure the requested pt bins correspond to boundaries
+	histogram_pt_bins = hist2d.GetYaxis().GetBins()
+	for pt_boundary in pt_bins:
+		if not pt_boundary in histogram_pt_bins:
+			print "[run_histograms::SliceSignalHistogram] ERROR : Bin boundary {} does not correspond to a histogram bin boundary."
+			print histogram_pt_bins
+			sys.exit(1)
+	histogram_slices = {}
+	for islice in xrange(len(pt_bins) - 1):
+		ptmin = pt_bins[islice]
+		ptmax = pt_bins[islice+1]
+		binmin = 1e10
+		binmax = -1e10
+		for bin in xrange(1, hist2d.GetNbinsY() + 1):
+			low_edge = hist2d.GetYaxis().GetBinLowEdge(bin)
+			up_edge = hist2d.GetYaxis().GetBinUpEdge(bin)
+			# Is this bin inside this pt slice (+epsilon)?
+			if ptmin - 1.e-5 < low_edge and high_edge < ptmax + 1.e-5:
+				if bin < binmin:
+					binmin = bin
+				if bin > binmax:
+					binmax = bin
+		histogram_slices[islice] = hist2d.ProjectionX(hist2d.GetName() + "_" + str(islice), binmin, binmax)
+	return histogram_slices
+
+
 if __name__ == "__main__":
 	import argparse
 	parser = argparse.ArgumentParser(description="Submit histogram jobs on condor")
@@ -190,75 +218,83 @@ if __name__ == "__main__":
 		master_hadd_script.write("#!/bin/bash\n")
 		for hadd_script_path in hadd_scripts:
 			master_hadd_script.write("source " + hadd_script_path + "\n")
-		master_hadd_script.close()		
+		master_hadd_script.close()
+
 
 	if args.combine_outputs:
-		luminosity = args.luminosity # in pb^-1
+		luminosity = args.luminosity
 		from DAZSLE.PhiBBPlusJet.cross_sections import cross_sections
-		systematics = {
-			"SR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"N2SR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"N2SR_loose":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"N2CR":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"Preselection":["JESUp", "JESDown", "JERUp", "JERDown", "TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"muCR":["JESUp", "JESDown", "JERUp", "JERDown", "MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
-		}
-		selections = ["SR", "muCR", "Preselection", "N2CR", "N2SR"] # N2CR
-		extra_vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt", "n2ddt_vs_n2"]
-		selection_tau21s = {}
-		selection_dcsvs = {}
-		for selection in selections:
-			if "SR" in selection:
-				selection_prefix = "SR"
-			if "N2CR" in selection:
-				selection_prefix = "N2CR"
-			if "N2SR" in selection:
-				selection_prefix = "N2SR"
-			elif "muCR" in selection:
-				selection_prefix = "muCR"
-			elif "Preselection" in selection:
-				selection_prefix = "Preselection"
-			output_file = ROOT.TFile("$HOME/PhiBBPlusJet/data/Histograms/histograms_{}_{}.root".format(selection, args.jet_type), "RECREATE")
-			pass_histograms = {}
-			pass_histograms_syst = {}
-			fail_histograms = {}
-			fail_histograms_syst = {}
-			# data_obs, data_singlemu - not ready yet
-			# "zll", "wlnu", "vvqq" - you need to find the cross sections, and split into appropriate samples
-			if selection == "muCR":
-				supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
-			else:
-				supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
-			supersamples.extend(config.simulated_signal_names)
-			for supersample in supersamples:
-				first = True
-				pass_histograms_syst[supersample] = {}
-				fail_histograms_syst[supersample] = {}
-				use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
-				use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
-				if use_loose_template:
-					pass_histograms_syst[supersample + "_normalization"] = {}
 
-				for sample in config.samples[supersample]:
-					input_histogram_filename = "$HOME/DAZSLE/data/Histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
-					print "Opening {}".format(input_histogram_filename)
-					input_file = ROOT.TFile(input_histogram_filename, "READ")
-					if selection in selection_tau21s:
-						pass_histogram_name = "h_{}_tau21ddt{}_{}_pass_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
-						fail_histogram_name = "h_{}_tau21ddt{}_{}_fail_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
-						nevents_histogram_name = "h_{}_tau21ddt{}_{}_pass_nevents".format(selection_prefix, selection_tau21s[selection], args.jet_type)
-					elif selection == "N2SR":
-						pass_histogram_name = "h_{}_{}_pass".format(selection_prefix, args.jet_type)
-						fail_histogram_name = "h_{}_{}_fail".format(selection_prefix, args.jet_type)
-						nevents_histogram_name = "h_{}_{}_pass_nevents".format(selection_prefix, args.jet_type)
-						if use_Vmatched_histograms:
-							pass_histogram_name += "_matched"
-							fail_histogram_name += "_matched"
+		selections = ["SR", "Preselection"] # N2CR
+		boxes = ["all", "pass1", "pass2", "fail1", "fail2"]
+		weight_systematics = {
+			"SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
+			"Preselection":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
+		}
+		jet_systematics = ["JESUp", "JESDown", "JERUp", "JERDown"]
+		extra_vars = ["pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho", "n2ddt_vs_msd_vs_pt", "dcsv_vs_msd_vs_pt"]
+		output_file = ROOT.TFile("$HOME/PhiBBPlusJet/data/Histograms/histograms_{}_{}.root".format(selection, args.jet_type), "RECREATE")
+
+		box_histograms = {}
+
+		if selection == "muCR":
+			supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
+		else:
+			supersamples = ["data_obs", "data_singlemu", "data_obs_ps10", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
+		supersamples.extend(config.simulated_signal_names)
+		for supersample in supersamples:
+			first = True
+			box_histograms[supersample] = {}
+			use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
+			use_loose_template = False # (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
+			if use_loose_template:
+				pass_histograms_syst[supersample + "_normalization"] = {}
+
+			for sample in config.samples[supersample]:
+				input_histogram_filename = "$HOME/DAZSLE/data/Histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
+				print "Opening {}".format(input_histogram_filename)
+				input_file = ROOT.TFile(input_histogram_filename, "READ")
+				if selection in selection_tau21s:
+					pass_histogram_name = "h_{}_tau21ddt{}_{}_pass_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
+					fail_histogram_name = "h_{}_tau21ddt{}_{}_fail_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, selection_dcsvs[selection])
+					nevents_histogram_name = "h_{}_tau21ddt{}_{}_pass_nevents".format(selection_prefix, selection_tau21s[selection], args.jet_type)
+				elif selection == "N2SR":
+					pass_histogram_name = "h_{}_{}_pass".format(selection_prefix, args.jet_type)
+					fail_histogram_name = "h_{}_{}_fail".format(selection_prefix, args.jet_type)
+					nevents_histogram_name = "h_{}_{}_pass_nevents".format(selection_prefix, args.jet_type)
+					if use_Vmatched_histograms:
+						pass_histogram_name += "_matched"
+						fail_histogram_name += "_matched"
+				else:
+					pass_histogram_name = "h_{}_{}_pass_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
+					fail_histogram_name = "h_{}_{}_fail_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
+					nevents_histogram_name = "h_{}_{}_pass_nevents".format(selection_prefix, args.jet_type)
+					if use_Vmatched_histograms:
+						pass_histogram_name += "_matched"
+						fail_histogram_name += "_matched"
+				if use_loose_template:
+					pass_histogram_name_normalization = pass_histogram_name
+					if selection == "N2SR":
+						pass_histogram_name.replace("N2SR", "N2SR_loose")
+						fail_histogram_name.replace("N2SR", "N2SR_loose")
 					else:
-						pass_histogram_name = "h_{}_{}_pass_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
-						fail_histogram_name = "h_{}_{}_fail_dcsv{}".format(selection_prefix, args.jet_type, params[args.jet_type]["DCSV"])
-						nevents_histogram_name = "h_{}_{}_pass_nevents".format(selection_prefix, args.jet_type)
-						if use_Vmatched_histograms:
+						pass_histogram_name = pass_histogram_name.replace("dcsv{}".format(params[args.jet_type]["DCSV"]), "dcsv{}".format(params[args.jet_type]["DCSV_LOOSE"]))
+				this_pass_histogram = input_file.Get(pass_histogram_name)
+				if not this_pass_histogram:
+					print "[run_histograms] ERROR : Couldn't find histogram {} in file {}".format(pass_histogram_name, input_file.GetPath())
+				this_fail_histogram = input_file.Get(fail_histogram_name)
+				if use_loose_template:
+					this_pass_histogram_normalization = input_file.Get(pass_histogram_name_normalization)
+				this_pass_histogram_syst = {}
+				this_fail_histogram_syst = {}
+				for systematic in systematics[selection]:
+					if selection in selection_tau21s:
+						pass_histogram_name = "h_{}_tau21ddt{}_{}_pass_{}_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, systematic, selection_dcsvs[selection])
+						fail_histogram_name = "h_{}_tau21ddt{}_{}_fail_{}_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, systematic, selection_dcsvs[selection])
+					else:
+						pass_histogram_name = "h_{}_{}_pass_{}".format(selection, args.jet_type, systematic)
+						fail_histogram_name = "h_{}_{}_fail_{}".format(selection, args.jet_type, systematic)
+						if supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"] or ("Sbb" in supersample) or ("ZPrime" in supersample):
 							pass_histogram_name += "_matched"
 							fail_histogram_name += "_matched"
 					if use_loose_template:
@@ -267,245 +303,220 @@ if __name__ == "__main__":
 							pass_histogram_name.replace("N2SR", "N2SR_loose")
 							fail_histogram_name.replace("N2SR", "N2SR_loose")
 						else:
-							pass_histogram_name = pass_histogram_name.replace("dcsv{}".format(params[args.jet_type]["DCSV"]), "dcsv{}".format(params[args.jet_type]["DCSV_LOOSE"]))
-					this_pass_histogram = input_file.Get(pass_histogram_name)
-					if not this_pass_histogram:
-						print "[run_histograms] ERROR : Couldn't find histogram {} in file {}".format(pass_histogram_name, input_file.GetPath())
-					this_fail_histogram = input_file.Get(fail_histogram_name)
+							pass_histogram_name = pass_histogram_name.replace("pass", "passloose")
+					this_pass_histogram_syst[systematic] = input_file.Get(pass_histogram_name)
+					this_fail_histogram_syst[systematic] = input_file.Get(fail_histogram_name)
 					if use_loose_template:
-						this_pass_histogram_normalization = input_file.Get(pass_histogram_name_normalization)
-					this_pass_histogram_syst = {}
-					this_fail_histogram_syst = {}
-					for systematic in systematics[selection]:
-						if selection in selection_tau21s:
-							pass_histogram_name = "h_{}_tau21ddt{}_{}_pass_{}_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, systematic, selection_dcsvs[selection])
-							fail_histogram_name = "h_{}_tau21ddt{}_{}_fail_{}_dcsv{}".format(selection_prefix, selection_tau21s[selection], args.jet_type, systematic, selection_dcsvs[selection])
-						else:
-							pass_histogram_name = "h_{}_{}_pass_{}".format(selection, args.jet_type, systematic)
-							fail_histogram_name = "h_{}_{}_fail_{}".format(selection, args.jet_type, systematic)
-							if supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"] or ("Sbb" in supersample) or ("ZPrime" in supersample):
-								pass_histogram_name += "_matched"
-								fail_histogram_name += "_matched"
-						if use_loose_template:
-							pass_histogram_name_normalization = pass_histogram_name
-							if selection == "N2SR":
-								pass_histogram_name.replace("N2SR", "N2SR_loose")
-								fail_histogram_name.replace("N2SR", "N2SR_loose")
-							else:
-								pass_histogram_name = pass_histogram_name.replace("pass", "passloose")
-						this_pass_histogram_syst[systematic] = input_file.Get(pass_histogram_name)
-						this_fail_histogram_syst[systematic] = input_file.Get(fail_histogram_name)
-						if use_loose_template:
-							this_pass_histogram_syst[systematic + "_normalization"] = input_file.Get(pass_histogram_name_normalization)
-					if supersample in config.background_names or supersample in config.simulated_signal_names:
-						n_input_events = input_file.Get("h_input_nevents").Integral()
-						print "\tSample input events = {}".format(n_input_events)
-						print "\tSample processed events = {}".format(input_file.Get("h_processed_nevents").Integral())
-						print "\tSample pass events = {}".format(input_file.Get(nevents_histogram_name).Integral())
-						print "\tScaled nevents ({} pb-1) = {}".format(luminosity, luminosity * cross_sections[sample])
-						if input_file.Get("h_processed_nevents").Integral() == 0:
-							print "[setup_limits] ERROR : Processed zero events for sample {}. This is fatal, fix it!"
-							sys.exit(1)
+						this_pass_histogram_syst[systematic + "_normalization"] = input_file.Get(pass_histogram_name_normalization)
+				if supersample in config.background_names or supersample in config.simulated_signal_names:
+					n_input_events = input_file.Get("h_input_nevents").Integral()
+					print "\tSample input events = {}".format(n_input_events)
+					print "\tSample processed events = {}".format(input_file.Get("h_processed_nevents").Integral())
+					print "\tSample pass events = {}".format(input_file.Get(nevents_histogram_name).Integral())
+					print "\tScaled nevents ({} pb-1) = {}".format(luminosity, luminosity * cross_sections[sample])
+					if input_file.Get("h_processed_nevents").Integral() == 0:
+						print "[setup_limits] ERROR : Processed zero events for sample {}. This is fatal, fix it!"
+						sys.exit(1)
 
-						# Normalize histograms
-						if "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
-							# Normalize to visible cross section of 1 pb
-							#print "\tNormalizing signal sample {} to visible cross section of 1 pb".format(sample)
-							#if this_pass_histogram.GetEntries():
-							#	lumi_sf = luminosity / this_pass_histogram.GetEntries()
-							#	print "\tLuminosity scale factor = {}".format(lumi_sf)
-							#else:
-							#	print "[setup_limits] WARNING : Found zero input events for sample {}.".format(sample)
-							#	lumi_sf = 0.
-							
-							# Actually, maybe it's easier to normalize to xs*BR*A(filter)=1pb
-							print "\tNormalizing signal sample {} to xs*BR*A=1pb"
-							if n_input_events > 0:
-								print sample
-								lumi_sf = luminosity * cross_sections[sample] / n_input_events
-								print "\tLuminosity scale factor = {}".format(lumi_sf)
-							else:
-								print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
-								lumi_sf = 0.
+					# Normalize histograms
+					if "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
+						# Normalize to visible cross section of 1 pb
+						#print "\tNormalizing signal sample {} to visible cross section of 1 pb".format(sample)
+						#if this_pass_histogram.GetEntries():
+						#	lumi_sf = luminosity / this_pass_histogram.GetEntries()
+						#	print "\tLuminosity scale factor = {}".format(lumi_sf)
+						#else:
+						#	print "[setup_limits] WARNING : Found zero input events for sample {}.".format(sample)
+						#	lumi_sf = 0.
+						
+						# Actually, maybe it's easier to normalize to xs*BR*A(filter)=1pb
+						print "\tNormalizing signal sample {} to xs*BR*A=1pb"
+						if n_input_events > 0:
+							print sample
+							lumi_sf = luminosity * cross_sections[sample] / n_input_events
+							print "\tLuminosity scale factor = {}".format(lumi_sf)
 						else:
-							if n_input_events > 0:
-								print sample
-								lumi_sf = luminosity * cross_sections[sample] / n_input_events
-								print "\tLuminosity scale factor = {}".format(lumi_sf)
-							else:
-								print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
-								lumi_sf = 0.
-						this_pass_histogram.Scale(lumi_sf)
-						this_fail_histogram.Scale(lumi_sf)
-						for systematic in systematics[selection]:
-							this_pass_histogram_syst[systematic].Scale(lumi_sf)
-							this_fail_histogram_syst[systematic].Scale(lumi_sf)
-						if use_loose_template:
-							this_pass_histogram_normalization.Scale(lumi_sf)
-							for systematic in systematics[selection]:
-								this_pass_histogram_syst[systematic + "_normalization"].Scale(lumi_sf)
-
-					if first:
-						pass_histograms[supersample] = this_pass_histogram.Clone()
-						pass_histograms[supersample].SetDirectory(0)
-						pass_histograms[supersample].SetName("{}_pass".format(supersample))
-						fail_histograms[supersample] = this_fail_histogram.Clone()
-						fail_histograms[supersample].SetDirectory(0)
-						fail_histograms[supersample].SetName("{}_fail".format(supersample))
-						for systematic in systematics[selection]:
-							pass_histograms_syst[supersample][systematic] = this_pass_histogram_syst[systematic].Clone()
-							pass_histograms_syst[supersample][systematic].SetDirectory(0)
-							pass_histograms_syst[supersample][systematic].SetName("{}_pass_{}".format(supersample, systematic))
-							fail_histograms_syst[supersample][systematic] = this_fail_histogram_syst[systematic].Clone()
-							fail_histograms_syst[supersample][systematic].SetDirectory(0)
-							fail_histograms_syst[supersample][systematic].SetName("{}_fail_{}".format(supersample, systematic))
-						if use_loose_template:
-							pass_histograms[supersample + "_normalization"] = this_pass_histogram_normalization.Clone()
-							pass_histograms[supersample + "_normalization"].SetDirectory(0)
-							pass_histograms[supersample + "_normalization"].SetName("{}_pass_normalization".format(supersample))
-							for systematic in systematics[selection]:
-								pass_histograms_syst[supersample + "_normalization"][systematic] = this_pass_histogram_syst[systematic + "_normalization"].Clone()
-								pass_histograms_syst[supersample + "_normalization"][systematic].SetDirectory(0)
-								pass_histograms_syst[supersample + "_normalization"][systematic].SetName("{}_pass_{}_normalization".format(supersample, systematic))
-						first = False
+							print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
+							lumi_sf = 0.
 					else:
-						pass_histograms[supersample].Add(this_pass_histogram)
-						fail_histograms[supersample].Add(this_fail_histogram)
-						for systematic in systematics[selection]:
-							pass_histograms_syst[supersample][systematic].Add(this_pass_histogram_syst[systematic])
-							fail_histograms_syst[supersample][systematic].Add(this_fail_histogram_syst[systematic])
-						if use_loose_template:
-							pass_histograms[supersample + "_normalization"].Add(this_pass_histogram_normalization)
-							for systematic in systematics[selection]:
-								pass_histograms_syst[supersample + "_normalization"][systematic].Add(this_pass_histogram_syst[systematic + "_normalization"])
-					#if sample in cross_sections:
-					#	n_input_events += input_file.Get("h_input_nevents").Integral()
-					input_file.Close()
-				output_file.cd()
-				if use_loose_template:
-					if pass_histograms[supersample].Integral():
-						pass_histograms[supersample].Scale(pass_histograms[supersample + "_normalization"].Integral() / pass_histograms[supersample].Integral())
+						if n_input_events > 0:
+							print sample
+							lumi_sf = luminosity * cross_sections[sample] / n_input_events
+							print "\tLuminosity scale factor = {}".format(lumi_sf)
+						else:
+							print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
+							lumi_sf = 0.
+					this_pass_histogram.Scale(lumi_sf)
+					this_fail_histogram.Scale(lumi_sf)
 					for systematic in systematics[selection]:
-						if pass_histograms_syst[supersample][systematic].Integral():
-							pass_histograms_syst[supersample][systematic].Scale(pass_histograms_syst[supersample + "_normalization"][systematic].Integral() / pass_histograms_syst[supersample][systematic].Integral())
-
-				# For muCR, project to 1D
-				if "muCR" in selection:
-					old_name = pass_histograms[supersample].GetName()
-					pass_histograms[supersample].RebinY(pass_histograms[supersample].GetNbinsY())
-					pass_histograms[supersample].SetName(old_name)
-					old_name = fail_histograms[supersample].GetName()
-					fail_histograms[supersample].RebinY(fail_histograms[supersample].GetNbinsY())
-					fail_histograms[supersample].SetName(old_name)
-					for systematic in systematics[selection]:
-						old_name = pass_histograms_syst[supersample][systematic].GetName()
-						pass_histograms_syst[supersample][systematic].RebinY(pass_histograms_syst[supersample][systematic].GetNbinsY())
-						pass_histograms_syst[supersample][systematic].SetName(old_name)
-						old_name = fail_histograms_syst[supersample][systematic].GetName()
-						fail_histograms_syst[supersample][systematic].RebinY(fail_histograms_syst[supersample][systematic].GetNbinsY())
-						fail_histograms_syst[supersample][systematic].SetName(old_name)
+						this_pass_histogram_syst[systematic].Scale(lumi_sf)
+						this_fail_histogram_syst[systematic].Scale(lumi_sf)
 					if use_loose_template:
-						old_name = pass_histograms[supersample + "_normalization"].GetName()
-						pass_histograms[supersample + "_normalization"].RebinY(pass_histograms[supersample + "_normalization"].GetNbinsY())
-						pass_histograms[supersample + "_normalization"].SetName(old_name)
+						this_pass_histogram_normalization.Scale(lumi_sf)
 						for systematic in systematics[selection]:
-							old_name = pass_histograms_syst[supersample + "_normalization"][systematic].GetName()
-							pass_histograms_syst[supersample + "_normalization"][systematic].RebinY(pass_histograms_syst[supersample + "_normalization"][systematic].GetNbinsY())
-							pass_histograms_syst[supersample + "_normalization"][systematic].SetName(old_name)
+							this_pass_histogram_syst[systematic + "_normalization"].Scale(lumi_sf)
 
-				pass_histograms[supersample].Write()
-				fail_histograms[supersample].Write()
-				for systematic in systematics[selection]:
-					pass_histograms_syst[supersample][systematic].Write()
-					fail_histograms_syst[supersample][systematic].Write()
-				if use_loose_template:
-					pass_histograms[supersample + "_normalization"].Write()
+				if first:
+					pass_histograms[supersample] = this_pass_histogram.Clone()
+					pass_histograms[supersample].SetDirectory(0)
+					pass_histograms[supersample].SetName("{}_pass".format(supersample))
+					fail_histograms[supersample] = this_fail_histogram.Clone()
+					fail_histograms[supersample].SetDirectory(0)
+					fail_histograms[supersample].SetName("{}_fail".format(supersample))
 					for systematic in systematics[selection]:
-						pass_histograms_syst[supersample + "_normalization"][systematic].Write()
+						pass_histograms_syst[supersample][systematic] = this_pass_histogram_syst[systematic].Clone()
+						pass_histograms_syst[supersample][systematic].SetDirectory(0)
+						pass_histograms_syst[supersample][systematic].SetName("{}_pass_{}".format(supersample, systematic))
+						fail_histograms_syst[supersample][systematic] = this_fail_histogram_syst[systematic].Clone()
+						fail_histograms_syst[supersample][systematic].SetDirectory(0)
+						fail_histograms_syst[supersample][systematic].SetName("{}_fail_{}".format(supersample, systematic))
+					if use_loose_template:
+						pass_histograms[supersample + "_normalization"] = this_pass_histogram_normalization.Clone()
+						pass_histograms[supersample + "_normalization"].SetDirectory(0)
+						pass_histograms[supersample + "_normalization"].SetName("{}_pass_normalization".format(supersample))
+						for systematic in systematics[selection]:
+							pass_histograms_syst[supersample + "_normalization"][systematic] = this_pass_histogram_syst[systematic + "_normalization"].Clone()
+							pass_histograms_syst[supersample + "_normalization"][systematic].SetDirectory(0)
+							pass_histograms_syst[supersample + "_normalization"][systematic].SetName("{}_pass_{}_normalization".format(supersample, systematic))
+					first = False
+				else:
+					pass_histograms[supersample].Add(this_pass_histogram)
+					fail_histograms[supersample].Add(this_fail_histogram)
+					for systematic in systematics[selection]:
+						pass_histograms_syst[supersample][systematic].Add(this_pass_histogram_syst[systematic])
+						fail_histograms_syst[supersample][systematic].Add(this_fail_histogram_syst[systematic])
+					if use_loose_template:
+						pass_histograms[supersample + "_normalization"].Add(this_pass_histogram_normalization)
+						for systematic in systematics[selection]:
+							pass_histograms_syst[supersample + "_normalization"][systematic].Add(this_pass_histogram_syst[systematic + "_normalization"])
+				#if sample in cross_sections:
+				#	n_input_events += input_file.Get("h_input_nevents").Integral()
+				input_file.Close()
+			output_file.cd()
+			if use_loose_template:
+				if pass_histograms[supersample].Integral():
+					pass_histograms[supersample].Scale(pass_histograms[supersample + "_normalization"].Integral() / pass_histograms[supersample].Integral())
+				for systematic in systematics[selection]:
+					if pass_histograms_syst[supersample][systematic].Integral():
+						pass_histograms_syst[supersample][systematic].Scale(pass_histograms_syst[supersample + "_normalization"][systematic].Integral() / pass_histograms_syst[supersample][systematic].Integral())
 
-				# Now do the extra histograms for plots
-				if "SR" in selection or selection in ["Preselection", "muCR", "N2CR"]:
-					extra_histograms = {}
-					extra_histograms_pass = {}
-					extra_histograms_fail = {}
-					for var in extra_vars:
-						first = True
-						for sample in config.samples[supersample]:
-							input_histogram_filename = "$HOME/DAZSLE/data/Histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
-							print "Opening {}".format(input_histogram_filename)
-							input_file = TFile(input_histogram_filename, "READ")
-							this_histogram = input_file.Get("h_{}_{}_{}".format(selection, args.jet_type, var))
-							if not this_histogram:
-								print "ERROR : Couldn't find histogram {} in file {}".format("h_{}_{}_{}".format(selection, args.jet_type, var), input_histogram_filename)
-							this_histogram_pass = input_file.Get("h_{}_{}_pass_{}".format(selection, args.jet_type, var))
-							this_histogram_fail = input_file.Get("h_{}_{}_fail_{}".format(selection, args.jet_type, var))
-							# Normalize histograms
-							if supersample in config.background_names or supersample in config.simulated_signal_names:
-								n_input_events = input_file.Get("h_input_nevents").Integral()
-								if "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
-									# Normalize to visible cross section of 1 pb
-									#print "\tNormalizing signal sample {} to visible cross section of 1 pb".format(sample)
-									#pass_events = input_file.Get("h_SR_{}_pass".format(args.jet_type)).Integral()
-									#if pass_events:
-									#	lumi_sf = luminosity / pass_events
-									#	print "\tLuminosity scale factor = {}".format(lumi_sf)
-									#else:
-									#	print "[setup_limits] WARNING : Found zero input events for sample {}.".format(sample)
-									#	lumi_sf = 0.
-									
-									# Actually, maybe it's easier to normalize to xs*BR*A(filter)=1pb
-									print "\tNormalizing signal sample {} to xs*BR*A=1pb".format(supersample)
-									if n_input_events > 0:
-										print sample
-										lumi_sf = luminosity * cross_sections[sample] / n_input_events
-										print "\tLuminosity scale factor = {}".format(lumi_sf)
-									else:
-										print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
-										lumi_sf = 0.
+			# For muCR, project to 1D
+			if "muCR" in selection:
+				old_name = pass_histograms[supersample].GetName()
+				pass_histograms[supersample].RebinY(pass_histograms[supersample].GetNbinsY())
+				pass_histograms[supersample].SetName(old_name)
+				old_name = fail_histograms[supersample].GetName()
+				fail_histograms[supersample].RebinY(fail_histograms[supersample].GetNbinsY())
+				fail_histograms[supersample].SetName(old_name)
+				for systematic in systematics[selection]:
+					old_name = pass_histograms_syst[supersample][systematic].GetName()
+					pass_histograms_syst[supersample][systematic].RebinY(pass_histograms_syst[supersample][systematic].GetNbinsY())
+					pass_histograms_syst[supersample][systematic].SetName(old_name)
+					old_name = fail_histograms_syst[supersample][systematic].GetName()
+					fail_histograms_syst[supersample][systematic].RebinY(fail_histograms_syst[supersample][systematic].GetNbinsY())
+					fail_histograms_syst[supersample][systematic].SetName(old_name)
+				if use_loose_template:
+					old_name = pass_histograms[supersample + "_normalization"].GetName()
+					pass_histograms[supersample + "_normalization"].RebinY(pass_histograms[supersample + "_normalization"].GetNbinsY())
+					pass_histograms[supersample + "_normalization"].SetName(old_name)
+					for systematic in systematics[selection]:
+						old_name = pass_histograms_syst[supersample + "_normalization"][systematic].GetName()
+						pass_histograms_syst[supersample + "_normalization"][systematic].RebinY(pass_histograms_syst[supersample + "_normalization"][systematic].GetNbinsY())
+						pass_histograms_syst[supersample + "_normalization"][systematic].SetName(old_name)
+
+			pass_histograms[supersample].Write()
+			fail_histograms[supersample].Write()
+			for systematic in systematics[selection]:
+				pass_histograms_syst[supersample][systematic].Write()
+				fail_histograms_syst[supersample][systematic].Write()
+			if use_loose_template:
+				pass_histograms[supersample + "_normalization"].Write()
+				for systematic in systematics[selection]:
+					pass_histograms_syst[supersample + "_normalization"][systematic].Write()
+
+			# Now do the extra histograms for plots
+			if "SR" in selection or selection in ["Preselection", "muCR", "N2CR"]:
+				extra_histograms = {}
+				extra_histograms_pass = {}
+				extra_histograms_fail = {}
+				for var in extra_vars:
+					first = True
+					for sample in config.samples[supersample]:
+						input_histogram_filename = "$HOME/DAZSLE/data/Histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
+						print "Opening {}".format(input_histogram_filename)
+						input_file = TFile(input_histogram_filename, "READ")
+						this_histogram = input_file.Get("h_{}_{}_{}".format(selection, args.jet_type, var))
+						if not this_histogram:
+							print "ERROR : Couldn't find histogram {} in file {}".format("h_{}_{}_{}".format(selection, args.jet_type, var), input_histogram_filename)
+						this_histogram_pass = input_file.Get("h_{}_{}_pass_{}".format(selection, args.jet_type, var))
+						this_histogram_fail = input_file.Get("h_{}_{}_fail_{}".format(selection, args.jet_type, var))
+						# Normalize histograms
+						if supersample in config.background_names or supersample in config.simulated_signal_names:
+							n_input_events = input_file.Get("h_input_nevents").Integral()
+							if "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
+								# Normalize to visible cross section of 1 pb
+								#print "\tNormalizing signal sample {} to visible cross section of 1 pb".format(sample)
+								#pass_events = input_file.Get("h_SR_{}_pass".format(args.jet_type)).Integral()
+								#if pass_events:
+								#	lumi_sf = luminosity / pass_events
+								#	print "\tLuminosity scale factor = {}".format(lumi_sf)
+								#else:
+								#	print "[setup_limits] WARNING : Found zero input events for sample {}.".format(sample)
+								#	lumi_sf = 0.
+								
+								# Actually, maybe it's easier to normalize to xs*BR*A(filter)=1pb
+								print "\tNormalizing signal sample {} to xs*BR*A=1pb".format(supersample)
+								if n_input_events > 0:
+									print sample
+									lumi_sf = luminosity * cross_sections[sample] / n_input_events
+									print "\tLuminosity scale factor = {}".format(lumi_sf)
 								else:
-									if n_input_events > 0:
-										print sample
-										lumi_sf = luminosity * cross_sections[sample] / n_input_events
-										print "\t{} luminosity scale factor = {}*{}/{}={}".format(sample, luminosity, cross_sections[sample], n_input_events, lumi_sf)
-									else:
-										print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
-										lumi_sf = 0.
-								this_histogram.Scale(lumi_sf)
-								if this_histogram_pass:
-									this_histogram_pass.Scale(lumi_sf)
-								if this_histogram_fail:
-									this_histogram_fail.Scale(lumi_sf)
-
-							# Add up
-							if first:
-								first = False
-								extra_histograms[var] = this_histogram.Clone()
-								extra_histograms[var].SetDirectory(0)
-								extra_histograms[var].SetName(supersample + "_" + var)
-								if this_histogram_pass:
-									extra_histograms_pass[var] = this_histogram_pass.Clone()
-									extra_histograms_pass[var].SetDirectory(0)
-									extra_histograms_pass[var].SetName(supersample + "_" + var + "_pass")
-								if this_histogram_fail:
-									extra_histograms_fail[var] = this_histogram_fail.Clone()
-									extra_histograms_fail[var].SetDirectory(0)
-									extra_histograms_fail[var].SetName(supersample + "_" + var + "_fail")
+									print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
+									lumi_sf = 0.
 							else:
-								extra_histograms[var].Add(this_histogram)
-								if this_histogram_pass:
-									extra_histograms_pass[var].Add(this_histogram_pass)
-								if this_histogram_fail:
-									extra_histograms_fail[var].Add(this_histogram_fail)
-							input_file.Close()
-						output_file.cd()
-						extra_histograms[var].Write()
-						if var in extra_histograms_pass:
-							extra_histograms_pass[var].Write()
-						if var in extra_histograms_fail:
-							extra_histograms_fail[var].Write()
-					# End loop over extra vars
-				# End if SR or muCR
-				
-				# For matched histograms, also save the matched and unmatched histograms
-			# End loop over supersamples
-			output_file.Close()
+								if n_input_events > 0:
+									print sample
+									lumi_sf = luminosity * cross_sections[sample] / n_input_events
+									print "\t{} luminosity scale factor = {}*{}/{}={}".format(sample, luminosity, cross_sections[sample], n_input_events, lumi_sf)
+								else:
+									print "[setup_limits] WARNING : Found zero input events for sample {}. Something went wrong in an earlier step. I'll continue, but you need to fix this.".format(sample)
+									lumi_sf = 0.
+							this_histogram.Scale(lumi_sf)
+							if this_histogram_pass:
+								this_histogram_pass.Scale(lumi_sf)
+							if this_histogram_fail:
+								this_histogram_fail.Scale(lumi_sf)
+
+						# Add up
+						if first:
+							first = False
+							extra_histograms[var] = this_histogram.Clone()
+							extra_histograms[var].SetDirectory(0)
+							extra_histograms[var].SetName(supersample + "_" + var)
+							if this_histogram_pass:
+								extra_histograms_pass[var] = this_histogram_pass.Clone()
+								extra_histograms_pass[var].SetDirectory(0)
+								extra_histograms_pass[var].SetName(supersample + "_" + var + "_pass")
+							if this_histogram_fail:
+								extra_histograms_fail[var] = this_histogram_fail.Clone()
+								extra_histograms_fail[var].SetDirectory(0)
+								extra_histograms_fail[var].SetName(supersample + "_" + var + "_fail")
+						else:
+							extra_histograms[var].Add(this_histogram)
+							if this_histogram_pass:
+								extra_histograms_pass[var].Add(this_histogram_pass)
+							if this_histogram_fail:
+								extra_histograms_fail[var].Add(this_histogram_fail)
+						input_file.Close()
+					output_file.cd()
+					extra_histograms[var].Write()
+					if var in extra_histograms_pass:
+						extra_histograms_pass[var].Write()
+					if var in extra_histograms_fail:
+						extra_histograms_fail[var].Write()
+				# End loop over extra vars
+			# End if SR or muCR
+			
+			# For matched histograms, also save the matched and unmatched histograms
+		# End loop over supersamples
+		output_file.Close()
