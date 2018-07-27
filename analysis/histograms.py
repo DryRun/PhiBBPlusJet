@@ -52,8 +52,8 @@ class Histograms(AnalysisBase):
 		self._data.SetJetSelection(jet_type_enum, self._jet_ordering)
 
 		# Cuts
-		self._dbtagcut = params[jet_type]["DCSV"]
-		self._dbtagcut_loose = params[jet_type]["DCSV_LOOSE"]
+		self._dbtagcut = 0.8
+		self._dbtagcut_loose = 0.7
 		self._dcsv_min = -999.
 		self._data_source = "data"
 		self._prescale = -1
@@ -62,8 +62,6 @@ class Histograms(AnalysisBase):
 		# Weight systematics: these only affect the weights used to fill histograms, so can easily be filled in normal running
 		self._weight_systematics = {
 			"SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"N2SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
-			"N2CR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"Preselection":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"muCR":["MuTriggerUp", "MuTriggerDown", "MuIDUp", "MuIDDown", "MuIsoUp", "MuIsoDown", "PUUp", "PUDown"]
 		}
@@ -268,8 +266,8 @@ class Histograms(AnalysisBase):
 			self._selection_histograms[selection].AddPrefix("h_{}_{}_".format(selection, self._jet_type))
 
 			for box in self._boxes:
-				self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd".format(box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
-				self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_unweighted".format(box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+				self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd".format(box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
+				self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_unweighted".format(box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 				self._selection_histograms[selection].AddTH1D("{}_nevents".format(box), "{}_nevents".format(box), "", 1, -0.5, 0.5)
 				self._selection_histograms[selection].AddTH1D("{}_nevents_weighted".format(box), "{}_nevents_weighted".format(box), "", 1, -0.5, 0.5)
 				self._selection_histograms[selection].AddTH1D("{}_pfmet".format(box), "PF MET", "PF MET [GeV]", 200, 0., 1000.)
@@ -284,7 +282,7 @@ class Histograms(AnalysisBase):
 				self._selection_histograms[selection].AddTH2D("{}_met_vs_msd".format(box), "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
 				if selection in self._weight_systematics:
 					for systematic in self._weight_systematics[selection]:
-						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_{}".format(box, systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", len(self._pt_bins) - 1, self._pt_bins)
+						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_{}".format(box, systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 
 			self._selection_histograms[selection].AddTH3D("dbtag_vs_pt_vs_msd", "dbtag_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 80, 40, 600,
