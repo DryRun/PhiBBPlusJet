@@ -518,7 +518,7 @@ class Histograms(AnalysisBase):
 						# Weight systematics: run only if this selection is defined in self._weight_systematics
 						if selection in self._weight_systematics:
 							for systematic in self._weight_systematics[selection]:
-								self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_{}".format(box, systematic)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+								self._selection_histograms[selection].GetTH2D("{}_{}_pt_vs_msd_{}".format(systematic, box)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
 
 					self._selection_histograms[selection].GetTH3D("dbtag_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_dbtag)
 					self._selection_histograms[selection].GetTH3D("n2ddt_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_n2ddt)
