@@ -263,7 +263,7 @@ class Histograms(AnalysisBase):
 		self._boxes = ["all", "pass1", "pass2", "fail1", "fail2", "pass1loose", "pass2loose"]
 		for selection in self._selections:
 			self._selection_histograms[selection] = ROOT.Root.HistogramManager()
-			self._selection_histograms[selection].AddPrefix("h_{}_{}_".format(selection, self._jet_type))
+			self._selection_histograms[selection].AddPrefix("h_{}_".format(selection))
 
 			for box in self._boxes:
 				self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd".format(box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
@@ -282,7 +282,7 @@ class Histograms(AnalysisBase):
 				self._selection_histograms[selection].AddTH2D("{}_met_vs_msd".format(box), "met_msd", "m_{SD} [GeV]", 40, 40, 600, "E_{T}^{miss} [GeV]", 25, 0., 500.)
 				if selection in self._weight_systematics:
 					for systematic in self._weight_systematics[selection]:
-						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_{}".format(box, systematic), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
+						self._selection_histograms[selection].AddTH2D("{}_{}_pt_vs_msd".format(systematic, box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 
 			self._selection_histograms[selection].AddTH3D("dbtag_vs_pt_vs_msd", "dbtag_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 80, 40, 600,
