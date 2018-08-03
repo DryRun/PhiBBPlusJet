@@ -208,11 +208,14 @@ class Histograms(AnalysisBase):
 			self._event_selectors["SR_matched"] = EventSelector("SR_matched")
 			self._event_selectors["SR_matched"].add_cut("Vmatch", 
 				"""
-	matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi)));
-	matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt;
-	matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass;
-	vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;
-	cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);""")
+	if event.genVPt > 0 and event.genVMass > 0:
+		matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi)));
+		matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt;
+		matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass;
+		vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;
+		cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);
+	else:
+		cut_result = False;""")
 			self._event_selectors["SR_matched"].add_cut("jetID", 		"cut_result = event.SelectedJet_isTightVJet == 1")
 			self._event_selectors["SR_matched"].add_cut("min_pt", 		"cut_result = event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
 			self._event_selectors["SR_matched"].add_cut("min_msd", 		"cut_result = event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
@@ -236,7 +239,15 @@ class Histograms(AnalysisBase):
 				self._selections.append("SR_matched_{}".format(systematic))
 				self._event_selectors["SR_matched_{}".format(systematic)] = EventSelector("SR_matched_{}".format(systematic))
 				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("Vmatch", 
-					"""matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi))); matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt; matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass; vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3; cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);""")
+					"""
+	if event.genVPt > 0 and event.genVMass > 0:
+		matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi))); 
+		matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt; 
+		matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass; 
+		vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3; 
+		cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);
+	else:
+		cut_result = False;""")
 				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("jetID", 		"cut_result = (event.SelectedJet_isTightVJet == 1)")
 				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_pt", 		"cut_result = (event.SelectedJet_pt > 450.)", return_data=["event.SelectedJet_pt"])
 				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_msd", 		"cut_result = (event.SelectedJet_msd_puppi > 40.)", return_data=["event.SelectedJet_msd_puppi"])

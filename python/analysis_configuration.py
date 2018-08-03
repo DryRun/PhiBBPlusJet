@@ -24,7 +24,7 @@ background_names = [
 # First 12.05 signal processing. Some samples are missing.
 signal_names = []
 simulated_signal_names = []
-signal_models = ["Sbb", "PSbb"] # ZPrime
+signal_models = ["Sbb", "PSbb", "ZPrime"] # ZPrime
 signal_model_masses = {
 	"Sbb":[50,100,125,200,300,350,400,500], 
 	"PSbb":[50,100,125,200,300,350,400,500], 
