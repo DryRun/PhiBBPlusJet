@@ -13,9 +13,9 @@ from array import array
 import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 from DAZSLE.PhiBBPlusJet.cross_sections import cross_sections
 
-input_folder = "/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT"
-output_folder = "/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT/tmp"
-ddt_folder = "/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT/"
+input_folder = os.path.expandvars("$HOME/PhiBB2017/data/DDT")
+output_folder = os.path.expandvars("$HOME/PhiBB2017/data/DDT/tmp")
+ddt_folder = os.path.expandvars("$HOME/PhiBB2017/data/DDT/")
 
 
 rho_bins = [21, -7., -0.]
@@ -187,12 +187,12 @@ def do_ddt_point(rho, pt, points, drho_cut=None, wp=0.26):
 	this_z = points[last_point_index].z * p_delta + points[last_point_index-1].z * (1. - p_delta)
 	return [rho, pt, this_z]
 
-def get_ddt3dhist_path(jet_type, zvar, wp):
-	path = "{}/DDT_3D_hists_{}_{}_wp{}".format(output_folder, jet_type, zvar, wp)
+def get_ddt3dhist_path(jet_type, zvar):
+	path = "{}/DDT_3D_hists_{}_{}".format(output_folder, jet_type, zvar, wp)
 	path += ".root"
 	return path
 
-def do_ddt_simple_step1(jet_type, wp, zvar="N2"):
+def make_3dhists(jet_type, zvar="N2"):
 	if jet_type == "AK8":
 		dbtag_var = "dcsv"
 	elif jet_type == "CA15":
@@ -253,30 +253,30 @@ def do_ddt_simple_step1(jet_type, wp, zvar="N2"):
 			H3.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 			H3_samples[sample].Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 			if entry % 3 == 0:
-				H31.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+				H31.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 			if entry % 3 == 1:
-				H32.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+				H32.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 			if entry % 3 == 2:
-				H33.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+				H33.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 
 			if containers[dbtag_var][0] > 0.8:
 				H3_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				H3_samples_dbtag_pass[sample].Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 0:
-					H31_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+					H31_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 1:
-					H32_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+					H32_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 2:
-					H33_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+					H33_dbtag_pass.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 			elif containers[dbtag_var][0] < 0.8:
 				H3_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				H3_samples_dbtag_fail[sample].Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 0:
-					H31_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+					H31_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 1:
-					H32_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+					H32_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 				if entry % 3 == 2:
-					H33_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], total_weight)
+					H33_dbtag_fail.Fill(containers["rho"][0], containers["pt"][0], containers[zvar][0], total_weight)
 		weight_debug.sort()
 		print weight_debug[-20:]
 	# Save big histograms
@@ -312,8 +312,8 @@ def get_ddttransf_path(jet_type ,zvar, wp, dbtag_pass=False, dbtag_fail=False):
 	return path
 
 
-def do_ddt_simple_step2(jet_type, wp, zvar="N2", dbtag_pass=False, dbtag_fail=False):
-	f_h3 = TFile(get_ddt3dhist_path(jet_type, zvar, wp), "READ")
+def make_ddt_simple(jet_type, wp, zvar="N2", dbtag_pass=False, dbtag_fail=False):
+	f_h3 = TFile(get_ddt3dhist_path(jet_type, zvar), "READ")
 	if dbtag_pass:
 		hist_suffix = "_dbtag_pass"
 	elif dbtag_fail:
@@ -362,9 +362,10 @@ if __name__ == '__main__':
 	import argparse
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--jet_type", type=str, help="AK8 or CA15")
-	parser.add_argument("--run_simple1", action="store_true", help="Run simple binned DDT (step 1: long step to make 3D hists)")
-	parser.add_argument("--run_simple2", action="store_true", help="Run simple binned DDT (step 2: short step to compute quantiles)")
+	parser.add_argument("--run_hists", action="store_true", help="Run simple binned DDT (step 1: long step to make 3D hists)")
+	parser.add_argument("--run_ddt_simple", action="store_true", help="Run simple binned DDT (step 2: short step to compute quantiles)")
 	parser.add_argument("--run_smoothing", action="store_true", help="Run smoothed DDT")
+	parser.add_argument("--wp", type=float, help="Efficiency working point")
 	parser.add_argument("--crun", action="store_true", help="Run on HTCondor")
 	parser.add_argument("--ncpu", type=int, default=4, help="Multiprocessing ncpus")
 	parser.add_argument("--drho_cut", type=float, help="Add drho cut for smoothing")
@@ -380,7 +381,9 @@ if __name__ == '__main__':
 		output_folder = "./"
 
 	# WPs
-	if args.zvar == "N2":
+	if args.wp:
+		wp = args.wp
+	elif args.zvar == "N2":
 		wp = 0.26
 	elif args.zvar == "dcsv" and args.jet_type == "AK8":
 		wp = 0.015
@@ -410,12 +413,12 @@ if __name__ == '__main__':
 					break
 				rho_pt_points_subjob[isubjob].append(rho_pt_points_all[j])
 
-	if args.run_simple1:
-		do_ddt_simple_step1(args.jet_type, wp, args.zvar)
-	if args.run_simple2:
-		do_ddt_simple_step2(args.jet_type, wp, args.zvar)
-		do_ddt_simple_step2(args.jet_type, wp, args.zvar, dbtag_pass=True)
-		do_ddt_simple_step2(args.jet_type, wp, args.zvar, dbtag_fail=True)
+	if args.run_hists:
+		make_3dhists(args.jet_type, args.zvar)
+	if args.run_ddt_simple:
+		make_ddt_simple(args.jet_type, wp, args.zvar)
+		make_ddt_simple(args.jet_type, wp, args.zvar, dbtag_pass=True)
+		make_ddt_simple(args.jet_type, wp, args.zvar, dbtag_fail=True)
 
 
 	if args.run_smoothing:
@@ -441,14 +444,14 @@ if __name__ == '__main__':
 		#rho_bins_fine = [280, -7.0, 0.0]
 		#pt_bins_fine = [200, 400., 1000.]
 		import time
-		submission_dir = "/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT/condor/smoothing_{}/".format(time.time())
+		submission_dir = os.path.expandvars("$HOME/PhiBB2017/data/DDT/condor/smoothing_{}/").format(time.time())
 		cwd = os.getcwd()
 		os.system("mkdir -pv {}".format(submission_dir))
 		os.chdir(submission_dir)
 
 		input_files = []
 		for sample in config.samples["qcd"]:
-			input_files.append("/afs/cern.ch/user/d/dryu/DAZSLE/data/DDT/ddt_ntuple_{}.root".format(sample))
+			input_files.append(os.path.expandvars("$HOME/PhiBB2017/data/DDT/ddt_ntuple_{}.root").format(sample))
 
 		job_script_path = "{}/run_csubjob.sh".format(submission_dir)
 		job_script = open(job_script_path, 'w')
