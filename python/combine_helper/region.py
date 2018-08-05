@@ -91,9 +91,9 @@ class Region():
 		ws = ROOT.RooWorkspace(ws_name)
 		for background_name in self._background_names:
 			self._backgrounds[background_name].RooDataHist().SetName("{}_{}".format(background_name, self._region_name))
-			getattr(ws, "import")(self._backgrounds[background_name].RooDataHist(), ROOT.RooFit.RecycleConflictNodes())
+			getattr(ws, "import")(self._backgrounds[background_name].RooDataHist())
 		self._signal.RooDataHist().SetName("{}_{}".format(self._signal_name, self._region_name))
-		getattr(ws, "import")(self._signal.RooDataHist(), ROOT.RooFit.RecycleConflictNodes())
+		getattr(ws, "import")(self._signal.RooDataHist())
 		self._data.RooDataHist().SetName("{}_{}".format("data_obs", self._region_name))
-		getattr(ws, "import")(self._data.RooDataHist(), ROOT.RooFit.RecycleConflictNodes())
+		getattr(ws, "import")(self._data.RooDataHist())
 		ws.writeToFile(ws_path)		
