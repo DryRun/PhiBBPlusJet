@@ -227,6 +227,8 @@ def make_3dhists(jet_type, zvar="N2"):
 		H3_samples_dbtag_fail[sample] = TH3F("H3_{}_dbtag_fail".format(sample), ";Jet #rho;Jet p_{T} (GeV)", len(rho_bins_array)-1, rho_bins_array, len(pt_bins_array)-1, pt_bins_array, len(z_bins_array[zvar])-1, z_bins_array[zvar])
 		H3_samples_dbtag_fail[sample].SetDirectory(0)
 		f = TFile("{}/ddt_ntuple_{}.root".format(input_folder, sample))
+		if not f.IsOpen():
+			print "ERROR : Can't open file {}".format(f.GetPath())
 		nevents = f.Get("NEvents").Integral()
 		xs = cross_sections[sample]
 		T = f.Get("ddttree")
@@ -280,7 +282,7 @@ def make_3dhists(jet_type, zvar="N2"):
 		weight_debug.sort()
 		print weight_debug[-20:]
 	# Save big histograms
-	f_h3 = TFile(get_ddt3dhist_path(jet_type, zvar, wp), "RECREATE")
+	f_h3 = TFile(get_ddt3dhist_path(jet_type, zvar), "RECREATE")
 	H3.Write()
 	H31.Write()
 	H32.Write()
