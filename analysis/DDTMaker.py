@@ -218,6 +218,10 @@ def make_3dhists(jet_type, zvar="N2"):
 	H3_samples_dbtag_pass = {}
 	H3_samples_dbtag_fail = {}
 	for sample in config.samples["qcd"]:
+		# Skip the low-HT QCD samples, which only contribute giant nooise spikes. 
+		if sample in ["QCD_HT100to200", "QCD_HT200to300","QCD_HT300to500"]:
+			continue
+
 		print "Processing sample {}".format(sample)
 		H3_samples[sample] = TH3F("H3_{}".format(sample), ";Jet #rho;Jet p_{T} (GeV)", len(rho_bins_array)-1, rho_bins_array, len(pt_bins_array)-1, pt_bins_array, len(z_bins_array[zvar])-1, z_bins_array[zvar])
 		H3_samples[sample].SetDirectory(0)

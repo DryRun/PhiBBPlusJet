@@ -52,8 +52,10 @@ class Histograms(AnalysisBase):
 		self._data.SetJetSelection(jet_type_enum, self._jet_ordering)
 
 		# Cuts
-		self._dbtagcut = 0.8
-		self._dbtagcut_loose = 0.7
+		self._n2ddt_wps = [0.05, 0.15, 0.26]
+		self._dbtag_cuts= [0.7, 0.8, 0.9]
+		#self._dbtagcut = 0.8
+		#self._dbtagcut_loose = 0.7
 		self._dcsv_min = -999.
 		self._data_source = "data"
 		self._prescale = -1
@@ -271,7 +273,18 @@ class Histograms(AnalysisBase):
 
 		# Histograms for each event selection
 		self._selection_histograms = {}
-		self._boxes = ["all", "pass1", "pass2", "fail1", "fail2", "pass1loose", "pass2loose"]
+		self._boxes = ["all"]
+		self._wps = [] # List of (n2ddt wp, dbtag cut)
+		# "pass1", "pass2", "fail1", "fail2", "pass1loose", "pass2loose"]
+		for n2ddt_wp in self._n2ddt_wps:
+			for dbtag_cut in self._dbtag_cuts:
+				self._wps.append((n2ddt_wp, dbtag_cut))
+				box_suffix = "_n2wp{}_dbtag{}".format(n2ddt_wp, dbtag_cut)
+				self._boxes.append("passn2_passdbtag{}".format(box_suffix))
+				self._boxes.append("passn2_faildbtag{}".format(box_suffix))
+				self._boxes.append("failn2_passdbtag{}".format(box_suffix))
+				self._boxes.append("failn2_faildbtag{}".format(box_suffix))
+
 		for selection in self._selections:
 			self._selection_histograms[selection] = ROOT.Root.HistogramManager()
 			self._selection_histograms[selection].AddPrefix("h_{}_".format(selection))
@@ -475,6 +488,7 @@ class Histograms(AnalysisBase):
 				else:
 					fatjet_dbtag     = self._data.SelectedJet_doublesub
 				fatjet_n2ddt    = self._data.SelectedJet_N2DDT
+				fatjet_n2ddt_wp = self._data.SelectedJet_N2DDT_wp
 				fatjet_tau21ddt = self._data.SelectedJet_tau21DDT
 				fatjet_rho      = self._data.SelectedJet_rho
 				fatjet_phi      = self._data.SelectedJet_phi
@@ -492,23 +506,20 @@ class Histograms(AnalysisBase):
 				self._event_selectors[selection].process_event(self._data, event_weight)
 
 				# Boxes
-				# - Pass N2, pass dbtag = p1 := 1
-				# - Fail N2, pass dbtag = f1 := -1
-				# - Pass N2, fail dbttag = p2 := 2
-				# - Fail N2, fail dbtag = f2 := -2
 				event_boxes = ["all"]
-				if fatjet_n2ddt <= 0. and fatjet_dbtag >= self._dbtagcut:
-					event_boxes.append("pass1")
-				if fatjet_n2ddt <= 0. and fatjet_dbtag >= self._dbtagcut_loose:
-					event_boxes.append("pass1loose")
-				if fatjet_n2ddt <= 0. and fatjet_dbtag < self._dbtagcut:
-					event_boxes.append("pass2")
-				if fatjet_n2ddt <= 0. and fatjet_dbtag < self._dbtagcut_loose:
-					event_boxes.append("pass2loose")
-				if fatjet_n2ddt > 0. and fatjet_dbtag > self._dbtagcut:
-					event_boxes.append("fail1")
-				if fatjet_n2ddt > 0. and fatjet_dbtag < self._dbtagcut:
-					event_boxes.append("fail2")
+				for wp_pair in self._wps:
+					n2ddt_wp = wp_pair[0]
+					dbtag_cut = wp_pair[1]
+					box_suffix = "_n2wp{}_dbtag{}".format(n2ddt_wp, dbtag_cut)
+					if fatjet_n2ddt_wp[n2ddt_wp] <= 0. and fatjet_dbtag >= dbtag_cut:
+						event_boxes.append("passn2_passdbtag{}".format(box_suffix))
+					if fatjet_n2ddt_wp[n2ddt_wp] <= 0. and fatjet_dbtag < dbtag_cut:
+						event_boxes.append("passn2_faildbtag{}".format(box_suffix))
+					if fatjet_n2ddt_wp[n2ddt_wp] > 0. and fatjet_dbtag >= dbtag_cut:
+						event_boxes.append("failn2_passdbtag{}".format(box_suffix))
+					if fatjet_n2ddt_wp[n2ddt_wp] > 0. and fatjet_dbtag < dbtag_cut:
+						event_boxes.append("failn2_faildbtag{}".format(box_suffix))
+
 				if self._event_selectors[selection].event_pass():
 					for box in event_boxes:
 						self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd".format(box)).Fill(fatjet_msd, fatjet_pt, event_weight)

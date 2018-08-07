@@ -9,6 +9,7 @@ BaconData::BaconData(TTree *tree) : BaconTree(tree) {
 	_jetordering = kPt;
 
 	// Histogram for N2 DDT
+	/*** Old method: load precomputed DDT
 	TFile *f_n2ddt_AK8 = new TFile("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/analysis/ZqqJet/h3_n2ddt_26eff_36binrho11pt_Spring16.root","read");
 	n2_ddt_transformation_AK8_ = (TH1D*)f_n2ddt_AK8->Get("h2ddt");
 	n2_ddt_transformation_AK8_->SetName("h2ddt_AK8");
@@ -23,6 +24,27 @@ BaconData::BaconData(TTree *tree) : BaconTree(tree) {
 	n2_ddt_transformation_CA15_->SetDirectory(0);
 	f_n2ddt_CA15->Close();
 	delete f_n2ddt_CA15;
+	***/
+	/*** New method: compute DDT from 3D N2 vs pt vs msd histogram **/
+	TFile *f_n2ddt_3dhists_AK8 = new TFile("$CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/data/DDT_3D_hists_AK8_N2.root", "READ");
+	n2_pt_msd_AK8_ = (TH3D*)f_n2ddt_3dhists_AK8->Get("H3");
+	n2_pt_msd_AK8_->SetName("h3ddt_AK8");
+	n2_pt_msd_AK8_->SetDirectory(0);
+	f_n2ddt_3dhists_AK8->Close();
+
+	TFile *f_n2ddt_3dhists_CA15 = new TFile("$CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/data/DDT_3D_hists_CA15_N2.root", "READ");
+	n2_pt_msd_CA15_ = (TH3D*)f_n2ddt_3dhists_CA15->Get("H3");
+	n2_pt_msd_CA15_->SetName("h3ddt_CA15");
+	n2_pt_msd_CA15_->SetDirectory(0);
+	f_n2ddt_3dhists_CA15->Close();
+
+	n2ddt_wps_.push_back(0.05);
+	n2ddt_wps_.push_back(0.15);
+	n2ddt_wps_.push_back(0.26);
+	for (auto& it_wp : n2ddt_wps_) {
+		n2_ddt_transformation_AK8_[it_wp] = ComputeDDTMap(n2_pt_msd_AK8_, it_wp);
+		n2_ddt_transformation_CA15_[it_wp] = ComputeDDTMap(n2_pt_msd_CA15_, it_wp);
+	}
 
 	// PUPPI weight functions
 	// Based on https://github.com/thaarres/PuppiSoftdropMassCorr Summer16
@@ -100,91 +122,23 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 	CA15Puppijet2_rho = 2 * TMath::Log(CA15Puppijet2_msd_puppi/ CA15Puppijet2_pt);
 
 	// AK8Puppijet0_N2DDT
-	int rho_index = n2_ddt_transformation_AK8_->GetXaxis()->FindBin(AK8Puppijet0_rho);
-	if (rho_index > n2_ddt_transformation_AK8_->GetXaxis()->GetNbins()) {
-		rho_index = n2_ddt_transformation_AK8_->GetXaxis()->GetNbins();
-	} else if (rho_index <= 0) {
-		rho_index = 1;
-	}
-	int pt_index = n2_ddt_transformation_AK8_->GetYaxis()->FindBin(AK8Puppijet0_pt);
-	if (pt_index > n2_ddt_transformation_AK8_->GetYaxis()->GetNbins()) {
-		pt_index = n2_ddt_transformation_AK8_->GetYaxis()->GetNbins();
-	} else if (pt_index <= 0) {
-		pt_index = 1;
-	}
-	AK8Puppijet0_N2DDT = AK8Puppijet0_N2sdb1 - n2_ddt_transformation_AK8_->GetBinContent(rho_index, pt_index);
+	for (auto& it_wp : n2ddt_wps_) {
+		AK8Puppijet0_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], AK8Puppijet0_N2sdb1, AK8Puppijet0_rho, AK8Puppijet0_pt);
+		AK8Puppijet1_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], AK8Puppijet1_N2sdb1, AK8Puppijet1_rho, AK8Puppijet1_pt);
+		AK8Puppijet2_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], AK8Puppijet2_N2sdb1, AK8Puppijet2_rho, AK8Puppijet2_pt);
 
-	rho_index = n2_ddt_transformation_AK8_->GetXaxis()->FindBin(AK8Puppijet1_rho);
-	if (rho_index > n2_ddt_transformation_AK8_->GetXaxis()->GetNbins()) {
-		rho_index = n2_ddt_transformation_AK8_->GetXaxis()->GetNbins();
-	} else if (rho_index <= 0) {
-		rho_index = 1;
+		CA15Puppijet0_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], CA15Puppijet0_N2sdb1, CA15Puppijet0_rho, CA15Puppijet0_pt);
+		CA15Puppijet1_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], CA15Puppijet1_N2sdb1, CA15Puppijet1_rho, CA15Puppijet1_pt);
+		CA15Puppijet2_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], CA15Puppijet2_N2sdb1, CA15Puppijet2_rho, CA15Puppijet2_pt);
 	}
-	pt_index = n2_ddt_transformation_AK8_->GetYaxis()->FindBin(AK8Puppijet1_pt);
-	if (pt_index > n2_ddt_transformation_AK8_->GetYaxis()->GetNbins()) {
-		pt_index = n2_ddt_transformation_AK8_->GetYaxis()->GetNbins();
-	} else if (pt_index <= 0) {
-		pt_index = 1;
-	}
-	AK8Puppijet1_N2DDT = AK8Puppijet1_N2sdb1 - n2_ddt_transformation_AK8_->GetBinContent(rho_index, pt_index);
 
-	rho_index = n2_ddt_transformation_AK8_->GetXaxis()->FindBin(AK8Puppijet2_rho);
-	if (rho_index > n2_ddt_transformation_AK8_->GetXaxis()->GetNbins()) {
-		rho_index = n2_ddt_transformation_AK8_->GetXaxis()->GetNbins();
-	} else if (rho_index <= 0) {
-		rho_index = 1;
-	}
-	pt_index = n2_ddt_transformation_AK8_->GetYaxis()->FindBin(AK8Puppijet2_pt);
-	if (pt_index > n2_ddt_transformation_AK8_->GetYaxis()->GetNbins()) {
-		pt_index = n2_ddt_transformation_AK8_->GetYaxis()->GetNbins();
-	} else if (pt_index <= 0) {
-		pt_index = 1;
-	}
-	AK8Puppijet2_N2DDT = AK8Puppijet2_N2sdb1 - n2_ddt_transformation_AK8_->GetBinContent(rho_index, pt_index);
-
-	// CA15Puppijet0_N2DDT
-	rho_index = n2_ddt_transformation_CA15_->GetXaxis()->FindBin(CA15Puppijet0_rho);
-	if (rho_index > n2_ddt_transformation_CA15_->GetXaxis()->GetNbins()) {
-		rho_index = n2_ddt_transformation_CA15_->GetXaxis()->GetNbins();
-	} else if (rho_index <= 0) {
-		rho_index = 1;
-	}
-	pt_index = n2_ddt_transformation_CA15_->GetYaxis()->FindBin(CA15Puppijet0_pt);
-	if (pt_index > n2_ddt_transformation_CA15_->GetYaxis()->GetNbins()) {
-		pt_index = n2_ddt_transformation_CA15_->GetYaxis()->GetNbins();
-	} else if (pt_index <= 0) {
-		pt_index = 1;
-	}
-	CA15Puppijet0_N2DDT = CA15Puppijet0_N2sdb1 - n2_ddt_transformation_CA15_->GetBinContent(rho_index, pt_index);
-
-	rho_index = n2_ddt_transformation_CA15_->GetXaxis()->FindBin(CA15Puppijet1_rho);
-	if (rho_index > n2_ddt_transformation_CA15_->GetXaxis()->GetNbins()) {
-		rho_index = n2_ddt_transformation_CA15_->GetXaxis()->GetNbins();
-	} else if (rho_index <= 0) {
-		rho_index = 1;
-	}
-	pt_index = n2_ddt_transformation_CA15_->GetYaxis()->FindBin(CA15Puppijet1_pt);
-	if (pt_index > n2_ddt_transformation_CA15_->GetYaxis()->GetNbins()) {
-		pt_index = n2_ddt_transformation_CA15_->GetYaxis()->GetNbins();
-	} else if (pt_index <= 0) {
-		pt_index = 1;
-	}
-	CA15Puppijet1_N2DDT = CA15Puppijet1_N2sdb1 - n2_ddt_transformation_CA15_->GetBinContent(rho_index, pt_index);
-
-	rho_index = n2_ddt_transformation_CA15_->GetXaxis()->FindBin(CA15Puppijet2_rho);
-	if (rho_index > n2_ddt_transformation_CA15_->GetXaxis()->GetNbins()) {
-		rho_index = n2_ddt_transformation_CA15_->GetXaxis()->GetNbins();
-	} else if (rho_index <= 0) {
-		rho_index = 1;
-	}
-	pt_index = n2_ddt_transformation_CA15_->GetYaxis()->FindBin(CA15Puppijet2_pt);
-	if (pt_index > n2_ddt_transformation_CA15_->GetYaxis()->GetNbins()) {
-		pt_index = n2_ddt_transformation_CA15_->GetYaxis()->GetNbins();
-	} else if (pt_index <= 0) {
-		pt_index = 1;
-	}
-	CA15Puppijet2_N2DDT = CA15Puppijet2_N2sdb1 - n2_ddt_transformation_CA15_->GetBinContent(rho_index, pt_index);
-
+	// Fixed N2DDT wp containers, for backwards compatibility
+	AK8Puppijet0_N2DDT = AK8Puppijet0_N2DDT_wp[0.26];
+	AK8Puppijet1_N2DDT = AK8Puppijet1_N2DDT_wp[0.26];
+	AK8Puppijet2_N2DDT = AK8Puppijet2_N2DDT_wp[0.26];
+	CA15Puppijet0_N2DDT = CA15Puppijet0_N2DDT_wp[0.26];
+	CA15Puppijet1_N2DDT = CA15Puppijet1_N2DDT_wp[0.26];
+	CA15Puppijet2_N2DDT = CA15Puppijet2_N2DDT_wp[0.26];
 
 	// MET JES/JER
     double puppet_x = puppet * TMath::Cos(puppetphi);
@@ -358,6 +312,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_tau21DDT     = AK8Puppijet0_tau21DDT;
 		SelectedJet_rho          = AK8Puppijet0_rho;
 		SelectedJet_N2DDT        = AK8Puppijet0_N2DDT;
+		for (auto& it_wp : n2ddt_wps_) {
+			SelectedJet_N2DDT_wp[it_wp] = AK8Puppijet0_N2DDT_wp[it_wp];
+		}
 		SelectedJet_msd_puppi    = AK8Puppijet0_msd_puppi;
 		SelectedJet_nParticles = AK8Puppijet0_nParticles;
 	} else if (which_jet == kAK8_1) {
@@ -423,6 +380,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_tau21DDT     = AK8Puppijet1_tau21DDT;
 		SelectedJet_rho          = AK8Puppijet1_rho;
 		SelectedJet_N2DDT        = AK8Puppijet1_N2DDT;
+		for (auto& it_wp : n2ddt_wps_) {
+			SelectedJet_N2DDT_wp[it_wp] = AK8Puppijet1_N2DDT_wp[it_wp];
+		}
 		SelectedJet_msd_puppi    = AK8Puppijet1_msd_puppi;
 		SelectedJet_nParticles = AK8Puppijet0_nParticles;
 	} else if (which_jet == kAK8_2) {
@@ -488,6 +448,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_tau21DDT     = AK8Puppijet2_tau21DDT;
 		SelectedJet_rho          = AK8Puppijet2_rho;
 		SelectedJet_N2DDT        = AK8Puppijet2_N2DDT;
+		for (auto& it_wp : n2ddt_wps_) {
+			SelectedJet_N2DDT_wp[it_wp] = AK8Puppijet2_N2DDT_wp[it_wp];
+		}
 		SelectedJet_msd_puppi    = AK8Puppijet2_msd_puppi;
 		SelectedJet_nParticles = AK8Puppijet0_nParticles;
 	} else if (which_jet == kCA15_0) {
@@ -553,6 +516,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_tau21DDT     = CA15Puppijet0_tau21DDT;
 		SelectedJet_rho          = CA15Puppijet0_rho;
 		SelectedJet_N2DDT        = CA15Puppijet0_N2DDT;
+		for (auto& it_wp : n2ddt_wps_) {
+			SelectedJet_N2DDT_wp[it_wp] = CA15Puppijet0_N2DDT_wp[it_wp];
+		}
 		SelectedJet_msd_puppi    = CA15Puppijet0_msd_puppi;
 		SelectedJet_nParticles = CA15Puppijet0_nParticles;
 	} else if (which_jet == kCA15_1) {
@@ -618,6 +584,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_tau21DDT     = CA15Puppijet1_tau21DDT;
 		SelectedJet_rho          = CA15Puppijet1_rho;
 		SelectedJet_N2DDT        = CA15Puppijet1_N2DDT;
+		for (auto& it_wp : n2ddt_wps_) {
+			SelectedJet_N2DDT_wp[it_wp] = CA15Puppijet1_N2DDT_wp[it_wp];
+		}
 		SelectedJet_msd_puppi    = CA15Puppijet1_msd_puppi;
 		SelectedJet_nParticles = CA15Puppijet0_nParticles;
 	} else if (which_jet == kCA15_2) {
@@ -683,6 +652,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		SelectedJet_tau21DDT     = CA15Puppijet2_tau21DDT;
 		SelectedJet_rho          = CA15Puppijet2_rho;
 		SelectedJet_N2DDT        = CA15Puppijet2_N2DDT;
+		for (auto& it_wp : n2ddt_wps_) {
+			SelectedJet_N2DDT_wp[it_wp] = CA15Puppijet2_N2DDT_wp[it_wp];
+		}
 		SelectedJet_msd_puppi    = CA15Puppijet2_msd_puppi;
 		SelectedJet_nParticles = CA15Puppijet0_nParticles;
 	}
@@ -700,6 +672,50 @@ Double_t BaconData::PUPPIweight(double pt, double eta) const {
 Bool_t BaconData::IsVMatched(double matching_dR) const {
 	double dR = TMath::Sqrt(TMath::Power(SelectedJet_eta - genVEta, 2) + TMath::Power(SelectedJet_phi - genVPhi, 2));
 	return dR <= matching_dR;
+}
+
+TH2D* BaconData::ComputeDDTMap(TH3D *h3_n2_pt_msd, double wp) const {
+	TH2D *ddt_hist = (TH2D*)h3_n2_pt_msd->Project3D("yx");
+	char hname[100];
+	sprintf(hname, "%s_ddt_wp%f", h3_n2_pt_msd->GetName(), wp);
+	ddt_hist->SetName(hname);
+	ddt_hist->Reset();
+	ddt_hist->SetStats(0);
+	ddt_hist->SetDirectory(0);
+	int nbins_x = ddt_hist->GetNbinsX();
+	int nbins_y = ddt_hist->GetNbinsY();
+	for (int xbin = 1; xbin <= nbins_x; ++xbin) {
+		for (int ybin = 1; ybin <= nbins_y; ++ybin) {
+			sprintf(hname, "%s_x%d_y%d", h3_n2_pt_msd->GetName(), xbin, ybin);
+			TH1D* n2proj = h3_n2_pt_msd->ProjectionZ(hname	, xbin, xbin, ybin, ybin);
+			if (n2proj->Integral() == 0) {
+				std::cout << "[BaconData::ComputeDDTMap] WARNING : N2 integral = 0 for xbin=" << xbin << " / ybin=" << ybin << " for hist " << h3_n2_pt_msd->GetName() << ". Setting DDT to -1000." << std::endl;
+				ddt_hist->SetBinContent(xbin, ybin, -1000);
+				continue;
+			}
+			double wp_array[1] = {wp};
+			double quantiles[1] = {0.};
+			n2proj->GetQuantiles(1, quantiles, wp_array);
+			ddt_hist->SetBinContent(xbin, ybin, quantiles[0]);
+		}
+	}
+	return ddt_hist;
+}
+
+double BaconData::ComputeDDT(TH2D *ddt_map, double n2, double rho, double pt) const {
+	int rho_bin = ddt_map->GetXaxis()->FindBin(rho);
+	if (rho_bin > ddt_map->GetXaxis()->GetNbins()) {
+		rho_bin = ddt_map->GetXaxis()->GetNbins();
+	} else if (rho_bin <= 0) {
+		rho_bin = 1;
+	}
+	int pt_bin = ddt_map->GetXaxis()->FindBin(pt);
+	if (pt_bin > ddt_map->GetXaxis()->GetNbins()) {
+		pt_bin = ddt_map->GetXaxis()->GetNbins();
+	} else if (pt_bin <= 0) {
+		pt_bin = 1;
+	}
+	return n2 - ddt_map->GetBinContent(rho_bin, pt_bin);
 }
 
 

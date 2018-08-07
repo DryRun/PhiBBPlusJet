@@ -6,6 +6,8 @@
 #include "TMath.h"
 #include "TH1D.h"
 #include "TF1.h"
+#include "TH2D.h"
+#include "TH3D.h"
  /**
   * @brief      Class for exposing data from bacon ntuples.
   */
@@ -23,6 +25,10 @@ public:
 	Double_t PUPPIweight(double pt, double eta) const;
 
 	Bool_t IsVMatched(double matching_dR) const;
+
+	TH2D* ComputeDDTMap(TH3D *h3_n2_pt_msd, double wp) const;
+
+	double ComputeDDT(TH2D *ddt_map, double n2, double rho, double pt) const;
 
 public:
 	// Enums for specifying the jet type and jet selection
@@ -58,8 +64,14 @@ public:
 	Double_t CA15Puppijet0_tau21DDT;
 	Double_t AK8Puppijet0_rho;
 	Double_t CA15Puppijet0_rho;
-	Double_t AK8Puppijet0_N2DDT;
-	Double_t CA15Puppijet0_N2DDT;
+	Double_t AK8Puppijet0_N2DDT; // Old DDT: pre-compute WP 0.26
+	Double_t CA15Puppijet0_N2DDT; // Old DDT: pre-compute WP 0.26
+	std::map<double, double> AK8Puppijet0_N2DDT_wp; // New DDT: compute on the fly
+	std::map<double, double> AK8Puppijet1_N2DDT_wp; 
+	std::map<double, double> AK8Puppijet2_N2DDT_wp; 
+	std::map<double, double> CA15Puppijet0_N2DDT_wp; // New DDT: compute on the fly
+	std::map<double, double> CA15Puppijet1_N2DDT_wp; 
+	std::map<double, double> CA15Puppijet2_N2DDT_wp; 
 	Double_t CA15CHSjet0_N2DDT;
 	Double_t AK8Puppijet0_msd_puppi;
 	Double_t CA15Puppijet0_msd_puppi;
@@ -155,11 +167,15 @@ public:
 	Int_t           SelectedJet_isTightVJet;
 	Double_t 		SelectedJet_tau21DDT;
 	Double_t 		SelectedJet_N2DDT;
+	std::map<double, double> SelectedJet_N2DDT_wp;
 	Double_t 		SelectedJet_msd_puppi;
 	Int_t           SelectedJet_nParticles;
 private:
-	TH1D* n2_ddt_transformation_AK8_;
-	TH1D* n2_ddt_transformation_CA15_;
+	std::map<double, TH2D*> n2_ddt_transformation_AK8_;
+	std::map<double, TH2D*> n2_ddt_transformation_CA15_;
+	std::vector<double> n2ddt_wps_;
+	TH3D* n2_pt_msd_AK8_; // Base histograms for deriving N2 DDT
+	TH3D* n2_pt_msd_CA15_; // Base histograms for deriving N2 DDT
 	TF1* puppi_corr_gen_;
 	TF1* puppi_corr_reco_cen_;
 	TF1* puppi_corr_reco_for_;
