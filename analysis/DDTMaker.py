@@ -23,7 +23,6 @@ pt_bins = [8, 200., 1000.]
 rho_bins_array = array('d', [])
 for i in xrange(rho_bins[0]+1):
 	rho_bins_array.append(rho_bins[1] + (rho_bins[2]-rho_bins[1])/rho_bins[0]*i)
-print rho_bins_array
 pt_bins_array = array('d', [200., 400., 450., 500., 550., 600., 675., 800., 1000.])
 
 z_bins = {
@@ -315,6 +314,7 @@ def get_ddttransf_path(jet_type ,zvar, wp, dbtag_pass=False, dbtag_fail=False):
 
 
 def make_ddt_simple(jet_type, wp, zvar="N2", dbtag_pass=False, dbtag_fail=False):
+	print "[make_ddt_simple] INFO : Opening {}".format(get_ddt3dhist_path(jet_type, zvar))
 	f_h3 = TFile(get_ddt3dhist_path(jet_type, zvar), "READ")
 	if dbtag_pass:
 		hist_suffix = "_dbtag_pass"
@@ -325,7 +325,7 @@ def make_ddt_simple(jet_type, wp, zvar="N2", dbtag_pass=False, dbtag_fail=False)
 	H3 = f_h3.Get("H3" + hist_suffix)
 	# Subtract off samples with large errors
 	for sample in ["QCD_HT100to200","QCD_HT200to300","QCD_HT300to500"]:
-		print f_h3.Get("H3_{}{}".format(sample, hist_suffix))
+		#print f_h3.Get("H3_{}{}".format(sample, hist_suffix))
 		H3.Add(f_h3.Get("H3_{}{}".format(sample, hist_suffix)), -1)
 	H31 = f_h3.Get("H31" + hist_suffix)
 	H32 = f_h3.Get("H32" + hist_suffix)
