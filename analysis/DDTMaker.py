@@ -324,7 +324,7 @@ def make_ddt_simple(jet_type, wp, zvar="N2", dbtag_pass=False, dbtag_fail=False)
 		hist_suffix = ""
 	H3 = f_h3.Get("H3" + hist_suffix)
 	# Subtract off samples with large errors
-	for sample in ["QCD_HT100to200","QCD_HT200to300","QCD_HT300to500"]:
+	for sample in ["QCD_HT200to300","QCD_HT300to500"]: # QCD_HT100to200
 		#print f_h3.Get("H3_{}{}".format(sample, hist_suffix))
 		H3.Add(f_h3.Get("H3_{}{}".format(sample, hist_suffix)), -1)
 	H31 = f_h3.Get("H31" + hist_suffix)
