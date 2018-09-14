@@ -104,6 +104,9 @@ class EventSelector(Cutflow):
 			if self._event_pass_nm1[cut]:
 				if cut in self._nm1_histograms:
 					for variable_name, histogram in self._nm1_histograms[cut].iteritems():
+						if self._return_data[cut][variable_name] == None:
+							print "[EventSelector::process_event] ERROR : Return data was not set, selector {}, self._return_data[{}][{}]".format(self._name, cut, variable_name)
+							sys.exit(1)
 						histogram.Fill(self._return_data[cut][variable_name])
 		# Reset return data
 		for cut_name, cut_data in self._return_data.iteritems():

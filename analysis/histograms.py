@@ -196,7 +196,7 @@ class Histograms(AnalysisBase):
 		self._event_selectors["Preselection"] = EventSelector("Preselection")
 
 		@add_cut(self._event_selectors["Preselection"])
-		@add_nm1_hist(self._event_selectors["Preselection"], "min_pt", "pt", "p_{T} [GeV]", 120, 0., 1200.)
+		@add_nm1_hist(self._event_selectors["Preselection"], "pt", "p_{T} [GeV]", 120, 0., 1200.)
 		def min_pt(self, event):
 			self._return_data["min_pt"]["pt"] = event.SelectedJet_pt
 			return event.SelectedJet_pt > 400.
@@ -236,13 +236,13 @@ class Histograms(AnalysisBase):
 		@add_cut(self._event_selectors["SR"])
 		@add_nm1_hist(self._event_selectors["SR"], "nmuLoose", "N_{#mu}", 11, -0.5, 10.5)
 		def muonveto(self, event):
-			self._return_data["electronveto"]["nmuLoose"] = event.nmuLoose
+			self._return_data["muonveto"]["nmuLoose"] = event.nmuLoose
 			return event.nmuLoose == 0
 
 		@add_cut(self._event_selectors["SR"])
 		@add_nm1_hist(self._event_selectors["SR"], "ntau", "N_{#tau}", 11, -0.5, 10.5)
 		def tauveto(self, event):
-			self._return_data["electronveto"]["ntau"] = event.ntau
+			self._return_data["tauveto"]["ntau"] = event.ntau
 			return event.ntau==0
 
 		@add_cut(self._event_selectors["SR"])
@@ -267,10 +267,11 @@ class Histograms(AnalysisBase):
 					matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt
 					matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass
 					vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3
+					self._return_data["Vmatch"]["Vmatch_dphi"] = matching_dphi
 					self._return_data["Vmatch"]["Vmatch_dR"] = (matching_deta**2 + matching_dphi**2)**0.5
 					self._return_data["Vmatch"]["Vmatch_dpt"] = (event.genVPt - event.SelectedJet_pt) / event.genVPt
 
-					return = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
+					return (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
 				else:
 					return False
 
@@ -299,13 +300,13 @@ class Histograms(AnalysisBase):
 			@add_cut(self._event_selectors["SR_matched"])
 			@add_nm1_hist(self._event_selectors["SR_matched"], "nmuLoose", "N_{#mu}", 11, -0.5, 10.5)
 			def muonveto(self, event):
-				self._return_data["electronveto"]["nmuLoose"] = event.nmuLoose
+				self._return_data["muonveto"]["nmuLoose"] = event.nmuLoose
 				return event.nmuLoose == 0
 
 			@add_cut(self._event_selectors["SR_matched"])
 			@add_nm1_hist(self._event_selectors["SR_matched"], "ntau", "N_{#tau}", 11, -0.5, 10.5)
 			def tauveto(self, event):
-				self._return_data["electronveto"]["ntau"] = event.ntau
+				self._return_data["tauveto"]["ntau"] = event.ntau
 				return event.ntau==0
 
 			@add_cut(self._event_selectors["SR_matched"])
