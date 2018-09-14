@@ -16,8 +16,8 @@ class Cutflow:
 
 		# N-1 histogram stuff
 		self._return_data = {} # Container for storing the variables to be filled in the N-1 histograms. Should be set when the cut function is called.
-		self._nminusone_variables = {} # Map from the cut name to the variable name
-		self._nminusone_histograms = {}
+		self._nm1_variables = {} # Map from the cut name to the variable name
+		self._nm1_histograms = {}
 
 		# Cutflow counting containers
 		self._pass_calls = 0
@@ -33,7 +33,7 @@ class Cutflow:
 	def add_cut(self, cut_name, cut_parameters=None):
 		self._cut_list.append(cut_name)
 		self._cut_parameters[cut_name] = cut_parameters # Maybe should deep copy this?
-		self._nminusone_histograms[cut_name] = {}
+		self._nm1_histograms[cut_name] = {}
 
 		# Initialize cut counters
 		self._cut_counter[cut_name] = 0
@@ -54,18 +54,21 @@ class Cutflow:
 	#############################
 
 	# Creates a histograms of variable_name that is filled if all cuts except cut_name are True.
-	# self._cut_functions[cut_name] MUST SET self._return_data[variable_name]. 
-	def add_nminusone_histogram(self, cut_name, variable_name, xtitle, nbins, xmin, xmax):
-		if not cut_name in self._nminusone_histograms:
-			self._nminusone_histograms[cut_name] = {}
-		self._nminusone_histograms[cut_name][variable_name] = TH1D("h_nminusone_{}_{}_{}".format(self._name, cut_name, variable_name), "h_nminusone_{}_{}_{}".format(self._name, cut_name, variable_name), nbins, xmin, xmax)
-		self._nminusone_histograms[cut_name][variable_name].SetDirectory(0)
-		self._nminusone_histograms[cut_name][variable_name].Sumw2()
-		self._nminusone_histograms[cut_name][variable_name].GetXaxis().SetTitle(xtitle)
+	# self._cut_functions[cut_name] must set self._return_data[cut_name][variable_name]. 
+	def add_nm1_histogram(self, cut_name, variable_name, xtitle, nbins, xmin, xmax):
+		if not cut_name in self._nm1_histograms:
+			self._nm1_histograms[cut_name] = {}
+		if not cut_name in self._return_data:
+			self._return_data[cut_name] = {}
+		self._nm1_histograms[cut_name][variable_name] = TH1D("h_nm1_{}_CUT_{}_VAR_{}".format(self._name, cut_name, variable_name), "h_nm1_{}_{}_{}".format(self._name, cut_name, variable_name), nbins, xmin, xmax)
+		self._nm1_histograms[cut_name][variable_name].SetDirectory(0)
+		self._nm1_histograms[cut_name][variable_name].Sumw2()
+		self._nm1_histograms[cut_name][variable_name].GetXaxis().SetTitle(xtitle)
+		self._return_data[cut_name][variable_name] = None
 
-	def save_nminusone_histograms(self, directory):
+	def save_nm1_histograms(self, directory):
 		directory.cd()
-		for cut, hist_dict in self._nminusone_histograms.iteritems():
+		for cut, hist_dict in self._nm1_histograms.iteritems():
 			for var, hist in hist_dict.iteritems():
 				hist.Write()
 

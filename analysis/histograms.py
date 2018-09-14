@@ -4,7 +4,7 @@ import ROOT
 from DAZSLE.PhiBBPlusJet.analysis_base import AnalysisBase
 import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 import DAZSLE.PhiBBPlusJet.event_selections as event_selections
-from DAZSLE.PhiBBPlusJet.bacon_event_selector import *
+from DAZSLE.PhiBBPlusJet.event_selector import *
 from DAZSLE.ZPrimePlusJet.xbb_config import analysis_parameters as params
 from math import ceil, sqrt,floor
 import array
@@ -190,73 +190,191 @@ class Histograms(AnalysisBase):
 		# Event selections
 		self._selections = []
 		self._event_selectors = {}
+
+		### Preselection ###
 		self._selections.append("Preselection")
 		self._event_selectors["Preselection"] = EventSelector("Preselection")
-		self._event_selectors["Preselection"].add_cut("min_pt", 	"cut_result = event.SelectedJet_pt > 400.", return_data=["event.SelectedJet_pt"])
-		self._event_selectors["Preselection"].add_cut("min_msd", 	"cut_result = event.SelectedJet_msd_puppi > 40.", return_data="event.SelectedJet_msd_puppi")
 
+		@add_cut(self._event_selectors["Preselection"])
+		@add_nm1_hist(self._event_selectors["Preselection"], "min_pt", "pt", "p_{T} [GeV]", 120, 0., 1200.)
+		def min_pt(self, event):
+			self._return_data["min_pt"]["pt"] = event.SelectedJet_pt
+			return event.SelectedJet_pt > 400.
+
+		@add_cut(self._event_selectors["Preselection"])
+		@add_nm1_hist(self._event_selectors["Preselection"], "msd_puppi", "p_{T} [GeV]", 120, 0., 1200.)
+		def min_msd(self, event):
+			self._return_data["min_msd"]["msd_puppi"] = event.SelectedJet_msd_puppi
+			return event.SelectedJet_msd_puppi > 40.
+
+		### Signal region ###
 		self._selections.append("SR")
 		self._event_selectors["SR"] = EventSelector("SR")
-		self._event_selectors["SR"].add_cut("jetID", 		"cut_result = event.SelectedJet_isTightVJet == 1")
-		self._event_selectors["SR"].add_cut("min_pt", 		"cut_result = event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
-		self._event_selectors["SR"].add_cut("min_msd", 		"cut_result = event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
-		self._event_selectors["SR"].add_cut("electronveto", "cut_result = event.neleLoose==0", return_data=["event.neleLoose"])
-		self._event_selectors["SR"].add_cut("muonveto", 	"cut_result = event.nmuLoose==0", return_data=["event.nmuLoose"])
-		self._event_selectors["SR"].add_cut("tauveto", 		"cut_result = event.ntau==0", return_data=["event.ntau"])
-		self._event_selectors["SR"].add_cut("max_pfmet", 	"cut_result = event.pfmet<140.", return_data=["event.pfmet"])
 
+		@add_cut(self._event_selectors["SR"])
+		def jetID(self, event):
+			return event.SelectedJet_isTightVJet == 1
+
+		@add_cut(self._event_selectors["SR"])
+		@add_nm1_hist(self._event_selectors["SR"], "pt", "p_{T} [GeV]", 120, 0., 1200.)
+		def min_pt(self, event):
+			self._return_data["min_pt"]["pt"] = event.SelectedJet_pt
+			return event.SelectedJet_pt > 450.
+
+		@add_cut(self._event_selectors["SR"])
+		@add_nm1_hist(self._event_selectors["SR"], "msd", "m_{SD}^{PUPPI} [GeV]", 80, 40., 600.)
+		def min_msd(self, event):
+			self._return_data["min_msd"]["msd"] = event.SelectedJet_msd_puppi
+			return event.SelectedJet_msd_puppi > 40.
+
+		@add_cut(self._event_selectors["SR"])
+		@add_nm1_hist(self._event_selectors["SR"], "neleLoose", "N_{e}", 11, -0.5, 10.5)
+		def electronveto(self, event):
+			self._return_data["electronveto"]["neleLoose"] = event.neleLoose
+			return event.neleLoose == 0
+
+		@add_cut(self._event_selectors["SR"])
+		@add_nm1_hist(self._event_selectors["SR"], "nmuLoose", "N_{#mu}", 11, -0.5, 10.5)
+		def muonveto(self, event):
+			self._return_data["electronveto"]["nmuLoose"] = event.nmuLoose
+			return event.nmuLoose == 0
+
+		@add_cut(self._event_selectors["SR"])
+		@add_nm1_hist(self._event_selectors["SR"], "ntau", "N_{#tau}", 11, -0.5, 10.5)
+		def tauveto(self, event):
+			self._return_data["electronveto"]["ntau"] = event.ntau
+			return event.ntau==0
+
+		@add_cut(self._event_selectors["SR"])
+		@add_nm1_hist(self._event_selectors["SR"], "pfmet", "pfmet [GeV]", 25, 0., 500.)
+		def max_pfmet(self, event):
+			self._return_data["max_pfmet"]["pfmet"] = event.pfmet
+			return event.pfmet<140.
+
+		### Signal region, with additional truth-reco V matching ###
 		if self._data_source == "simulation":
 			self._selections.append("SR_matched")
 			self._event_selectors["SR_matched"] = EventSelector("SR_matched")
-			self._event_selectors["SR_matched"].add_cut("Vmatch", 
-				"""
-	if event.genVPt > 0 and event.genVMass > 0:
-		matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi)));
-		matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt;
-		matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass;
-		vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3;
-		cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);
-	else:
-		cut_result = False;""")
-			self._event_selectors["SR_matched"].add_cut("jetID", 		"cut_result = event.SelectedJet_isTightVJet == 1")
-			self._event_selectors["SR_matched"].add_cut("min_pt", 		"cut_result = event.SelectedJet_pt > 450.", return_data=["event.SelectedJet_pt"])
-			self._event_selectors["SR_matched"].add_cut("min_msd", 		"cut_result = event.SelectedJet_msd_puppi > 40.", return_data=["event.SelectedJet_msd_puppi"])
-			self._event_selectors["SR_matched"].add_cut("electronveto", "cut_result = event.neleLoose==0", return_data=["event.neleLoose"])
-			self._event_selectors["SR_matched"].add_cut("muonveto", 	"cut_result = event.nmuLoose==0", return_data=["event.nmuLoose"])
-			self._event_selectors["SR_matched"].add_cut("tauveto", 		"cut_result = event.ntau==0", return_data=["event.ntau"])
-			self._event_selectors["SR_matched"].add_cut("max_pfmet", 	"cut_result = event.pfmet<140.", return_data=["event.pfmet"])
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dphi", "#Delta #phi(V_{truth}, V_{rec})", 140, -7., 7.)
+			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dR", "#Delta R(V_{truth}, V_{rec})", 100, 0., 10.)
+			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dpt", "(p_{T}^{gen}-p_{T}^{rec})/p_{T}^{gen}", 200, -10., 10.)
+			def Vmatch(self, event):
+				if event.genVPt > 0 and event.genVMass > 0:
+					matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi)))
+					matching_deta = abs(event.genVEta - event.SelectedJet_eta)
+					matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt
+					matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass
+					vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3
+					self._return_data["Vmatch"]["Vmatch_dR"] = (matching_deta**2 + matching_dphi**2)**0.5
+					self._return_data["Vmatch"]["Vmatch_dpt"] = (event.genVPt - event.SelectedJet_pt) / event.genVPt
+
+					return = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
+				else:
+					return False
+
+			@add_cut(self._event_selectors["SR_matched"])
+			def jetID(self, event):
+				return event.SelectedJet_isTightVJet == 1
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "pt", "p_{T} [GeV]", 120, 0., 1200.)
+			def min_pt(self, event):
+				self._return_data["min_pt"]["pt"] = event.SelectedJet_pt
+				return event.SelectedJet_pt > 450.
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "msd", "m_{SD}^{PUPPI} [GeV]", 80, 40., 600.)
+			def min_msd(self, event):
+				self._return_data["min_msd"]["msd"] = event.SelectedJet_msd_puppi
+				return event.SelectedJet_msd_puppi > 40.
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "neleLoose", "N_{e}", 11, -0.5, 10.5)
+			def electronveto(self, event):
+				self._return_data["electronveto"]["neleLoose"] = event.neleLoose
+				return event.neleLoose == 0
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "nmuLoose", "N_{#mu}", 11, -0.5, 10.5)
+			def muonveto(self, event):
+				self._return_data["electronveto"]["nmuLoose"] = event.nmuLoose
+				return event.nmuLoose == 0
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "ntau", "N_{#tau}", 11, -0.5, 10.5)
+			def tauveto(self, event):
+				self._return_data["electronveto"]["ntau"] = event.ntau
+				return event.ntau==0
+
+			@add_cut(self._event_selectors["SR_matched"])
+			@add_nm1_hist(self._event_selectors["SR_matched"], "pfmet", "pfmet [GeV]", 25, 0., 500.)
+			def max_pfmet(self, event):
+				self._return_data["max_pfmet"]["pfmet"] = event.pfmet
+				return event.pfmet<140.
 
 		for systematic in self._jet_systematics:
-			self._selections.append("SR_{}".format(systematic))
-			self._event_selectors["SR_{}".format(systematic)] = EventSelector("SR_{}".format(systematic))
-			self._event_selectors["SR_{}".format(systematic)].add_cut("jetID", 		"cut_result = (event.SelectedJet_isTightVJet == 1)")
-			self._event_selectors["SR_{}".format(systematic)].add_cut("min_pt", 		"cut_result = (event.SelectedJet_pt > 450.)", return_data=["event.SelectedJet_pt"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("min_msd", 		"cut_result = (event.SelectedJet_msd_puppi > 40.)", return_data=["event.SelectedJet_msd_puppi"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("electronveto", "cut_result = (event.neleLoose==0)", return_data=["event.neleLoose"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("muonveto", 	"cut_result = (event.nmuLoose==0)", return_data=["event.nmuLoose"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("tauveto", 		"cut_result = (event.ntau==0)", return_data=["event.ntau"])
-			self._event_selectors["SR_{}".format(systematic)].add_cut("max_pfmet", 	"cut_result = (event.pfmet<140.)", return_data=["event.pfmet"])
+			selector_syst_name = "SR_{}".format(systematic)
+			self._selections.append(selector_syst_name)
+			self._event_selectors[selector_syst_name] =  EventSelector(selector_syst_name)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def jetID(self, event):
+				return (event.SelectedJet_isTightVJet == 1)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def min_pt(self, event):
+				return (event.SelectedJet_pt > 450.)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def min_msd(self, event):
+				return (event.SelectedJet_msd_puppi > 40.)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def electronveto(self, event):
+				return (event.neleLoose==0)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def muonveto(self, event):
+				return (event.nmuLoose==0)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def tauveto(self, event):
+				return (event.ntau==0)
+			@add_cut(self._event_selectors[selector_syst_name])
+			def max_pfmet(self, event):
+				return (event.pfmet<140.)
 
 			if self._data_source == "simulation":
-				self._selections.append("SR_matched_{}".format(systematic))
-				self._event_selectors["SR_matched_{}".format(systematic)] = EventSelector("SR_matched_{}".format(systematic))
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("Vmatch", 
-					"""
-	if event.genVPt > 0 and event.genVMass > 0:
-		matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi))); 
-		matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt; 
-		matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass; 
-		vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3; 
-		cut_result = (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3);
-	else:
-		cut_result = False;""")
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("jetID", 		"cut_result = (event.SelectedJet_isTightVJet == 1)")
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_pt", 		"cut_result = (event.SelectedJet_pt > 450.)", return_data=["event.SelectedJet_pt"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("min_msd", 		"cut_result = (event.SelectedJet_msd_puppi > 40.)", return_data=["event.SelectedJet_msd_puppi"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("electronveto", "cut_result = (event.neleLoose==0)", return_data=["event.neleLoose"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("muonveto", 	"cut_result = (event.nmuLoose==0)", return_data=["event.nmuLoose"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("tauveto", 		"cut_result = (event.ntau==0)", return_data=["event.ntau"])
-				self._event_selectors["SR_matched_{}".format(systematic)].add_cut("max_pfmet", 	"cut_result = (event.pfmet<140.)", return_data=["event.pfmet"])
+				selector_syst_name = "SR_{}_matched".format(systematic)
+				self._selections.append(selector_syst_name)
+				self._event_selectors[selector_syst_name] = EventSelector(selector_syst_name)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def Vmatch(self, event):
+					if event.genVPt > 0 and event.genVMass > 0:
+						matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi))) 
+						matching_dpt = abs(event.genVPt - event.SelectedJet_pt) / event.genVPt 
+						matching_dmass = abs(event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass 
+						vmatched = matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3 
+						return (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
+					else:
+						return False
+				@add_cut(self._event_selectors[selector_syst_name])
+				def jetID(self, event):
+				 	return (event.SelectedJet_isTightVJet == 1)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def min_pt(self, event):
+				 	return (event.SelectedJet_pt > 450.)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def min_msd(self, event):
+				 	return (event.SelectedJet_msd_puppi > 40.)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def electronveto(self, event):
+					return (event.neleLoose==0)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def muonveto(self, event):
+				 	return (event.nmuLoose==0)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def tauveto(self, event):
+				 	return (event.ntau==0)
+				@add_cut(self._event_selectors[selector_syst_name])
+				def max_pfmet(self, event):
+				 	return (event.pfmet<140.)
 
 
 		# Histograms
