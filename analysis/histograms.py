@@ -273,6 +273,9 @@ class Histograms(AnalysisBase):
 
 					return (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
 				else:
+					self._return_data["Vmatch"]["Vmatch_dphi"] = -1.e20
+					self._return_data["Vmatch"]["Vmatch_dR"] = -1.e20
+					self._return_data["Vmatch"]["Vmatch_dpt"] = -1.e20
 					return False
 
 			@add_cut(self._event_selectors["SR_matched"])
@@ -345,6 +348,7 @@ class Histograms(AnalysisBase):
 				selector_syst_name = "SR_{}_matched".format(systematic)
 				self._selections.append(selector_syst_name)
 				self._event_selectors[selector_syst_name] = EventSelector(selector_syst_name)
+				
 				@add_cut(self._event_selectors[selector_syst_name])
 				def Vmatch(self, event):
 					if event.genVPt > 0 and event.genVMass > 0:
@@ -355,24 +359,31 @@ class Histograms(AnalysisBase):
 						return (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
 					else:
 						return False
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def jetID(self, event):
 				 	return (event.SelectedJet_isTightVJet == 1)
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def min_pt(self, event):
 				 	return (event.SelectedJet_pt > 450.)
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def min_msd(self, event):
 				 	return (event.SelectedJet_msd_puppi > 40.)
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def electronveto(self, event):
 					return (event.neleLoose==0)
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def muonveto(self, event):
 				 	return (event.nmuLoose==0)
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def tauveto(self, event):
 				 	return (event.ntau==0)
+
 				@add_cut(self._event_selectors[selector_syst_name])
 				def max_pfmet(self, event):
 				 	return (event.pfmet<140.)
@@ -677,7 +688,7 @@ class Histograms(AnalysisBase):
 		for selection, selector in self._event_selectors.iteritems():
 			selector.print_cutflow()
 			selector.make_cutflow_histograms(f_out)
-			selector.save_nminusone_histograms(f_out)
+			selector.save_nm1_histograms(f_out)
 		f_out.Close()
 
 
