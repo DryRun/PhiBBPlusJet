@@ -9,7 +9,8 @@ import math
 from math import floor, ceil
 import ROOT
 
-def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, use_loose_template):
+# If box_loose is specified, the shape will be taken from box_loose, and the normalization from box. 
+def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, wp_string, wp_string_loose=None):
 	return_hist = None
 	first = True
 
@@ -19,19 +20,25 @@ def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, u
 		input_file = ROOT.TFile(input_histogram_filename, "READ")
 
 		# Main signal histogram
-		hname = "h_{}_{}_{}".format(selection, box, var)
+		if wp_string_loose:
+			hname = "h_{}_{}_{}_{}".format(selection, box, wp_string_loose, var)
+		else:
+			hname = "h_{}_{}_{}_{}".format(selection, box, wp_string, var)
 
 		if use_Vmatched_histograms:
 			hname.replace(selection, selection + "_matched")
-		if use_loose_template:
-			# Save normalization before replacing name
-			normalization = input_file.Get(hname).Integral()
-			hname.replace("pass1", "pass1loose") # Only valid for pass1 (=pass N2, pass dcsv)
+
 		this_histogram = input_file.Get(hname)
 		if not this_histogram:
 			print "[MergeHistograms] WARNING : Histogram {} doesn't exist in file {}".format(hname, input_file.GetPath())
-		if use_loose_template:
-			this_histogram.Scale(normalization / this_histogram.Integral())
+
+		if wp_string_loose:
+			hname_normalization = "h_{}_{}_{}_{}".format(selection, box, wp_string, var)
+			if use_Vmatched_histograms:
+				hname_normalization.replace(selection, selection + "_matched")
+			normalization = input_file.Get(hname_normalization).Integral()
+			if this_histogram.Integral() > 0:
+				this_histogram.Scale(normalization / this_histogram.Integral())
 
 		# Normalize MC histograms
 		if supersample in config.background_names or supersample in config.simulated_signal_names:
@@ -40,7 +47,7 @@ def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, u
 			print "\tSample processed events = {}".format(input_file.Get("h_processed_nevents").Integral())
 			print "\tScaled nevents ({} pb-1) = {}".format(luminosity, luminosity * cross_sections[sample])
 			if input_file.Get("h_processed_nevents").Integral() == 0:
-				print "[setup_limits] ERROR : Processed zero events for sample {}. This is fatal, fix it!"
+				print "[setup_limits] ERROR : Processed zero events for sample {} {} {} {}. This is fatal, fix it!".format(supersample, var, selection, box)
 				sys.exit(1)
 
 			# Normalize histograms
@@ -103,6 +110,7 @@ if __name__ == "__main__":
 	parser.add_argument('--luminosity', type=float, default=35900, help="Luminosity in pb^-1")
 	parser.add_argument('--jet_type', type=str, default="AK8", help="AK8 or CA15")
 	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
+	parser.add_argument('--do_optimization', action='store_true', help="For merging: merge optimization histograms")
 	args = parser.parse_args()
 
 	if args.crun:
@@ -275,7 +283,14 @@ if __name__ == "__main__":
 		from DAZSLE.PhiBBPlusJet.cross_sections import cross_sections
 
 		selections = ["SR", "Preselection"] # N2CR
-		boxes = ["all", "pass1", "pass2", "fail1", "fail2"]
+
+		if args.do_optimization:
+			n2ddt_wps = [0.05, 0.15, 0.26]
+			dbtag_wps= [0.7, 0.8, 0.9]
+		else:
+			n2ddt_wps = [0.26]
+			dbtag_wps= [0.9]
+
 		weight_systematics = {
 			"SR":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
 			"Preselection":["TriggerUp", "TriggerDown", "PUUp", "PUDown"],
@@ -285,36 +300,64 @@ if __name__ == "__main__":
 		#		selections.append("SR_{}".format(systematic))
 		vars = ["pt_vs_msd", "pfmet", "dcsv", "n2ddt", "n2", "pt", "eta", "rho"]
 
-		for selection in selections:
-			if selection == "muCR":
-				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
-			else:
-				supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
-			supersamples.extend(config.simulated_signal_names)
+		boxes = []
+		boxes.append("passn2_passdbtag")
+		boxes.append("failn2_passdbtag")
+		boxes.append("passn2_faildbtag")
+		boxes.append("failn2_faildbtag")
 
-			output_file = ROOT.TFile("$HOME/PhiBB2017/data/histograms/histograms_{}_{}.root".format(selection, args.jet_type), "RECREATE")
+		for dbtag_wp in dbtag_wps:
+			for n2wp_dbpass in n2ddt_wps:
+				for n2wp_dbfail in n2ddt_wps:
 
-			for box in boxes:
-				for supersample in supersamples:
-					for var in vars:
-						use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
-						use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
-						merged_histogram = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, use_loose_template=use_loose_template)
-						output_file.cd()
+					for selection in selections:
+						if selection == "muCR":
+							supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
+						else:
+							supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq"]
+						supersamples.extend(config.simulated_signal_names)
 
-						# For muCR, project to 1D
-						if "muCR" in selection:
-							old_name = merged_histogram.GetName()
-							merged_histogram.RebinY(merged_histogram.GetNbinsY())
-							merged_histogram.SetName(old_name)
+						if args.do_optimization:
+							opt_wp_string = "_dbtag{}_n2wpdbpass{}_n2wpdbfail{}".format(dbtag_wp, n2wp_dbpass, n2wp_dbfail)
+							output_file = ROOT.TFile("$HOME/PhiBB2017/data/histograms/optimization/histograms_{}_{}{}.root".format(selection, args.jet_type, opt_wp_string), "RECREATE")
+						else:
+							output_file = ROOT.TFile("$HOME/PhiBB2017/data/histograms/histograms_{}_{}{}.root".format(selection, args.jet_type), "RECREATE")
 
-						output_file.cd()
-						merged_histogram.Write()
+						for box in boxes:
+							for supersample in supersamples:
+								for var in vars:
+									use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
+									#use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
 
-						# Systematics
-						if selection == "SR" and var == "pt_vs_msd":
-							for systematic in weight_systematics["SR"] + jet_systematics:
-								merged_histogram_syst = MergeHistograms(var=var, selection="SR_{}".format(systematic), box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, use_loose_template=use_loose_template)
-								output_file.cd()
-								merged_histogram_syst.Write()
-			output_file.Close()
+									if "passdbtag" in box:
+										wp_string = "n2wp{}_dbtag{}".format(n2wp_dbpass, dbtag_wp)
+									elif "faildbtag" in box:
+										wp_string = "n2wp{}_dbtag{}".format(n2wp_dbfail, dbtag_wp)
+
+									# When to use loose templates?
+									# - Resonant EW backgrounds (W/Z/H)
+									# - Pass-pass box only. pass-fail and fail-pass should have enough stats.
+									if supersample in ["wqq", "zqq", "hhqq125"] and box == "passn2_passdbtag":
+										wp_string_loose = "n2wp{}_dbtag0.7".format(n2wp_dbpass)
+									else:
+										wp_string_loose = None
+
+									merged_histogram = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, wp_string=wp_string, wp_string_loose=wp_string_loose)
+									output_file.cd()
+
+									# For muCR, project to 1D
+									if "muCR" in selection:
+										old_name = merged_histogram.GetName()
+										merged_histogram.RebinY(merged_histogram.GetNbinsY())
+										merged_histogram.SetName(old_name)
+
+									output_file.cd()
+									merged_histogram.Write()
+
+									# Systematics
+									if selection == "SR" and var == "pt_vs_msd":
+										for systematic in weight_systematics["SR"] + jet_systematics:
+											merged_histogram_syst = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, wp_string=wp_string, wp_string_loose=wp_string_loose)
+											output_file.cd()
+											merged_histogram_syst.Write()
+						output_file.Close()
