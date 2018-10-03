@@ -641,14 +641,14 @@ class Histograms(AnalysisBase):
 					n2ddt_wp = wp_pair[0]
 					dbtag_cut = wp_pair[1]
 					box_suffix = "_n2wp{}_dbtag{}".format(n2ddt_wp, dbtag_cut)
-					if fatjet_n2ddt_wp[n2ddt_wp] <= 0. and fatjet_dbtag >= dbtag_cut:
+					if fatjet_n2ddt_wp.at(n2ddt_wp) <= 0. and fatjet_dbtag >= dbtag_cut:
 						event_boxes.append("passn2_passdbtag{}".format(box_suffix))
-					if fatjet_n2ddt_wp[n2ddt_wp] <= 0. and fatjet_dbtag < dbtag_cut:
+					if fatjet_n2ddt_wp.at(n2ddt_wp) <= 0. and fatjet_dbtag < dbtag_cut:
 						event_boxes.append("passn2_faildbtag{}".format(box_suffix))
-					if fatjet_n2ddt_wp[n2ddt_wp] > 0. and fatjet_dbtag >= dbtag_cut:
+					if fatjet_n2ddt_wp.at(n2ddt_wp) > 0. and fatjet_dbtag >= dbtag_cut:
 						event_boxes.append("failn2_passdbtag{}".format(box_suffix))
-					if fatjet_n2ddt_wp[n2ddt_wp] > 0. and fatjet_dbtag < dbtag_cut:
-						event_boxes.append("failn2_faildbtag{}".format(box_suffix))
+					if fatjet_n2ddt_wp.at(n2ddt_wp) > 0. and fatjet_dbtag < dbtag_cut:
+						event_boxes.append("failn2_faildbtag{}".format(box_suffix))					
 
 				if self._event_selectors[selection].event_pass():
 					for box in event_boxes:

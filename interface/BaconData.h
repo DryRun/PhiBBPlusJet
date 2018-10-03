@@ -174,8 +174,8 @@ private:
 	std::map<double, TH2D*> n2_ddt_transformation_AK8_;
 	std::map<double, TH2D*> n2_ddt_transformation_CA15_;
 	std::vector<double> n2ddt_wps_;
-	TH3D* n2_pt_msd_AK8_; // Base histograms for deriving N2 DDT
-	TH3D* n2_pt_msd_CA15_; // Base histograms for deriving N2 DDT
+	TH3D* n2_pt_rho_AK8_; // Base histograms for deriving N2 DDT
+	TH3D* n2_pt_rho_CA15_; // Base histograms for deriving N2 DDT
 	TF1* puppi_corr_gen_;
 	TF1* puppi_corr_reco_cen_;
 	TF1* puppi_corr_reco_for_;

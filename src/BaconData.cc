@@ -27,23 +27,29 @@ BaconData::BaconData(TTree *tree) : BaconTree(tree) {
 	***/
 	/*** New method: compute DDT from 3D N2 vs pt vs msd histogram **/
 	TFile *f_n2ddt_3dhists_AK8 = new TFile("$CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/data/DDT_3D_hists_AK8_N2.root", "READ");
-	n2_pt_msd_AK8_ = (TH3D*)f_n2ddt_3dhists_AK8->Get("H3");
-	n2_pt_msd_AK8_->SetName("h3ddt_AK8");
-	n2_pt_msd_AK8_->SetDirectory(0);
+	n2_pt_rho_AK8_ = (TH3D*)f_n2ddt_3dhists_AK8->Get("H3");
+	n2_pt_rho_AK8_->SetName("h3ddt_AK8");
+	n2_pt_rho_AK8_->SetDirectory(0);
 	f_n2ddt_3dhists_AK8->Close();
 
 	TFile *f_n2ddt_3dhists_CA15 = new TFile("$CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/data/DDT_3D_hists_CA15_N2.root", "READ");
-	n2_pt_msd_CA15_ = (TH3D*)f_n2ddt_3dhists_CA15->Get("H3");
-	n2_pt_msd_CA15_->SetName("h3ddt_CA15");
-	n2_pt_msd_CA15_->SetDirectory(0);
+	n2_pt_rho_CA15_ = (TH3D*)f_n2ddt_3dhists_CA15->Get("H3");
+	n2_pt_rho_CA15_->SetName("h3ddt_CA15");
+	n2_pt_rho_CA15_->SetDirectory(0);
 	f_n2ddt_3dhists_CA15->Close();
 
 	n2ddt_wps_.push_back(0.05);
 	n2ddt_wps_.push_back(0.15);
 	n2ddt_wps_.push_back(0.26);
 	for (auto& it_wp : n2ddt_wps_) {
-		n2_ddt_transformation_AK8_[it_wp] = ComputeDDTMap(n2_pt_msd_AK8_, it_wp);
-		n2_ddt_transformation_CA15_[it_wp] = ComputeDDTMap(n2_pt_msd_CA15_, it_wp);
+		char hname[100];
+		sprintf(hname, "h2_ddt_vs_pt_vs_rho_wp%f_AK8", it_wp);
+		n2_ddt_transformation_AK8_[it_wp] = ComputeDDTMap(n2_pt_rho_AK8_, it_wp);
+		n2_ddt_transformation_AK8_[it_wp]->SetName(hname);
+
+		sprintf(hname, "h2_ddt_vs_pt_vs_rho_wp%f_CA15", it_wp);
+		n2_ddt_transformation_CA15_[it_wp] = ComputeDDTMap(n2_pt_rho_CA15_, it_wp);
+		n2_ddt_transformation_CA15_[it_wp]->SetName(hname);
 	}
 
 	// PUPPI weight functions
@@ -127,9 +133,9 @@ Int_t BaconData::GetEntry(Long64_t entry) {
 		AK8Puppijet1_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], AK8Puppijet1_N2sdb1, AK8Puppijet1_rho, AK8Puppijet1_pt);
 		AK8Puppijet2_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], AK8Puppijet2_N2sdb1, AK8Puppijet2_rho, AK8Puppijet2_pt);
 
-		CA15Puppijet0_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], CA15Puppijet0_N2sdb1, CA15Puppijet0_rho, CA15Puppijet0_pt);
-		CA15Puppijet1_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], CA15Puppijet1_N2sdb1, CA15Puppijet1_rho, CA15Puppijet1_pt);
-		CA15Puppijet2_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_AK8_[it_wp], CA15Puppijet2_N2sdb1, CA15Puppijet2_rho, CA15Puppijet2_pt);
+		CA15Puppijet0_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_CA15_[it_wp], CA15Puppijet0_N2sdb1, CA15Puppijet0_rho, CA15Puppijet0_pt);
+		CA15Puppijet1_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_CA15_[it_wp], CA15Puppijet1_N2sdb1, CA15Puppijet1_rho, CA15Puppijet1_pt);
+		CA15Puppijet2_N2DDT_wp[it_wp] = ComputeDDT(n2_ddt_transformation_CA15_[it_wp], CA15Puppijet2_N2sdb1, CA15Puppijet2_rho, CA15Puppijet2_pt);
 	}
 
 	// Fixed N2DDT wp containers, for backwards compatibility
@@ -687,9 +693,11 @@ TH2D* BaconData::ComputeDDTMap(TH3D *h3_n2_pt_msd, double wp) const {
 	for (int xbin = 1; xbin <= nbins_x; ++xbin) {
 		for (int ybin = 1; ybin <= nbins_y; ++ybin) {
 			sprintf(hname, "%s_x%d_y%d", h3_n2_pt_msd->GetName(), xbin, ybin);
-			TH1D* n2proj = h3_n2_pt_msd->ProjectionZ(hname	, xbin, xbin, ybin, ybin);
+			TH1D* n2proj = h3_n2_pt_msd->ProjectionZ(hname, xbin, xbin, ybin, ybin);
 			if (n2proj->Integral() == 0) {
-				std::cout << "[BaconData::ComputeDDTMap] WARNING : N2 integral = 0 for xbin=" << xbin << " / ybin=" << ybin << " for hist " << h3_n2_pt_msd->GetName() << ". Setting DDT to -1000." << std::endl;
+				double xval = h3_n2_pt_msd->GetXaxis()->GetBinCenter(xbin);
+				double yval = h3_n2_pt_msd->GetYaxis()->GetBinCenter(ybin);
+				std::cout << "[BaconData::ComputeDDTMap] WARNING : N2 integral = 0 for xbin=" << xbin << " (" << xval << ") / ybin=" << ybin << " (" << yval << ") for hist " << h3_n2_pt_msd->GetName() << ". Setting DDT to -1000." << std::endl;
 				ddt_hist->SetBinContent(xbin, ybin, -1000);
 				continue;
 			}
@@ -709,9 +717,9 @@ double BaconData::ComputeDDT(TH2D *ddt_map, double n2, double rho, double pt) co
 	} else if (rho_bin <= 0) {
 		rho_bin = 1;
 	}
-	int pt_bin = ddt_map->GetXaxis()->FindBin(pt);
-	if (pt_bin > ddt_map->GetXaxis()->GetNbins()) {
-		pt_bin = ddt_map->GetXaxis()->GetNbins();
+	int pt_bin = ddt_map->GetYaxis()->FindBin(pt);
+	if (pt_bin > ddt_map->GetYaxis()->GetNbins()) {
+		pt_bin = ddt_map->GetYaxis()->GetNbins();
 	} else if (pt_bin <= 0) {
 		pt_bin = 1;
 	}
