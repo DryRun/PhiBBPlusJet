@@ -31,3 +31,9 @@ class RoofitHistContainer():
 
 	def NormalizationVar(self):
 		return self._normalization
+
+	def TH1(self):
+		return self._th1
+
+	def Integral(self):
+		return self._th1.Integral()
