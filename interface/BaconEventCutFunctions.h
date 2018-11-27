@@ -13,7 +13,7 @@
 
 #include "MyTools/RootUtils/interface/Constants.h"
 #include "MyTools/AnalysisTools/interface/EventSelector.h"
-#include "DAZSLE/PhiBBPlusJet/interface/BaconData.h"
+#include "DAZSLE/DAZSLECommon/interface/BaconData.h"
 
 template class EventSelector<BaconData>;
 

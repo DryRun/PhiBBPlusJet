@@ -1,13 +1,13 @@
 import os
 import sys
-from DAZSLE.PhiBBPlusJet.combine_helper.combine_project import CombineProject
-from DAZSLE.PhiBBPlusJet.combine_helper.region import Region
-from DAZSLE.PhiBBPlusJet.combine_helper.rhalphabet_region import RhalphabetRegion
+from DAZSLE.DAZSLECommon.combine_helper.combine_project import CombineProject
+from DAZSLE.DAZSLECommon.combine_helper.region import Region
+from DAZSLE.DAZSLECommon.combine_helper.rhalphabet_region import RhalphabetRegion
 from ROOT import TFile, TGraph, TColor, gROOT, kOrange, kGreen, TCanvas, TLegend, TH1D, kBlack, kBlue
 gROOT.SetBatch(True)
 import math
 
-import DAZSLE.PhiBB2017.systematics
+import systematics
 
 # Load histograms
 backgrounds = ["qcd", "tqq", "zqq", "wqq", "hqq125", "tthqq125", "vbfhqq125", "whqq125", "zhqq125"]

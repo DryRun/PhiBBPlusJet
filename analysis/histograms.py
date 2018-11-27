@@ -1,30 +1,24 @@
 import os
 import sys
 import ROOT
-from DAZSLE.PhiBBPlusJet.analysis_base import AnalysisBase
+from DAZSLE.DAZSLECommon.analysis_base import AnalysisBase
+from DAZSLE.DAZSLECommon.event_selector import *
 import DAZSLE.PhiBBPlusJet.analysis_configuration as config
-import DAZSLE.PhiBBPlusJet.event_selections as event_selections
-from DAZSLE.PhiBBPlusJet.event_selector import *
 from DAZSLE.ZPrimePlusJet.xbb_config import analysis_parameters as params
 from math import ceil, sqrt,floor
 import array
 
 import ROOT
 from ROOT import *
-gInterpreter.Declare("#include \"MyTools/RootUtils/interface/SeabornInterface.h\"")
-gInterpreter.Declare("#include \"MyTools/RootUtils/interface/HistogramManager.h\"")
-gSystem.Load(os.path.expandvars("$CMSSW_BASE/lib/$SCRAM_ARCH/libMyToolsRootUtils.so"))
-gInterpreter.Declare("#include \"MyTools/AnalysisTools/interface/EventSelector.h\"")
-gSystem.Load(os.path.expandvars("$CMSSW_BASE/lib/$SCRAM_ARCH/libMyToolsAnalysisTools.so"))
-ROOT.gInterpreter.Declare("#include \"DAZSLE/PhiBBPlusJet/interface/BaconData.h\"")
-ROOT.gInterpreter.Declare("#include \"DAZSLE/PhiBBPlusJet/interface/BaconEventCutFunctions.h\"")
+gInterpreter.Declare("#include \"DAZSLE/DAZSLECommon/interface/HistogramManager.h\"")
+ROOT.gInterpreter.Declare("#include \"DAZSLE/DAZSLECommon/interface/BaconData.h\"")
+gSystem.Load(os.path.expandvars("$CMSSW_BASE/lib/$SCRAM_ARCH/libDAZSLEDAZSLECommon.so"))
+
 gSystem.Load(os.path.expandvars("$CMSSW_BASE/lib/$SCRAM_ARCH/libDAZSLEPhiBBPlusJet.so"))
-#from ROOT import gInterpreter, gSystem, gROOT, gStyle, Root, TCanvas, TLegend, TH1F, TFile, TGraphErrors
+
 gROOT.SetBatch(ROOT.kTRUE);
 gStyle.SetOptStat(0)
 gStyle.SetOptTitle(0)
-seaborn = Root.SeabornInterface()
-seaborn.Initialize()
 
 # Enums
 #from BaconData import kAK8, kCA15, kPt, kDbtag, kN2DDT
