@@ -327,7 +327,7 @@ class Histograms(AnalysisBase):
 				return (event.SelectedJet_isTightVJet == 1)
 			@add_cut(self._event_selectors[selector_syst_name])
 			def min_pt(self, event):
-				return (event.SelectedJet_pt > 450.)
+				return (eval("event.SelectedJet_pt_{}".format(systematic)) > 450.)
 			@add_cut(self._event_selectors[selector_syst_name])
 			def min_msd(self, event):
 				return (event.SelectedJet_msd_puppi > 40.)
@@ -345,7 +345,7 @@ class Histograms(AnalysisBase):
 				return (event.pfmet<140.)
 
 			if self._data_source == "simulation":
-				selector_syst_name = "SR_{}_matched".format(systematic)
+				selector_syst_name = "SR_matched_{}".format(systematic)
 				self._selections.append(selector_syst_name)
 				self._event_selectors[selector_syst_name] = EventSelector(selector_syst_name)
 				
@@ -366,7 +366,7 @@ class Histograms(AnalysisBase):
 
 				@add_cut(self._event_selectors[selector_syst_name])
 				def min_pt(self, event):
-				 	return (event.SelectedJet_pt > 450.)
+				 	return (eval("event.SelectedJet_pt_{}".format(systematic)) > 450.)
 
 				@add_cut(self._event_selectors[selector_syst_name])
 				def min_msd(self, event):

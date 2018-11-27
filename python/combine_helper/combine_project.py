@@ -37,8 +37,14 @@ class CombineProject():
 			self._regions[region_name].write(datacard_path=datacard_paths[region_name], ws_path=ws_paths[region_name])
 
 		# Combine the regions into a megacard
+		# chdir into the directtory, to avoid pulling in full workspace paths into datacard
+		cwd = os.getcwd()
+		os.chdir(self._directory)
+
 		combine_card_command = "combineCards.py "
 		for region_name in self._region_names:
-			combine_card_command += " {}={}".format(region_name, datacard_paths[region_name])
+			combine_card_command += " {}={}".format(region_name, os.path.basename(datacard_paths[region_name]))
 		combine_card_command += " > {}/datacard_total.txt".format(self._directory)
 		os.system(combine_card_command)
+
+		os.chdir(cwd)

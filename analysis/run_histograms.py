@@ -10,32 +10,44 @@ from math import floor, ceil
 import ROOT
 
 # If box_loose is specified, the shape will be taken from box_loose, and the normalization from box. 
-def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, wp_string, wp_string_loose=None):
+def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, wp_string, wp_string_loose=None, systematic=None):
 	return_hist = None
 	first = True
+	original_selection = "" + selection
 
 	for sample in config.samples[supersample]:
 		input_histogram_filename = "$HOME/PhiBB2017/data/histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
-		print "Opening {}".format(input_histogram_filename)
+		#print "Opening {}".format(input_histogram_filename)
 		input_file = ROOT.TFile(input_histogram_filename, "READ")
+
+		# Modify the selection string for systematics and matching
+		selection = "" + original_selection
+		if use_Vmatched_histograms:
+			selection += "_matched"
+		if systematic:
+			selection += "_" + systematic
 
 		# Main signal histogram
 		if wp_string_loose:
 			hname = "h_{}_{}_{}_{}".format(selection, box, wp_string_loose, var)
 		else:
 			hname = "h_{}_{}_{}_{}".format(selection, box, wp_string, var)
-
-		if use_Vmatched_histograms:
-			hname.replace(selection, selection + "_matched")
-
 		this_histogram = input_file.Get(hname)
+		
+		# HACK: The JES and JER histograms were generated with the wrong name, switched matched and syst name
+		if not this_histogram and use_Vmatched_histograms and systematic:
+			selection = "{}_{}_matched".format(original_selection, systematic)
+			if wp_string_loose:
+				hname = "h_{}_{}_{}_{}".format(selection, box, wp_string_loose, var)
+			else:
+				hname = "h_{}_{}_{}_{}".format(selection, box, wp_string, var)
+			this_histogram = input_file.Get(hname)
 		if not this_histogram:
 			print "[MergeHistograms] WARNING : Histogram {} doesn't exist in file {}".format(hname, input_file.GetPath())
+			sys.exit(1)
 
 		if wp_string_loose:
 			hname_normalization = "h_{}_{}_{}_{}".format(selection, box, wp_string, var)
-			if use_Vmatched_histograms:
-				hname_normalization.replace(selection, selection + "_matched")
 			normalization = input_file.Get(hname_normalization).Integral()
 			if this_histogram.Integral() > 0:
 				this_histogram.Scale(normalization / this_histogram.Integral())
@@ -83,7 +95,11 @@ def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, w
 		if first:
 			return_hist = this_histogram.Clone()
 			return_hist.SetDirectory(0)
-			return_hist.SetName("{}_{}_{}".format(supersample, box, var))
+			if systematic:
+				hname_out = "{}_{}_{}_{}".format(supersample, box, var, systematic)
+			else:
+				hname_out = "{}_{}_{}".format(supersample, box, var)
+			return_hist.SetName(hname_out)
 			first = False
 		else:
 			return_hist.Add(this_histogram)
@@ -309,7 +325,6 @@ if __name__ == "__main__":
 		for dbtag_wp in dbtag_wps:
 			for n2wp_dbpass in n2ddt_wps:
 				for n2wp_dbfail in n2ddt_wps:
-
 					for selection in selections:
 						if selection == "muCR":
 							supersamples = ["data_obs", "data_singlemu", "qcd", "tqq", "wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125", "stqq", "vvqq", "zll", "wlnu"]
@@ -326,7 +341,7 @@ if __name__ == "__main__":
 						for box in boxes:
 							for supersample in supersamples:
 								for var in vars:
-									use_Vmatched_histograms = (supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)
+									use_Vmatched_histograms = ((supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)) and (selection == "SR")
 									#use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
 
 									if "passdbtag" in box:
@@ -355,9 +370,9 @@ if __name__ == "__main__":
 									merged_histogram.Write()
 
 									# Systematics
-									if selection == "SR" and var == "pt_vs_msd":
+									if selection == "SR" and var == "pt_vs_msd" and not "data" in supersample:
 										for systematic in weight_systematics["SR"] + jet_systematics:
-											merged_histogram_syst = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, wp_string=wp_string, wp_string_loose=wp_string_loose)
+											merged_histogram_syst = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, wp_string=wp_string, wp_string_loose=wp_string_loose, systematic=systematic)
 											output_file.cd()
 											merged_histogram_syst.Write()
 						output_file.Close()
