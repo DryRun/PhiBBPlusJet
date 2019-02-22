@@ -185,7 +185,7 @@ if __name__ == "__main__":
 						# def add_simple_background(self, bkgd_name, pass_hist, fail_hist, normalization_var=None):
 						region_containers[region_name].add_simple_background(background_name, pass_histograms[region_name][background_name], fail_histograms[region_name][background_name])
 				# y_value = pT 1/3 of the way up the bin
-				y_value = (1. * region_pts[region_name][0] + 2. * region_pts[region_name][1]) / 3.
+				y_value = region_pts[region_name][0] + (region_pts[region_name][1] - region_pts[region_name][0]) / 3.
 				if "passdbtag" in region_name:
 					rh_tag = "_passdbtag"
 				elif "faildbtag" in region_name:

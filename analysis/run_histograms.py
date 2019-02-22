@@ -5,6 +5,7 @@ import os
 import sys
 import DAZSLE.PhiBBPlusJet.analysis_configuration as config
 from DAZSLE.ZPrimePlusJet.xbb_config import analysis_parameters as params
+from DAZSLE.DAZSLECommon.baconbits import baconbits
 import math
 from math import floor, ceil
 import ROOT
@@ -121,6 +122,7 @@ if __name__ == "__main__":
 	action_group = parser.add_mutually_exclusive_group() 
 	action_group.add_argument('--crun', action="store_true", help="Run on condor")
 	action_group.add_argument('--combine_outputs', action="store_true", help="Compile results into one file for next step (buildRhalphabet). Also applies luminosity weights to MC.")
+	parser.add_argument('--year', type=int, help="2016, 2017, or 2018")
 	parser.add_argument('--output_folder', type=str, help="Output folder")
 	parser.add_argument('--label', type=str, help="If running with --files, need to specify a label manually, in lieu of the sample names, for the output file naming.")
 	parser.add_argument('--luminosity', type=float, default=35900, help="Luminosity in pb^-1")
@@ -128,6 +130,9 @@ if __name__ == "__main__":
 	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
 	parser.add_argument('--do_optimization', action='store_true', help="For merging: merge optimization histograms")
 	args = parser.parse_args()
+
+	if not args.year in [2016, 2017, 2018]:
+		print "[run_histograms] ERROR : --year must be 2016, 2017, or 2018"
 
 	if args.crun:
 		# Make a list of input samples and files
@@ -166,9 +171,9 @@ if __name__ == "__main__":
 			samples = args.samples.split(",")
 			for sample in samples:
 				if args.skim_inputs:
-					sample_files[sample] = config.skims[sample]
+					sample_files[sample] = baconbits[args.year][sample]
 				else:
-					sample_files[sample] = config.sklims[sample]
+					sample_files[sample] = baconbitst[args.year][sample]
 		elif args.files:
 			files = args.files.split(",")
 			for filename in files:

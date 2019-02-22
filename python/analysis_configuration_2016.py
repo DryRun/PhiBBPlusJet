@@ -20,8 +20,6 @@ background_names = [
 	"vbfhqq125",
 	"whqq125",
 	"zhqq125",
-	"wqq2018",
-	"zqq2018"
 ]
 # First 12.05 signal processing. Some samples are missing.
 signal_names = []
@@ -72,8 +70,6 @@ samples = {
 	"tqq":["tqq"],
 	"wqq":["wqq"],
 	"zqq":["zqq"],
-	"wqq2018":["wqq_HT400to600_2018", "wqq_HT600to800_2018", "wqq_HT_800toInf_2018"],
-	"zqq2018":["zqq_HT400to600_2018", "zqq_HT600to800_2018", "zqq_HT_800toInf_2018"],
 	"zll":["zll"],
 	"wlnu":["wlnu"],
 	"wlnu":['wlnu_HT_100To200','wlnu_HT_200To400','wlnu_HT_400To600','wlnu_HT_600To800','wlnu_HT_800To1200','wlnu_HT_1200To2500','wlnu_HT_2500ToInf'],
@@ -184,7 +180,6 @@ skims["QCD_HT700to1000"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_B
 skims["QCD_HT1000to1500"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/QCD_HT1000to1500_13TeV.txt"), "r")]
 skims["QCD_HT1500to2000"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/QCD_HT1500to2000_13TeV.txt"), "r")]
 skims["QCD_HT2000toInf"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/QCD_HT2000toInf_13TeV.txt"), "r")]
-
 #skims["ST_t_antitop"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/ST_t_channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV_powhegV2_madspin.txt"), "r")]
 #skims["ST_t_top"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/ST_t_channel_top_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV_powhegV2_madspin.txt"), "r")]
 #skims["ST_tW_antitop"] = [x.strip() for x in open(os.path.expandvars("$CMSSW_BASE/src/DAZSLE/ZPrimePlusJet/data/skim_directory/lxplus/ST_tW_antitop_5f_inclusiveDecays_13TeV_powheg_pythia8_TuneCUETP8M2T4.txt"), "r")]
