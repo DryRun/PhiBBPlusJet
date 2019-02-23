@@ -437,7 +437,7 @@ class Histograms(AnalysisBase):
 					for systematic in self._weight_systematics[selection]:
 						self._selection_histograms[selection].AddTH2D("{}_{}_pt_vs_msd".format(systematic, box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 				if self._do_ps_weights:
-					for ipsweight in xrange(1, 21):
+					for ipsweight in xrange(1, 20):
 						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_psweight{}".format(box, ipsweight), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 						self._selection_histograms[selection].AddTH1D("{}_n2ddt_psweight{}".format(box, ipsweight), "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
 
@@ -679,14 +679,14 @@ class Histograms(AnalysisBase):
 
 						# PS weight systematics
 						if self._do_ps_weights:
-							for ipsweight in xrange(1, 21):
+							for ipsweight in xrange(1, 20):
 								if self._data.psWeights[0] > 0:
 									self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_psweight{}".format(box, ipsweight)).Fill(fatjet_msd, fatjet_pt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
-									self._selection_histograms[selection].GetTH1D("{}_n2ddt_psweight".format(box, ipsweight)).Fill(fatjet_n2ddt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
+									self._selection_histograms[selection].GetTH1D("{}_n2ddt_psweight{}".format(box, ipsweight)).Fill(fatjet_n2ddt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
 
 								else:
 									print "[histograms::run] WARNING : Central PS weight == 0!"
-									for jpsweight in xrange(21):
+									for jpsweight in xrange(20):
 										print self._data.psWeights[jpsweight]
 
 					self._selection_histograms[selection].GetTH3D("dbtag_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_dbtag)

@@ -367,11 +367,11 @@ if __name__ == "__main__":
 			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
 			hadd_script.write("\tfi\n")
 			hadd_script.write("done\n")
-			hadd_script.write(os.path.expandvars("hadd $HOME/PhiBB2017/data/histograms/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
+			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/histograms/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
 			hadd_script.close()
 			os.chdir(start_directory)
 		# One hadd script to rule them all
-		master_hadd_script_path = os.path.expandvars("$HOME/PhiBB2017/data/histograms/condor/master_hadd_{}".format(args.jet_type))
+		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/histograms/condor/master_hadd_{}".format(args.jet_type))
 		if not args.all:
 			master_hadd_script_path += "_" + str(int(floor(time.time())))
 		master_hadd_script_path += ".sh"
@@ -421,9 +421,9 @@ if __name__ == "__main__":
 
 						if args.do_optimization:
 							opt_wp_string = "_dbtag{}_n2wpdbpass{}_n2wpdbfail{}".format(dbtag_wp, n2wp_dbpass, n2wp_dbfail)
-							output_file = ROOT.TFile("$HOME/PhiBB2017/data/histograms/optimization/histograms_{}_{}{}.root".format(selection, args.jet_type, opt_wp_string), "RECREATE")
+							output_file = ROOT.TFile("$HOME/DAZSLE/data/histograms/optimization/histograms_{}_{}{}.root".format(selection, args.jet_type, opt_wp_string), "RECREATE")
 						else:
-							output_file = ROOT.TFile("$HOME/PhiBB2017/data/histograms/histograms_{}_{}{}.root".format(selection, args.jet_type), "RECREATE")
+							output_file = ROOT.TFile("$HOME/DAZSLE/data/histograms/histograms_{}_{}{}.root".format(selection, args.jet_type), "RECREATE")
 
 						for box in boxes:
 							for supersample in supersamples:
