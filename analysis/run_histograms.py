@@ -134,6 +134,7 @@ if __name__ == "__main__":
 	parser.add_argument('--jet_type', type=str, default="AK8", help="AK8 or CA15")
 	parser.add_argument('--skim_inputs', action='store_true', help="Run over skim inputs")
 	parser.add_argument('--do_optimization', action='store_true', help="For merging: merge optimization histograms")
+	parser.add_argument('--do_ps_weights', action='store_true', help="Fill PS weight hists")
 	args = parser.parse_args()
 
 	if not args.year in [2016, 2017, 2018]:
@@ -265,6 +266,8 @@ if __name__ == "__main__":
 				limit_histogrammer.set_data_source("simulation")
 			if "ps10" in sample:
 				limit_histogrammer.set_prescale(10)
+			if args.do_ps_weights:
+				limit_histogrammer.do_ps_weights(True)
 			limit_histogrammer.start()
 			limit_histogrammer.run()
 			limit_histogrammer.finish()
@@ -280,27 +283,28 @@ if __name__ == "__main__":
 			os.chdir(submission_directory)
 
 			files_per_job = 1
-			if args.skim_inputs:
-				if "JetHTRun2016" in sample:
-					if "ps10" in sample:
-						files_per_job = 100
-					else:
-						files_per_job = 20
-				elif "SingleMuRun2016" in sample:
-					if "ps10" in sample:
-						files_per_job = 100
-					else:
-						files_per_job = 10
-				elif "QCD_HT500to700" in sample:
-					files_per_job = 3
-				elif "QCD_HT700to1000" in sample:
-					files_per_job = 3
-				elif "QCD_HT1000to1500" in sample:
-					files_per_job = 1
-				elif "QCD" in sample:
-					files_per_job = 5
-				elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
-					files_per_job = 3
+			if "JetHTRun2016" in sample:
+				if "ps10" in sample:
+					files_per_job = 100
+				else:
+					files_per_job = 20
+			elif "SingleMuRun2016" in sample:
+				if "ps10" in sample:
+					files_per_job = 100
+				else:
+					files_per_job = 10
+			elif "QCD_HT500to700" in sample:
+				files_per_job = 3
+			elif "QCD_HT700to1000" in sample:
+				files_per_job = 3
+			elif "QCD_HT1000to1500" in sample:
+				files_per_job = 1
+			elif "QCD" in sample:
+				files_per_job = 5
+			elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
+				files_per_job = 3
+			elif "WJetsToQQ_HT" in sample or "ZJetsToQQ_HT" in sample:
+				files_per_job = 10
 			n_jobs = int(ceil(1. * len(sample_files[sample]) / files_per_job))
 
 			job_script_path = "{}/run_csubjob.sh".format(submission_directory)

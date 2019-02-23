@@ -43,6 +43,7 @@ class Histograms(AnalysisBase):
 		elif self._jet_type == "CA15":
 			jet_type_enum = BaconData.kCA15
 		self._data.SetJetSelection(jet_type_enum, self._jet_ordering)
+		self._do_ps_weights = False
 
 		# Cuts
 		self._n2ddt_wps = [0.05, 0.15, 0.26]
@@ -63,6 +64,9 @@ class Histograms(AnalysisBase):
 		self._weight_systematics["SR_matched"] = self._weight_systematics["SR"]
 		# Jet systematics: these affect the jet pT, so modify the event selection
 		self._jet_systematics = ["JESUp", "JESDown", "JERUp", "JERDown"]
+
+	def do_ps_weights(self, do):
+		self._do_ps_weights = do
 
 	def set_prescale(self, prescale):
 		self._prescale = prescale
@@ -318,9 +322,10 @@ class Histograms(AnalysisBase):
 			@add_cut(self._event_selectors[selector_syst_name])
 			def jetID(self, event):
 				return (event.SelectedJet_isTightVJet == 1)
+			pt_branch = "event.SelectedJet_pt_{}".format(systematic)
 			@add_cut(self._event_selectors[selector_syst_name])
 			def min_pt(self, event):
-				return (eval("event.SelectedJet_pt_{}".format(systematic)) > 450.)
+				return (eval(pt_branch) > 450.)
 			@add_cut(self._event_selectors[selector_syst_name])
 			def min_msd(self, event):
 				return (event.SelectedJet_msd_puppi > 40.)
@@ -357,9 +362,10 @@ class Histograms(AnalysisBase):
 				def jetID(self, event):
 				 	return (event.SelectedJet_isTightVJet == 1)
 
+				pt_branch = "event.SelectedJet_pt_{}".format(systematic)
 				@add_cut(self._event_selectors[selector_syst_name])
 				def min_pt(self, event):
-				 	return (eval("event.SelectedJet_pt_{}".format(systematic)) > 450.)
+				 	return (eval(pt_branch) > 450.)
 
 				@add_cut(self._event_selectors[selector_syst_name])
 				def min_msd(self, event):
@@ -430,6 +436,12 @@ class Histograms(AnalysisBase):
 				if selection in self._weight_systematics:
 					for systematic in self._weight_systematics[selection]:
 						self._selection_histograms[selection].AddTH2D("{}_{}_pt_vs_msd".format(systematic, box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
+				if _do_ps_weights:
+					for ipsweight in xrange(1, 21):
+						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_psweight{}".format(box, ipsweight), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
+						self._selection_histograms[selection].AddTH1D("{}_n2ddt_psweight{}".format(box, ipsweight), "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
+
+
 
 			self._selection_histograms[selection].AddTH3D("dbtag_vs_pt_vs_msd", "dbtag_vs_pt_vs_msd", 
 				"m_{SD} [GeV]", 80, 40, 600,
@@ -664,6 +676,18 @@ class Histograms(AnalysisBase):
 						if selection in self._weight_systematics:
 							for systematic in self._weight_systematics[selection]:
 								self._selection_histograms[selection].GetTH2D("{}_{}_pt_vs_msd".format(systematic, box)).Fill(fatjet_msd, fatjet_pt, event_weight_syst[systematic])
+
+						# PS weight systematics
+						if self._do_ps_weights:
+							for ipsweight in xrange(1, 21):
+								if self._data.psWeights[0] > 0:
+									self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_psweight{}".format(box, ipsweight)).Fill(fatjet_msd, fatjet_pt, event_weight).Fill(fatjet_msd, fatjet_pt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
+									self._selection_histograms[selection].GetTH1D("{}_n2ddt_psweight".format(box, ipsweight)).Fill(fatjet_n2ddt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
+
+								else:
+									print "[histograms::run] WARNING : Central PS weight == 0!"
+									for jpsweight in xrange(21):
+										print self._data.psWeights[jpsweight]
 
 					self._selection_histograms[selection].GetTH3D("dbtag_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_dbtag)
 					self._selection_histograms[selection].GetTH3D("n2ddt_vs_pt_vs_msd").Fill(fatjet_msd, fatjet_pt, fatjet_n2ddt)
