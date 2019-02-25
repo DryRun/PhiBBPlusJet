@@ -201,14 +201,17 @@ if __name__ == "__main__":
 
 		if args.subjob:
 			subjob_index = args.subjob[0]
-			n_subjobs = args.subjob[0]
+			n_subjobs = args.subjob[1]
 			if len(sample_files[sample]) < n_subjobs:
 				print "[run_histograms] ERROR : Number of subjobs ({}) exceeds number of files ({})!".format(len(sample_files[sample]), n_subjobs)
 				sys.exit(1)
 			files_per_job = len(sample_files[sample]) / n_subjobs + 1
 			i0 = files_per_job * subjob_index
-			i1 = min(files_per_job * (subjob_index + 1) - 1, len(sample_files[sample]) - 1)
-			files_to_run = sample_file[sample][i0:i1]
+			i1 = min(files_per_job * (subjob_index + 1), len(sample_files[sample]))
+			print "Files per job = {}".format(files_per_job)
+			print "Total number of files = {}".format(len(sample_files[sample]))
+
+			files_to_run = sample_files[sample][i0:i1]
 			print "Running over files {}-{}:".format(i0, i1)
 			print files_to_run
 		else:
@@ -251,7 +254,11 @@ if __name__ == "__main__":
 						sample_files[sample].remove(filename)
 				
 			limit_histogrammer = Histograms(sample, tree_name=tree_name, jet_type=args.jet_type)
-			output_file_basename ="InputHistograms_{}_{}_{}.root".format(sample, args.jet_type, args.year) 
+			if args.label:
+				extra_tag = "_" + args.label
+			else:
+				extra_tag = ""
+			output_file_basename ="histograms_{}_{}_{}{}.root".format(sample, args.jet_type, args.year, extra_tag) 
 			if args.output_folder:
 				limit_histogrammer.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
 			else:
@@ -273,6 +280,7 @@ if __name__ == "__main__":
 			limit_histogrammer.finish()
 
 	elif args.crun:
+		os.system("csub_tar --cmssw")
 		import time
 		hadd_scripts = []
 		for sample in samples:
@@ -304,7 +312,7 @@ if __name__ == "__main__":
 			elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 				files_per_job = 3
 			elif "WJetsToQQ_HT" in sample or "ZJetsToQQ_HT" in sample:
-				files_per_job = 10
+				files_per_job = 3
 			n_jobs = int(ceil(1. * len(sample_files[sample]) / files_per_job))
 
 			job_script_path = "{}/run_csubjob.sh".format(submission_directory)
@@ -325,9 +333,11 @@ if __name__ == "__main__":
 			#job_script.write("this_input_files_string=\"$(join , ${this_input_files[@]})\"\n")
 			#job_script.write("echo \"Input files:\"\n")
 			#job_script.write("echo $this_input_files_string\n")
-			job_command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/run_histograms.py --year {} --jet_type {} --files $this_input_files_string --label {}_csubjob$1 --output_folder . --subjob $1 {}".format(args.year, args.jet_type, sample, n_jobs)
+			job_command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/run_histograms.py --run --year {} --jet_type {} --label {}_csubjob$1 --output_folder . --subjob $1 {} --sample {}".format(args.year, args.jet_type, sample, n_jobs, sample)
 			if args.skim_inputs or args.all_lxplus:
 				job_command += " --skim_inputs "
+			if args.do_ps_weights:
+				job_command += " --do_ps_weights"
 
 			job_command += " 2>&1\n"
 			job_script.write(job_command)
@@ -345,7 +355,7 @@ if __name__ == "__main__":
 			#job_script.write("fi\n")
 
 			job_script.close()
-			submission_command = "csub {} --cmssw --no_retar -n {}".format(job_script_path, n_jobs)
+			submission_command = "csub {} --cmssw --no_retar -m 3000 -n {}".format(job_script_path, n_jobs)
 			print submission_command
 
 			# Save csub command for resubmission attempts
@@ -362,16 +372,16 @@ if __name__ == "__main__":
 			hadd_scripts.append("{}/hadd.sh".format(submission_directory))
 			hadd_script = open("{}/hadd.sh".format(submission_directory), "w")
 			hadd_script.write("#!/bin/bash\n")
-			hadd_script.write("for f in ./jobstatus_csubjob*.txt; do\n")
+			hadd_script.write("for f in .{}/jobstatus_csubjob*.txt; do\n".format(submission_directory))
 			hadd_script.write("\tif grep -Fxq \"0\" $f; then\n")
 			hadd_script.write("\t\techo \"Subjob failure in $f\"\n")
 			hadd_script.write("\tfi\n")
 			hadd_script.write("done\n")
-			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/histograms/InputHistograms_{}_{}.root {}/InputHistograms*csubjob*root\n".format(sample, args.jet_type, submission_directory)))
+			hadd_script.write(os.path.expandvars("hadd $HOME/DAZSLE/data/histograms/histograms_{}_{}_{}.root {}/histograms*csubjob*root\n".format(sample, args.jet_type, args.year, submission_directory)))
 			hadd_script.close()
 			os.chdir(start_directory)
 		# One hadd script to rule them all
-		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/histograms/condor/master_hadd_{}".format(args.jet_type))
+		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/histograms/condor/master_hadd_{}_{}_{}".format(sample, args.jet_type, args.year))
 		if not args.all:
 			master_hadd_script_path += "_" + str(int(floor(time.time())))
 		master_hadd_script_path += ".sh"
@@ -428,7 +438,7 @@ if __name__ == "__main__":
 						for box in boxes:
 							for supersample in supersamples:
 								for var in vars:
-									use_Vmatched_histograms = ((supersample in ["wqq", "zqq", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)) and (selection == "SR")
+									use_Vmatched_histograms = ((supersample in ["wqq", "zqq", "wqq2018", "zqq2018", "hqq125","tthqq125","vbfhqq125","whqq125","zhqq125"]) or ("Sbb" in supersample) or ("ZPrime" in supersample)) and (selection == "SR")
 									#use_loose_template = (supersample in ["wqq", "zqq"]) # Use looser DCSV cut for pass shape, to improve statistics
 
 									if "passdbtag" in box:

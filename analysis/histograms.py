@@ -257,6 +257,7 @@ class Histograms(AnalysisBase):
 			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dphi", "#Delta #phi(V_{truth}, V_{rec})", 140, -7., 7.)
 			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dR", "#Delta R(V_{truth}, V_{rec})", 100, 0., 10.)
 			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dpt", "(p_{T}^{gen}-p_{T}^{rec})/p_{T}^{gen}", 200, -10., 10.)
+			@add_nm1_hist(self._event_selectors["SR_matched"], "Vmatch_dM", "(m^{gen}-m^{rec})/m^{gen}", 200, -10., 10.)
 			def Vmatch(self, event):
 				if event.genVPt > 0 and event.genVMass > 0:
 					matching_dphi = abs(math.acos(math.cos(event.genVPhi - event.SelectedJet_phi)))
@@ -267,12 +268,14 @@ class Histograms(AnalysisBase):
 					self._return_data["Vmatch"]["Vmatch_dphi"] = matching_dphi
 					self._return_data["Vmatch"]["Vmatch_dR"] = (matching_deta**2 + matching_dphi**2)**0.5
 					self._return_data["Vmatch"]["Vmatch_dpt"] = (event.genVPt - event.SelectedJet_pt) / event.genVPt
+					self._return_data["Vmatch"]["Vmatch_dM"] = (event.genVMass - event.SelectedJet_msd_puppi) / event.genVMass
 
 					return (event.genVPt>0 and event.genVMass>0 and matching_dphi < 0.8 and matching_dpt < 0.5 and matching_dmass < 0.3)
 				else:
 					self._return_data["Vmatch"]["Vmatch_dphi"] = -1.e20
 					self._return_data["Vmatch"]["Vmatch_dR"] = -1.e20
 					self._return_data["Vmatch"]["Vmatch_dpt"] = -1.e20
+					self._return_data["Vmatch"]["Vmatch_dM"] = -1.e20
 					return False
 
 			@add_cut(self._event_selectors["SR_matched"])
@@ -438,8 +441,8 @@ class Histograms(AnalysisBase):
 						self._selection_histograms[selection].AddTH2D("{}_{}_pt_vs_msd".format(systematic, box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 				if self._do_ps_weights:
 					for ipsweight in xrange(1, 20):
-						self._selection_histograms[selection].AddTH2D("{}_pt_vs_msd_psweight{}".format(box, ipsweight), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
-						self._selection_histograms[selection].AddTH1D("{}_n2ddt_psweight{}".format(box, ipsweight), "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
+						self._selection_histograms[selection].AddTH2F("{}_pt_vs_msd_psweight{}".format(box, ipsweight), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
+						self._selection_histograms[selection].AddTH1F("{}_n2ddt_psweight{}".format(box, ipsweight), "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
 
 
 
@@ -681,8 +684,8 @@ class Histograms(AnalysisBase):
 						if self._do_ps_weights:
 							for ipsweight in xrange(1, 20):
 								if self._data.psWeights[0] > 0:
-									self._selection_histograms[selection].GetTH2D("{}_pt_vs_msd_psweight{}".format(box, ipsweight)).Fill(fatjet_msd, fatjet_pt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
-									self._selection_histograms[selection].GetTH1D("{}_n2ddt_psweight{}".format(box, ipsweight)).Fill(fatjet_n2ddt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
+									self._selection_histograms[selection].GetTH2F("{}_pt_vs_msd_psweight{}".format(box, ipsweight)).Fill(fatjet_msd, fatjet_pt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
+									self._selection_histograms[selection].GetTH1F("{}_n2ddt_psweight{}".format(box, ipsweight)).Fill(fatjet_n2ddt, event_weight * self._data.psWeights[ipsweight] / self._data.psWeights[0])
 
 								else:
 									print "[histograms::run] WARNING : Central PS weight == 0!"

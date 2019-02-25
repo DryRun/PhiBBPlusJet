@@ -68,8 +68,8 @@ samples = {
 	"qcd":["QCD_HT200to300","QCD_HT300to500","QCD_HT500to700","QCD_HT700to1000","QCD_HT1000to1500","QCD_HT1500to2000","QCD_HT2000toInf"], # QCD_HT100to200
 	"stqq":["ST_t_antitop","ST_t_top","ST_tW_antitop","ST_tW_top"],
 	"tqq":["tqq"],
-	"wqq":["wqq"],
-	"zqq":["zqq"],
+	"wqq":["WJetsToQQ_HT180_13TeV"],
+	"zqq":["DYJetsToQQ_HT180_13TeV"],
 	"wqq2018":["WJetsToQQ_HT400to600", "WJetsToQQ_HT600to800", "WJetsToQQ_HT800toInf"],
 	"zqq2018":["ZJetsToQQ_HT400to600", "ZJetsToQQ_HT600to800", "ZJetsToQQ_HT800toInf"],
 	"zll":["zll"],
