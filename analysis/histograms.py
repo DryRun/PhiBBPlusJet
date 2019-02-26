@@ -441,7 +441,7 @@ class Histograms(AnalysisBase):
 						self._selection_histograms[selection].AddTH2D("{}_{}_pt_vs_msd".format(systematic, box), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
 				if self._do_ps_weights:
 					for ipsweight in xrange(1, 20):
-						self._selection_histograms[selection].AddTH2F("{}_pt_vs_msd_psweight{}".format(box, ipsweight), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 240, 0., 1200.)
+						self._selection_histograms[selection].AddTH2F("{}_pt_vs_msd_psweight{}".format(box, ipsweight), "; {} m_{{SD}}^{{PUPPI}} (GeV); {} p_{{T}} (GeV)".format(self._jet_type, self._jet_type), "m_{SD}^{PUPPI} [GeV]", 80, 40, 600, "p_{T} [GeV]", 120, 0., 1200.)
 						self._selection_histograms[selection].AddTH1F("{}_n2ddt_psweight{}".format(box, ipsweight), "n2ddt", "N_{2}^{DDT}", 160, -1.0, 1.0)
 
 
@@ -698,7 +698,7 @@ class Histograms(AnalysisBase):
 
 	def finish(self):
 		if self._output_path == "":
-			self._output_path = "/uscms/home/dryu/DAZSLE/data/LimitSetting/InputHistograms_{}.root".format(time.time)
+			self._output_path = "/uscms/home/dryu/DAZSLE/data/LimitSetting/histograms_{}.root".format(time.time)
 			print "[SignalCutflow::finish] WARNING : Output path was not provided! Saving to {}".format(self._output_path)
 		print "[SignalCutflow::finish] INFO : Saving histograms to {}".format(self._output_path)
 		f_out = ROOT.TFile(self._output_path, "RECREATE")

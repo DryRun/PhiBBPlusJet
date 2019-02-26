@@ -13,13 +13,13 @@ sys.path.append(".")
 from histograms import Histograms
 
 # If box_loose is specified, the shape will be taken from box_loose, and the normalization from box. 
-def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, wp_string, wp_string_loose=None, systematic=None):
+def MergeHistograms(var, selection, box, supersample, use_Vmatched_histograms, wp_string, wp_string_loose=None, systematic=None, jet_type="AK8", year=2016):
 	return_hist = None
 	first = True
 	original_selection = "" + selection
 
 	for sample in config.samples[supersample]:
-		input_histogram_filename = "$HOME/DAZSLE/data/histograms/InputHistograms_{}_{}.root".format(sample, args.jet_type)
+		input_histogram_filename = "$HOME/DAZSLE/data/histograms/histograms_{}_{}_{}.root".format(sample, jet_type, year)
 		#print "Opening {}".format(input_histogram_filename)
 		input_file = ROOT.TFile(input_histogram_filename, "READ")
 
@@ -194,10 +194,10 @@ if __name__ == "__main__":
 		#			sample_files[this_sample] = []
 		#		sample_files[this_sample].append(filename)
 		#	samples = sample_files.keys()
-		print "List of input samples: ",
-		print samples
-		print "List of samples and files: ",
-		print sample_files
+		#print "List of input samples: ",
+		#print samples
+		#print "List of samples and files: ",
+		#print sample_files
 
 		if args.subjob:
 			subjob_index = args.subjob[0]
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 			if len(sample_files[sample]) < n_subjobs:
 				print "[run_histograms] ERROR : Number of subjobs ({}) exceeds number of files ({})!".format(len(sample_files[sample]), n_subjobs)
 				sys.exit(1)
-			files_per_job = len(sample_files[sample]) / n_subjobs + 1
+			files_per_job = (len(sample_files[sample]) + n_subjobs - 1) / n_subjobs
 			i0 = files_per_job * subjob_index
 			i1 = min(files_per_job * (subjob_index + 1), len(sample_files[sample]))
 			print "Files per job = {}".format(files_per_job)
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 			if args.output_folder:
 				limit_histogrammer.set_output_path("{}/{}".format(args.output_folder, output_file_basename))
 			else:
-				limit_histogrammer.set_output_path("/uscms/home/dryu/DAZSLE/data/LimitSetting/{}".format(output_file_basename))
+				limit_histogrammer.set_output_path("/uscms/home/dryu/DAZSLE/data/histograms/tmp/{}".format(output_file_basename))
 			for filename in files_to_run:
 				print "Input file {}".format(filename)
 				limit_histogrammer.add_file(filename)
@@ -312,15 +312,15 @@ if __name__ == "__main__":
 			elif "Spin0" in sample or "Sbb" in sample or "ZPrime" in sample:
 				files_per_job = 3
 			elif "WJetsToQQ_HT" in sample or "ZJetsToQQ_HT" in sample:
-				files_per_job = 3
+				files_per_job = 10
 			n_jobs = int(ceil(1. * len(sample_files[sample]) / files_per_job))
 
 			job_script_path = "{}/run_csubjob.sh".format(submission_directory)
 			job_script = open(job_script_path, 'w')
 			job_script.write("#!/bin/bash\n")
-			job_script.write("which python\n")
-			job_script.write("python --version\n")
-			job_script.write("ls -lrth /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/\n")
+			#job_script.write("which python\n")
+			#job_script.write("python --version\n")
+			#job_script.write("ls -lrth /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/\n")
 			#job_script.write("input_files=( " + " ".join(sample_files[sample]) + " )\n")
 			#job_script.write("files_per_job=" + str(files_per_job) + "\n")
 			#job_script.write("first_file_index=$(($1*$files_per_job))\n")
@@ -334,8 +334,8 @@ if __name__ == "__main__":
 			#job_script.write("echo \"Input files:\"\n")
 			#job_script.write("echo $this_input_files_string\n")
 			job_command = "python $CMSSW_BASE/src/DAZSLE/PhiBBPlusJet/analysis/run_histograms.py --run --year {} --jet_type {} --label {}_csubjob$1 --output_folder . --subjob $1 {} --sample {}".format(args.year, args.jet_type, sample, n_jobs, sample)
-			if args.skim_inputs or args.all_lxplus:
-				job_command += " --skim_inputs "
+			#if args.skim_inputs or args.all_lxplus:
+			#	job_command += " --skim_inputs "
 			if args.do_ps_weights:
 				job_command += " --do_ps_weights"
 
@@ -343,7 +343,7 @@ if __name__ == "__main__":
 			job_script.write(job_command)
 
 			# Check if the output file exists
-			job_script.write("for f in ./InputHistograms*_csubjob$1*root; do\n")
+			job_script.write("for f in ./histograms*_csubjob$1*root; do\n")
 			job_script.write("\t[ -e \"$f\" ] && echo \"1\" > jobstatus_csubjob$1.txt || echo \"0\" > jobstatus_csubjob$1.txt \n")
 			job_script.write("\tbreak\n")
 			job_script.write("done\n")
@@ -381,7 +381,7 @@ if __name__ == "__main__":
 			hadd_script.close()
 			os.chdir(start_directory)
 		# One hadd script to rule them all
-		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/histograms/condor/master_hadd_{}_{}_{}".format(sample, args.jet_type, args.year))
+		master_hadd_script_path = os.path.expandvars("$HOME/DAZSLE/data/histograms/condor/master_hadd_{}_{}".format(args.jet_type, args.year))
 		if not args.all:
 			master_hadd_script_path += "_" + str(int(floor(time.time())))
 		master_hadd_script_path += ".sh"
@@ -454,7 +454,7 @@ if __name__ == "__main__":
 									else:
 										wp_string_loose = None
 
-									merged_histogram = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, wp_string=wp_string, wp_string_loose=wp_string_loose)
+									merged_histogram = MergeHistograms(var=var, selection=selection, box=box, supersample=supersample, use_Vmatched_histograms=use_Vmatched_histograms, wp_string=wp_string, wp_string_loose=wp_string_loose, jet_type=args.jet_type, year=args.year)
 									output_file.cd()
 
 									# For muCR, project to 1D
